@@ -1,0 +1,6 @@
+# Modelfile for local Llama 3.2 3B model
+FROM /models/Meta-Llama-3.2-3B-Instruct
+#quantize q4_0
+PARAMETER temperature 0.0
+PARAMETER num_ctx 2048
+TEMPLATE """{{ .Prompt }}"""
