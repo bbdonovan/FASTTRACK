@@ -7,7 +7,7 @@ To run the GraphRAG component:
 > pip install -r requirements.txt  
 > python load_data.py  
 
-This will do the following:
+This will do the following:  
     - read the documents specified in .env > INPUT_FOLDER (currently set to `input_docs_cnnxiaomi`)  
     - chunk the documents up into small, overlapping pieces  
     - extract entities and links from the document chunks  
