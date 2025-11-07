@@ -39,7 +39,7 @@ import pickle
 from cdlib import algorithms
 
 from constants import DOCUMENTS
-from util.config import LOGGER, OPENAI_API_KEY, DB, NODE_TABLE, BASE_URL, BASE_DIR, MODEL_NAME
+from util.config import LOGGER, DB, NODE_TABLE, BASE_URL, BASE_DIR, MODEL_NAME
 from hybrid_retrieval import (
     build_entity_index_and_graph,
     hybrid_retrieve_and_answer,
@@ -50,6 +50,8 @@ from hybrid_retrieval import (
 #########
 # Setup #
 #########
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 # Suppress all of the Langchain beta and other warnings
 warnings.filterwarnings("ignore", lineno=0)
