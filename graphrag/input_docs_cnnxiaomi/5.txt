@@ -1,0 +1,39 @@
+https://www.cnn.com/2024/06/24/tech/china-huawei-harmony-os-growth-intl-hnk
+
+Huawei isn’t just back from the dead. It’s a force to be reckoned with
+By Diksha Madhok and Joyce Jiang, CNN
+Published 5:27 AM EDT, Mon June 24, 2024
+
+Huawei is in the midst of one of the most stunning comebacks in the history of the tech industry.
+
+The Chinese giant, which has been a flashpoint in the escalating rivalry between Washington and Beijing, says more than 900 million smartphones now use its in-house operating system Harmony OS.
+
+“We have done in 10 years what our European and American counterparts have done in more than 30 years, and have achieved independent control of the core technology of the operating system,” Richard Yu, the chairman of Huawei’s consumer business group, said at a developer forum on Friday.
+
+Harmony, which is called “Hongmeng” in Chinese, was first unveiled in 2019, months after Huawei was placed on a US trade blacklist that barred American firms from selling tech and software to the Chinese tech company without a license.
+
+US policymakers have long claimed that Huawei poses a national security risk, alleging that the Chinese government could use the company’s equipment to spy. The company repeatedly denied those allegations, but that didn’t stop some American allies — such as the UK — limiting Huawei’s role in building 5G networks.
+
+The US ban prevented companies like Google (GOOGL) from supplying new Huawei devices with its version of Android OS. Those restrictions dealt a huge blow to the Chinese firm’s smartphone ambitions at the time, with some analysts predicting the Huawei phone would become “a brick.”
+
+Now the company is once again making its way back to the top. It’s also venturing into new businesses. Last year, it launched an electric sedan to take on Tesla’s Model S. And it has big ambitions in artificial intelligence (AI).
+
+Nvidia (NVDA), which is running neck and neck with Microsoft (MSFT) as the most valuable public company in the world, earlier this year named Huawei a top competitor in a number of areas, including in the production of processors that power AI systems.
+
+Yu said Friday that Huawei’s own AI framework, composed of its Ascend processors, was 1.1 times more effective in training large language models than mainstream international offerings. He did not name the competitors.
+
+A surprise development
+But it’s in smartphones that the revival is so far most obvious. Sales of Huawei’s flagship smartphones rose 72% in the first five months of 2024, compared to the same period a year ago, Yu added, underscoring the company’s ambitions to claw its way back to the top despite severe US restrictions.
+
+The Shenzhen-based conglomerate’s popular Mate 60 Pro smartphone made headlines last year when the US government sought more information about the model, which included a sophisticated processor.
+
+Its debut shocked industry experts who questioned how the company could acquire such chips following sweeping efforts by the US to restrict China’s access to foreign chip technology because of national security concerns.
+
+The company’s net profit soared 564% to $2.71 billion in the first quarter, and that robust jump comes after it recorded its fastest revenue growth in four years in 2023, thanks to a pick-up in its consumer segment and income from new businesses like smart car components.
+
+Huawei is also going after another of the biggest companies in the world. The success of its smartphones in China have directly impacted Apple (AAPL) in the premium segment, according to data from Counterpoint Research in April.
+
+The iPhone maker, which led China’s smartphone market with a near 20% share in the first quarter of 2023, fell to third spot in the first three months of this year, according to Counterpoint. Its market share stood at 15.7%, while Huawei’s jumped to 15.5%, from 9.3% in 2023.
+
+Sales of the iPhone began bouncing back in May, after the company aggressively cut prices in its largest overseas market.
+

@@ -1,0 +1,45 @@
+https://www.cnn.com/2024/11/26/tech/china-huawei-harmony-os-mate70-hnk-intl
+
+Huawei’s new homegrown Chinese smartphone takes on Apple and Android
+By Juliana Liu and Hassan Tayir, CNN
+Updated 3:50 AM EST, Tue November 26, 2024
+
+Hong Kong
+CNN
+ — 
+Huawei has unveiled a new flagship phone boasting entirely homegrown software that aims to give users an alternative to Google’s Android or Apple’s iOS, in another effort by the Chinese tech giant to defend against possible further sanctions by Washington.
+
+The new Mate 70 smartphone, which starts at 5,499 yuan ($760), features the HarmonyOS Next operating system, which no longer supports Android-based apps. It’s touted as a “pure-blooded” technology developed solely by Huawei’s engineers.
+
+“This is our most powerful phone (in the Mate series),” Richard Yu, the chairman of Huawei’s consumer business, said during the Tuesday launch event. “We have always been copied but never surpassed.”
+
+From next year, all of Huawei’s new phones and tablet devices would run on its own operating system, he added.
+
+The Mate 70 is the successor to last year’s Mate 60 series, which shocked industry experts who couldn’t understand how the company could have the technology to make an advanced chip following sweeping efforts by the United States to restrict China’s access to foreign semiconductor technology.
+
+The Mate 70 represents a “critical step” in Huawei’s software evolution, Lucas Zhong, research analyst at Canalys, told CNN.
+
+The shift away from the Android ecosystem “will be essential for Huawei to maintain momentum in the premium segment, solidify consumer loyalty, and attract potential platform switchers,” he said.
+
+That shift was made possible by the August 2023 launch of the Mate 60 Pro, which quickly became a symbol of the tech rivalry between the US and China. It also revived interest in Huawei’s high-end smartphone offerings.
+
+According to Canalys, Huawei’s share of the Chinese market for phones costing more than $600 has grown from 11% in the third quarter of 2022 to 33% in the same period this year, in a remarkable reversal of fortune for the company. Over the same period, Apple’s share of the same high-end market fell from 72% to 52%.
+
+Huawei, formerly the world’s second-largest maker of smartphones, had been fighting for survival since being hit by US export restrictions in 2019. The company’s woes later forced it to sell off its budget mobile brand, Honor, leaving it in bad shape.
+
+Android divorce
+The first version of HarmonyOS, which supported Android-based applications, was launched in August 2019, months after Huawei was placed on a US trade blacklist that barred American firms from selling tech and software to the Chinese company without a license.
+
+That ban prevented companies like Google from supplying new Huawei devices with its version of Android OS.
+
+But over the years, Huawei has put its resources into developing what it called a fully homegrown platform to rival Western standards. Major Chinese tech companies have reportedly gotten on board, hiring developers to create compatible apps.
+
+“When we migrate … tens of thousands of other apps from the Android ecosystem to HarmonyOS, our HarmonyOS will be truly built and truly become the world’s third mobile operating system in addition to Apple’s iOS and Google’s Android,” Eric Xu, the then-rotating chairman of Huawei, said in April, according to a post on the company’s official WeChat account.
+
+“We will first build the HarmonyOS application ecosystem based on the Chinese market and then promote it country by country in the future and gradually promote it to the world.”
+
+On Saturday, Xu said Huawei was aiming for 100,000 applications to be developed for its operating system over the next year. He said it was “crucial” to have a large number of apps and devices.
+
+“If no one uses it, no matter how advanced the operating system is, it will have no value,” he said, according to a Wechat post.
+
+Mengmeng Zhang, a senior analyst at Counterpoint Research, said she expected the Mate 70 series to achieve more than 10 million shipments over its lifetime, adding: “It will take time for Huawei to expand the developer community and establish a competitive … ecosystem.”

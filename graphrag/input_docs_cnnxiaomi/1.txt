@@ -1,0 +1,50 @@
+https://www.cnn.com/2025/05/23/business/china-xiaomi-new-suv-chip-launch-intl-hnk
+
+China’s Xiaomi unveils electric SUV, new chip in bid to rival Tesla, Apple
+By John Liu, CNN
+Published 3:06 AM EDT, Fri May 23, 2025
+
+Hong Kong
+CNN
+ — 
+Chinese consumer electronics giant Xiaomi has launched a new electric SUV and debuted a self-designed smartphone chip, in a push to expand beyond its roots in budget devices.
+
+The company’s CEO and founder Lei Jun introduced the YU7, Xiaomi’s first SUV, and the Xring O1, a 3-nanometer mobile chip meant to rival Apple and Qualcomm’s top-tier smartphone chips, at a livestreamed event in Beijing on Thursday.
+
+The launch event, which also introduced other products like a tablet, came as Xiaomi marks its 15th anniversary and signals a reinvention of its image. The event also follows a highly publicized deadly car crash in eastern China late March, which cast a shadow over its electric vehicle (EV) ambitions.
+
+Xiaomi’s multi-pronged expansion into autos and chips is also emblematic of Beijing’s larger ambition to break the country’s dependence on critical foreign technology.
+
+The YU7 SUV, set to hit the market in July, will offer a driving range of up to 835 kilometers (518 miles) on a single charge. Its top model will be able to accelerate from zero to 100 kilometers per hour (62 miles per hour) in just over three seconds – a performance benchmark that Lei says surpasses Tesla’s Model Y and Porsche’s comparable models. The standard models will come with advanced driving assistance software.
+
+No pricing information or pre-order timeline was shared during the launch. Lei had said in a social media post earlier on Thursday that Xiaomi is holding off on pre-orders and pricing disclosures for now.
+
+Xiaomi’s automobile business has come under intense scrutiny in recent months after an SU7 sedan, the company’s debut EV, was involved in a fatal highway accident in March that killed three people. The crash raised questions about Xiaomi’s marketing of its self-driving technology and led to a temporary slump in orders the following month.
+
+Lei has also made semiconductors a strategic priority. He revealed that the company invested 13.5 billion yuan ($1.87 billion) to develop the Xring O1. Like Apple and Nvidia, Xiaomi only designs the chips and outsources the production of chips to the world’s largest chipmaker, Taiwan Semiconductor Manufacturing Company (TSMC).
+
+Lei claimed the Xring O1 chip beat the A18 Pro chip in Apple’s latest iPhones in various metrics, including running cooler compared to rivals during intensive gaming. The chip will debut in Xiaomi’s newly announced 15S Pro smartphone, which retails for 5,499 yuan ($764).
+
+The achievement of designing three-nanometer chips puts Xiaomi ahead of another Chinese tech giant Huawei, as it struggles to make chips beyond seven nanometers due to American sanctions. Unlike Xiaomi, Huawei is banned from working with TSMC. (Smaller nanometers indicate more advanced and sophisticated manufacturing technology, making the chips more powerful and efficient.)
+
+Chinese state-run broadcaster CCTV touted Xiaomi’s new chip as a “breakthrough,” in a social media post earlier in the week.
+
+Currently, some of Xiaomi’s phones still rely on Qualcomm and MediaTek chips, but by designing its own chips, the company seeks to reduce this dependency and emulate Apple’s vertically integrated approach to hardware and software. Beyond smartphones, the Xring chip will power other flagship products such as its tablets.
+
+‘No choice’
+Xiaomi’s journey into developing its own chips has been years in the making.
+
+In a post on Chinese social media on Monday, Lei said Xiaomi began developing its own chips more than a decade ago in 2014.
+
+At the launch event, he said the company had invested 13.5 billiion yuan ($1.87 billion) in chip development as of April this year.
+
+“When it comes to the battle over chips, we have no choice,” he said.
+
+In the same post, Lei said Xiaomi will commit at least 50 billion yuan ($7 billion) in investment over the coming decade to advance its chips. He boasted a minimum 6-billion yuan ($833 million) investment in chip development this year with its 2500-member research and development team.
+
+In an online commentary posted by the Chinese state-run media People’s Daily last week, it said Xiaomi’s newly designed chip exemplified the ability of private businesses to “blaze new trails” in a complex and rapidly evolving international environment.
+
+“Over the past year, Xiaomi has made breakthrough innovations in fields such as new energy vehicles and domestic chips. This proves that with determination and hard work, no mountain is insurmountable,” it said.
+
+The US and China are clashing over access to the most advanced semiconductors. Over the past week, Beijing has repeatedly lashed out at Washington for warning companies against using AI chips made by Chinese tech champion Huawei. It has even accused the Trump administration of “undermining” a consensus reached at recent trade talks in Geneva, where both sides agreed to temporarily roll back tariffs and use a 90-day window to hash out a broader deal.
+
