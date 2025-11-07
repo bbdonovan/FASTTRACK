@@ -1,0 +1,366 @@
+{
+  "name": "Global Financial News Aggregator",
+  "children": [
+    {
+      "name": "United States",
+      "children": [
+        {
+          "name": "Wall Street Journal",
+          "children": [
+            {"name": "Tech Stocks Surge on Q3 Earnings", "value": 1},
+            {"name": "Fed Signals Steady Rate Path", "value": 1},
+            {"name": "Housing Starts Drop Unexpectedly", "value": 1}
+          ]
+        },
+        {
+          "name": "New York Times",
+          "children": [
+            {"name": "US-China Trade Talks Resume", "value": 1},
+            {"name": "Inflation Hits 40-Year High", "value": 1},
+            {"name": "Energy Policy Debate Heats Up", "value": 1}
+          ]
+        },
+        {
+          "name": "Bloomberg",
+          "children": [
+            {"name": "Commodity Prices Forecast", "value": 1},
+            {"name": "Global M&A Activity Rises", "value": 1},
+            {"name": "Crypto Regulation in Focus", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Japan",
+      "children": [
+        {
+          "name": "Nikkei Asia",
+          "children": [
+            {"name": "Yen Hits New Low Against Dollar", "value": 1},
+            {"name": "Automaker Shifts Focus to EV Production", "value": 1},
+            {"name": "Tokyo Real Estate Market Stabilizes", "value": 1},
+            {"name": "Semiconductor Export Controls", "value": 1}
+          ]
+        },
+        {
+          "name": "Japan Times",
+          "children": [
+            {"name": "BoJ Holds Ultra-Low Rates", "value": 1},
+            {"name": "Government Stimulus Measures", "value": 1},
+            {"name": "Tourism Sector Recovery", "value": 1}
+          ]
+        },
+        {
+          "name": "Kyodo News",
+          "children": [
+            {"name": "Pension Fund Performance Review", "value": 1},
+            {"name": "Regional Bank Mergers", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Germany",
+      "children": [
+        {
+          "name": "Frankfurter Allgemeine",
+          "children": [
+            {"name": "Energy Crisis Spurs Green Investment", "value": 1},
+            {"name": "Industrial Production Index Rises", "value": 1},
+            {"name": "Supply Chain Issues Ease", "value": 1}
+          ]
+        },
+        {
+          "name": "Handelsblatt",
+          "children": [
+            {"name": "DAX Performance Analysis", "value": 1},
+            {"name": "Startup Funding Trends", "value": 1}
+          ]
+        },
+        {
+          "name": "Deutsche Welle",
+          "children": [
+            {"name": "EU Regulatory Changes Impacting Tech", "value": 1},
+            {"name": "Labour Market Statistics", "value": 1},
+            {"name": "Export Growth Forecast", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "India",
+      "children": [
+        {
+          "name": "The Economic Times",
+          "children": [
+            {"name": "New FDI Policy Boosts Manufacturing", "value": 1},
+            {"name": "Fintech Startup Achieves Unicorn Status", "value": 1},
+            {"name": "Monsoon Impact on Agricultural Output", "value": 1},
+            {"name": "Digital Currency Launch Date", "value": 1}
+          ]
+        },
+        {
+          "name": "Business Standard",
+          "children": [
+            {"name": "Infrastructure Spending Plans", "value": 1},
+            {"name": "IT Sector Hiring Trends", "value": 1},
+            {"name": "Banking Sector NPA Report", "value": 1}
+          ]
+        },
+        {
+          "name": "Mint",
+          "children": [
+            {"name": "Mutual Fund Investment Surge", "value": 1},
+            {"name": "Taxation Law Amendments", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "United Kingdom",
+      "children": [
+        {
+          "name": "Financial Times",
+          "children": [
+            {"name": "Sterling Volatility Continues", "value": 1},
+            {"name": "Bank of England Rate Decision", "value": 1},
+            {"name": "London Property Market Slows", "value": 1},
+            {"name": "Impact of New Trade Deals", "value": 1}
+          ]
+        },
+        {
+          "name": "The Economist",
+          "children": [
+            {"name": "Global Recession Risk Assessment", "value": 1},
+            {"name": "Future of Remote Work", "value": 1}
+          ]
+        },
+        {
+          "name": "BBC Business",
+          "children": [
+            {"name": "Retail Sales Figures", "value": 1},
+            {"name": "Energy Price Cap Changes", "value": 1},
+            {"name": "Government Debt Levels", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "China",
+      "children": [
+        {
+          "name": "Xinhua Finance",
+          "children": [
+            {"name": "Manufacturing PMI Expansion", "value": 1},
+            {"name": "Real Estate Sector Stabilization Efforts", "value": 1},
+            {"name": "Digital Yuan Adoption", "value": 1}
+          ]
+        },
+        {
+          "name": "South China Morning Post",
+          "children": [
+            {"name": "Tech Regulatory Environment", "value": 1},
+            {"name": "Supply Chain Resilience", "value": 1},
+            {"name": "Overseas Investment Trends", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "France",
+      "children": [
+        {
+          "name": "Les Echos",
+          "children": [
+            {"name": "CAC 40 Index Performance", "value": 1},
+            {"name": "Luxury Goods Sector Growth", "value": 1},
+            {"name": "European Defense Spending", "value": 1}
+          ]
+        },
+        {
+          "name": "AFP Finance",
+          "children": [
+            {"name": "Agricultural Policy Subsidies", "value": 1},
+            {"name": "Unemployment Rate Decline", "value": 1},
+            {"name": "Tourism Revenue Forecast", "value": 1}
+          ]
+        },
+        {
+          "name": "Le Monde",
+          "children": [
+            {"name": "Government Budget Deficit", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Canada",
+      "children": [
+        {
+          "name": "Globe and Mail",
+          "children": [
+            {"name": "Housing Market Cooling Off", "value": 1},
+            {"name": "Oil and Gas Sector Investment", "value": 1},
+            {"name": "Interest Rate Hikes Continue", "value": 1}
+          ]
+        },
+        {
+          "name": "Financial Post",
+          "children": [
+            {"name": "Mining Exploration Activity", "value": 1},
+            {"name": "Tech Startup Exit Strategy", "value": 1}
+          ]
+        },
+        {
+          "name": "CBC Business",
+          "children": [
+            {"name": "Retail Sales Performance", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Brazil",
+      "children": [
+        {
+          "name": "Valor Econômico",
+          "children": [
+            {"name": "Bovespa Index Volatility", "value": 1},
+            {"name": "Agricultural Export Record", "value": 1},
+            {"name": "Inflation Control Measures", "value": 1}
+          ]
+        },
+        {
+          "name": "Folha de S.Paulo",
+          "children": [
+            {"name": "Foreign Debt Restructuring", "value": 1},
+            {"name": "Infrastructure Projects Update", "value": 1},
+            {"name": "Currency Exchange Rate Fluctuation", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Australia",
+      "children": [
+        {
+          "name": "The Australian Financial Review",
+          "children": [
+            {"name": "RBA Rate Hike Expectations", "value": 1},
+            {"name": "Mining Sector Labour Shortages", "value": 1},
+            {"name": "Sydney Housing Price Correction", "value": 1}
+          ]
+        },
+        {
+          "name": "Sydney Morning Herald",
+          "children": [
+            {"name": "Renewable Energy Investment Boom", "value": 1},
+            {"name": "Retail Spending Patterns", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "South Korea",
+      "children": [
+        {
+          "name": "Korea Herald",
+          "children": [
+            {"name": "Semiconductor Export Decline", "value": 1},
+            {"name": "KOSPI Index Analysis", "value": 1},
+            {"name": "Consumer Electronics Demand", "value": 1}
+          ]
+        },
+        {
+          "name": "Yonhap News",
+          "children": [
+            {"name": "Government Tech Subsidies", "value": 1},
+            {"name": "Automotive Industry Outlook", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Mexico",
+      "children": [
+        {
+          "name": "El Financiero",
+          "children": [
+            {"name": "Peso-Dollar Exchange Stability", "value": 1},
+            {"name": "Manufacturing Growth Data", "value": 1},
+            {"name": "Remittance Flow Impact", "value": 1}
+          ]
+        },
+        {
+          "name": "Reforma",
+          "children": [
+            {"name": "Energy Sector Nationalization Debate", "value": 1},
+            {"name": "Tourism Investment Figures", "value": 1},
+            {"name": "Central Bank Reserve Report", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "South Africa",
+      "children": [
+        {
+          "name": "Business Day",
+          "children": [
+            {"name": "Eskom Debt Crisis Update", "value": 1},
+            {"name": "Mining Output Performance", "value": 1},
+            {"name": "Rand Exchange Rate Movements", "value": 1}
+          ]
+        },
+        {
+          "name": "Fin24",
+          "children": [
+            {"name": "Retail Sales Outlook", "value": 1},
+            {"name": "Inflation Forecasts", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Russia",
+      "children": [
+        {
+          "name": "Interfax",
+          "children": [
+            {"name": "Oil Export Volumes", "value": 1},
+            {"name": "Ruble Stabilization Measures", "value": 1},
+            {"name": "Interest Rate Policy", "value": 1}
+          ]
+        },
+        {
+          "name": "TASS",
+          "children": [
+            {"name": "Sanctions Impact on GDP", "value": 1},
+            {"name": "Defense Spending Budget", "value": 1},
+            {"name": "Sovereign Wealth Fund Status", "value": 1}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Saudi Arabia",
+      "children": [
+        {
+          "name": "Arab News",
+          "children": [
+            {"name": "OPEC Production Decisions", "value": 1},
+            {"name": "NEOM Project Development", "value": 1},
+            {"name": "Non-Oil Revenue Growth", "value": 1}
+          ]
+        },
+        {
+          "name": "Saudi Gazette",
+          "children": [
+            {"name": "Tourism Investment Targets", "value": 1},
+            {"name": "Infrastructure Spending Plans", "value": 1}
+          ]
+        }
+      ]
+    }
+  ]
+}
