@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This script loads, processes, and visualizes documents from a list of URLs.
-It includes functions for fetching URLs, cleaning and preprocessing documents,
-and adding them to a graph vector store.
+This script loads, processes, and visualizes documents from a list of docs.
 """
 import os
 import json
