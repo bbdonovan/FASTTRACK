@@ -25,9 +25,11 @@ LOGGER = logging.getLogger(__name__)
 coloredlogs.install(level='DEBUG', logger=LOGGER)
 
 # Initialize embeddings and LLM using OpenAI
+"""
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("The OPENAI_API_KEY environment variable is not set.")
+"""
 
 MODEL_NAME = os.getenv("MODEL_NAME")
 
