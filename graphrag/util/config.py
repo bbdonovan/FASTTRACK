@@ -57,7 +57,7 @@ ANSWER_PROMPT = (
 )
 
 BASE_URL = os.getenv("BASE_URL")
-BASE_DIR = os.getenv("INPUT_FOLDER")
+INPUT_DOCS_DIR = os.getenv("INPUT_FOLDER")
 
 
 #SIMILARITY_SEARCH_URL="https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores/langchain_community.graph_vectorstores.cassandra.CassandraGraphVectorStore.html#langchain_community.graph_vectorstores.cassandra.CassandraGraphVectorStore.similarity_search"

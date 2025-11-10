@@ -3,8 +3,10 @@
 This script loads, processes, and visualizes documents from a list of docs.
 """
 import os
+from pathlib import Path
 import json
 import warnings
+from typing import List, Tuple
 from dotenv import load_dotenv
 
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
@@ -37,11 +39,13 @@ import pickle
 from cdlib import algorithms
 
 from constants import DOCUMENTS
-from util.config import LOGGER, DB, NODE_TABLE, BASE_URL, BASE_DIR, MODEL_NAME
+from util.config import LOGGER, DB, NODE_TABLE, BASE_URL, INPUT_DOCS_DIR, MODEL_NAME
 from hybrid_retrieval import (
     build_entity_index_and_graph,
     hybrid_retrieve_and_answer,
     show_subgraph,
+    graph_to_d3_tree,
+    graph_to_d3_tree_from_subgraph,
 )
 
 
@@ -49,31 +53,102 @@ from hybrid_retrieval import (
 # Setup #
 #########
 
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+# Global cache so we don't rebuild everything on every request
+_PIPELINE_CACHE = {
+    "initialized": False,
+    "vectorstore": None,
+    "graph": None,
+    "entity_index": None,
+    "llm": None,
+}
+
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
 
 # Suppress all of the Langchain beta and other warnings
 warnings.filterwarnings("ignore", lineno=0)
 
 # Initialize embeddings and LLM using OpenAI
-embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+#embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+
+BASE_DIR = Path(__file__).resolve().parent
 
 if DB == "chroma":
     from util.config import CHROMA_PERSIST_DIRECTORY, CHROMA_COLLECTION_NAME
-    vdb_client = chromadb.Client(Settings(persist_directory=CHROMA_PERSIST_DIRECTORY))
-    #collection = client.create_collection("my_vectors")
-    collection = vdb_client.get_or_create_collection(CHROMA_COLLECTION_NAME)
-    #vdb_store = Chroma(collection_name=CHROMA_COLLECTION_NAME, embedding_function=embeddings, persist_directory=CHROMA_PERSIST_DIRECTORY)
-    vdb_store = Chroma(client=vdb_client, collection_name=CHROMA_COLLECTION_NAME, embedding_function=embeddings)
+
+    #BASE_DIR = os.getenv("INPUT_FOLDER")
+    INPUT_DOCS_DIR = BASE_DIR / os.getenv("INPUT_FOLDER")
+    CHROMA_PERSIST_DIRECTORY = str(BASE_DIR / CHROMA_PERSIST_DIRECTORY)
+
+    #vdb_client = chromadb.Client(Settings(persist_directory=CHROMA_PERSIST_DIRECTORY))
+    ##collection = client.create_collection("my_vectors")
+    #collection = vdb_client.get_or_create_collection(CHROMA_COLLECTION_NAME)
+    ##vdb_store = Chroma(collection_name=CHROMA_COLLECTION_NAME, embedding_function=embeddings, persist_directory=CHROMA_PERSIST_DIRECTORY)
+    #vdb_store = Chroma(client=vdb_client, collection_name=CHROMA_COLLECTION_NAME, embedding_function=embeddings)
 
 
 openai_client = OpenAI(api_key=OPENAI_API_KEY) if not BASE_URL else OpenAI(base_url=BASE_URL, api_key=OPENAI_API_KEY)
-#llmchat_client = ChatOpenAI(api_key=OPENAI_API_KEY, model=MODEL_NAME) if not BASE_URL else ChatOpenAI(base_url=BASE_URL, api_key=OPENAI_API_KEY, model=MODEL_NAME)
-llmchat_client = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-4o-mini") if not BASE_URL else ChatOpenAI(base_url=BASE_URL, api_key=OPENAI_API_KEY, model=MODEL_NAME)
+##llmchat_client = ChatOpenAI(api_key=OPENAI_API_KEY, model=MODEL_NAME) if not BASE_URL else ChatOpenAI(base_url=BASE_URL, api_key=OPENAI_API_KEY, model=MODEL_NAME)
+#llmchat_client = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-4o-mini") if not BASE_URL else ChatOpenAI(base_url=BASE_URL, api_key=OPENAI_API_KEY, model=MODEL_NAME)
 
 
-#############
-# Utilities #
-#############
+
+#######################
+# Utilities & Helpers #
+#######################
+def _load_input_documents() -> List[Document]:
+    docs: List[Document] = []
+    if not INPUT_DOCS_DIR.exists():
+        return docs
+
+    for path in INPUT_DOCS_DIR.glob("*.txt"):
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        docs.append(
+            Document(
+                page_content=text,
+                metadata={"source": path.name},
+            )
+        )
+    return docs
+
+
+def _init_vectorstore_and_graph():
+    docs = _load_input_documents()
+
+    # Embeddings + Chroma
+    embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+    vdb_client = chromadb.Client(
+        Settings(persist_directory=CHROMA_PERSIST_DIRECTORY)
+    )
+
+    collection = vdb_client.get_or_create_collection(CHROMA_COLLECTION_NAME)
+
+    vdb_store = Chroma(client=vdb_client, collection_name=CHROMA_COLLECTION_NAME, embedding_function=embeddings)
+
+    # Only add if collection is empty
+    if not collection.count():
+        vdb_store.add_documents(docs)
+
+    # Build entity index + KG (simple doc-entity graph)
+    entity_index, G = build_entity_index_and_graph(docs)
+
+    # LLM for answering
+    llmchat_client = ChatOpenAI(api_key=OPENAI_API_KEY, model="gpt-4o-mini", temperature=0.1) if not BASE_URL else ChatOpenAI(base_url=BASE_URL, api_key=OPENAI_API_KEY, model=MODEL_NAME, temperature=0.1)
+
+    return vdb_store, G, entity_index, llmchat_client
+
+
+def _ensure_pipeline_initialized():
+    if not _PIPELINE_CACHE["initialized"]:
+        vdb, G, entity_index, llm = _init_vectorstore_and_graph()
+        _PIPELINE_CACHE["vectorstore"] = vdb
+        _PIPELINE_CACHE["graph"] = G
+        _PIPELINE_CACHE["entity_index"] = entity_index
+        _PIPELINE_CACHE["llm"] = llm
+        _PIPELINE_CACHE["initialized"] = True
+
+
+
 # ensure folder exists
 def ensure_dir(path):
     os.makedirs(path, exist_ok=True)
@@ -102,7 +177,7 @@ def read_list_from_folder(folder):
 # Split Source Documents Into Text Chunks #
 ###########################################
 def split_documents_into_chunks(documents, chunk_size=600, overlap_size=100):
-    folder = os.path.join(BASE_DIR, "1_chunks")
+    folder = os.path.join(INPUT_DOCS_DIR, "1_chunks")
     existing_chunks = read_list_from_folder(folder)
     if existing_chunks:
         print(f"Loaded {len(existing_chunks)} chunks from {folder}")
@@ -117,10 +192,46 @@ def split_documents_into_chunks(documents, chunk_size=600, overlap_size=100):
     print(f"Wrote {len(chunks)} chunks to {folder}")
     return chunks
 
+#####################################
+# Public API: called from ui/app.py #
+#####################################
+
+def run_graphrag_pipeline(query: str) -> Tuple[str, dict, dict]:
+    """
+    1. Ensures documents are loaded, embedded, and KG is built.
+    2. Runs hybrid_retrieve_and_answer() on the given query.
+    3. Returns:
+       - answer text
+       - full KG as D3 tree JSON
+       - subgraph (for this query) as D3 tree JSON
+    """
+    _ensure_pipeline_initialized()
+
+    vdb = _PIPELINE_CACHE["vectorstore"]
+    G = _PIPELINE_CACHE["graph"]
+    entity_index = _PIPELINE_CACHE["entity_index"]
+    llm = _PIPELINE_CACHE["llm"]
+
+    answer, subgraph = hybrid_retrieve_and_answer(
+        query,
+        vdb,
+        llm,
+        G,
+        entity_index,
+        return_subgraph=True,
+    )
+
+    full_graph_json = graph_to_d3_tree(G, root_label="Knowledge Graph")
+    subgraph_json = graph_to_d3_tree_from_subgraph(
+        subgraph, root_label="Answer Subgraph"
+    )
+
+    return answer, full_graph_json, subgraph_json
 
 
 
-def main():
+
+def old_main():
     try:
         print("000")
         #loader = DirectoryLoader(DOCUMENTS, glob="*.txt", loader_cls=TextLoader) #TODO: use this instead!
@@ -159,6 +270,7 @@ def main():
         entity_index, G = build_entity_index_and_graph(document_chunk)
 
         print("555")
+        vdb_store = None # added so that the next line doesn't err
         vdb_store.add_documents(document_chunk)
 
         print("666")
@@ -173,6 +285,7 @@ def main():
             print(f"Score: {r.metadata.get('score', 'N/A')}\nContent: {r.page_content}\n")
         """
         
+        llmchat_client = None # added so that the next line doesn't err
         answer = hybrid_retrieve_and_answer(query, vdb_store, llmchat_client, G, entity_index)
 
         print("Answer:\n", answer)
@@ -227,5 +340,14 @@ def main():
         print(doc)
     """
 
+"""
 if __name__ == "__main__":
-    main()
+    old_main()
+"""
+
+if __name__ == "__main__":
+    query = "Who are Xiaomi's primary competitors and what kinds of investments are they making?"
+    demo_query = "Who are Xiaomi's competitors and what OS do they use?"
+    ans, full_g, sub_g = run_graphrag_pipeline(demo_query)
+    print(ans)
+

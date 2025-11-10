@@ -3,16 +3,21 @@
 """
 
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
+
+BASE_DIR = Path(__file__).resolve().parent
+
 load_dotenv()
-BASE_DIR = os.getenv("INPUT_FOLDER")
+#BASE_DIR = os.getenv("INPUT_FOLDER")
+INPUT_DOCS_DIR = BASE_DIR / os.getenv("INPUT_FOLDER")
 
 
 # Function to read the content of each document from the example_text directory
 def read_documents_from_files():
     documents = []
-    directory = BASE_DIR
+    directory = INPUT_DOCS_DIR
     for filename in os.listdir(directory):
         if filename.endswith(".txt"):
             file_path = os.path.join(directory, filename)
