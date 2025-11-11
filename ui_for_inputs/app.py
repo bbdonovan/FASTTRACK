@@ -3,8 +3,11 @@ import sys
 import json
 import time
 import requests
+import csv
 from flask import Flask, render_template, request, send_from_directory
 from requests.exceptions import Timeout, RequestException
+import newsdata_io as nd_io
+from csv_to_json_converter import load_csv_to_json, save_json
 
 # --- Setup and Initialization ---
 app = Flask(__name__)
@@ -24,11 +27,8 @@ if not API_KEY:
 # --- Constants for News Source Selection ---
 NEWS_SOURCES = [
     "No Preference",
-    "New York Times",
-    "The Guardian",
-    "Fox News",
-    "The Wall Street Journal",
-    "Bloomberg",
+    "NewsData.io",
+    "The Guardian"
 ]
 # --- Constants ---
 API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent"
@@ -233,17 +233,45 @@ def index():
         selected_codes = request.form.getlist('countries')
         selected_time_code = request.form.get('time_frame')
         topic = request.form.get('topic', '')
-
-        # 1. Retrieve the new source preference input
+        print('selected_codes:',selected_codes)
+        # Retrieve the new source preference input
         selected_news_source = request.form.get('news_source', NEWS_SOURCES[0]) # <--- ADDED & FIXED
         
         # FIX: Store retrieved topic back into the variable for persistence
         input_topic = topic # <--- ADDED LINE: ensures topic persists in textarea
-
+        
         # Map selected codes to full country names
         selected_names = [d['name'] for d in country_data if d['code'] in selected_codes]
         time_name = next((tf['name'] for tf in time_frames if tf['code'] == selected_time_code), "No Limit")
-        
+
+        # API CALLS ADDED 11/10/25
+        # Call news apis for each country code + topic and store results in csv file
+        #news_countries = [d['code'] for d in country_data if d['code'] in selected_codes]
+        news_countries = selected_codes.copy()
+        news_countries.append('US')
+        news_countries = list(set(news_countries)) #so it doesn't repeat 'US' if already there
+        write_mode = 'w' # set output to start with a new file
+        for code in news_countries:
+            query = f'{input_topic} AND ({' OR '.join(selected_names)})'
+            print('news api query:', query,' ...to country code...', code)
+            nd_io.fetch_news_to_csv(
+                query=query,
+                country_code=code,
+                filename=f'newsdata_io_output.csv',
+                max_articles=25,
+                from_date='2025-01-01',
+                to_date='2025-11-08', 
+                write_mode=write_mode
+            )
+            write_mode = 'a' # set output to append to the current csv file
+
+        # Load and transform the data
+        tree_data = load_csv_to_json('newsdata_io_output.csv', root_name="API Search Results")
+    
+        # Save the result to a JSON file
+        save_json(tree_data, 'country_news_tree.json')
+       
+
         # 2. Construct the core prompt
         country_context = f"Ensure the response heavily features elements related to the following countries: {', '.join(selected_names)}." if selected_names else ""
         if time_name != "No Limit":
