@@ -5,7 +5,7 @@ from newsdataapi.newsdataapi_exception import NewsdataException
 
 # --- GLOBAL CONFIGURATION ---
 # IMPORTANT: Replace this placeholder with your actual API key
-API_KEY = 'pub_c9ed3f99fe984d8d80b23710d01ea9d9'
+API_KEY = 'pub_9619f9337fc44ef593a99b6e83fbf937'
 client = NewsDataApiClient(apikey=API_KEY)
 
 # Define the fields (column headers) we want to write to the CSV
