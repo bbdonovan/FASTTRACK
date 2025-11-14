@@ -1,116 +1,146 @@
 import csv
 import json
+import os
 
-def load_csv_to_json(filename: str, root_name: str = "News Articles"):
+def load_csv_to_json(filename: str, root_name: str = "Global News Aggregator") -> dict:
     """
-    Reads a CSV file created by fetch_news_to_csv, groups the articles
-    by Country Code, then by Source ID, and returns the data in a
-    nested JSON hierarchy suitable for visualization (e.g., D3.js).
-    
-    The resulting structure is: {name: root, children: [{name: Country, children: [{name: Source, children: [articles]}]}]}.
+    Reads a CSV file containing news articles and converts it into a nested
+    hierarchical JSON structure suitable for a D3 Collapsible Tree.
 
-    :param filename: The path/name of the input CSV file.
-    :param root_name: The name for the top-level node in the JSON tree.
-    :return: A dictionary representing the nested JSON structure.
+    Hierarchy: Root -> Country Code -> API Source -> Source ID -> Article Titles
+
+    :param filename: The name of the input CSV file.
+    :param root_name: The name for the top-level root node in the JSON tree (new parameter).
+    :return: A dictionary representing the D3 hierarchical structure.
     """
+    if not os.path.exists(filename):
+        print(f"Error: Input file '{filename}' not found.")
+        return {}
+
+    # Intermediate structure: {country: {api_source: {source_id: [articles]}}}
+    intermediate_data = {}
     
-    # Tier 1: Intermediate storage organized as {country: {source: [articles]}}
-    data_by_country_and_source = {}
+    # Required CSV fields
+    REQUIRED_FIELDS = ['Title', 'Link', 'Publication Date', 'Source ID', 'Country Code', 'API Source']
     
-    print(f"Reading data from {filename}...")
-    
+    print(f"Reading data from {filename} and building hierarchy...")
+
     try:
         with open(filename, mode='r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             
+            # Check if required fields exist
+            if not all(field in reader.fieldnames for field in REQUIRED_FIELDS):
+                print(f"Error: CSV is missing one or more required fields. Found: {reader.fieldnames}")
+                return {}
+
             for row in reader:
-                country = row.get('Country Code')
-                source = row.get('Source ID')
+                # --- Tier 1 & 2 Keys ---
+                country = row.get('Country Code', 'UNKNOWN_COUNTRY').upper()
+                api_source = row.get('API Source', 'UNKNOWN_API')
+                source_id = row.get('Source ID', 'UNKNOWN_SOURCE')
                 
-                # We need valid country and source to group data
-                if not country or not source or country == 'N/A' or source == 'N/A':
-                    continue
-                
-                # Tier 3 (Article Details): The leaf node data
+                # --- Tier 4 Leaf Node Data ---
                 article_node = {
+                    # 'name' is the visible text in the tree
                     "name": row.get('Title', 'Untitled Article'),
-                    "url": row.get('Link', 'N/A'),           # *** Updated link field to "url" for D3
-                    "pubDate": row.get('Publication Date', 'N/A'),
-                    "value": 1  # Placeholder value to match the hierarchy example
+                    # These fields are carried along for hyperlinking and display
+                    "url": row.get('Link', 'N/A'),
+                    "date": row.get('Publication Date', 'N/A'),
+                    "snippet": row.get('Snippet', 'N/A')
                 }
+
+                # Build the nested structure dynamically
+                # Nesting: Country -> API Source -> Source ID -> Articles
+                if country not in intermediate_data:
+                    intermediate_data[country] = {}
                 
-                # Safely create country level (Tier 1)
-                if country not in data_by_country_and_source:
-                    data_by_country_and_source[country] = {}
-                
-                # Safely create source level (Tier 2) and append the article
-                if source not in data_by_country_and_source[country]:
-                    data_by_country_and_source[country][source] = []
+                if api_source not in intermediate_data[country]:
+                    intermediate_data[country][api_source] = {}
                     
-                data_by_country_and_source[country][source].append(article_node)
+                if source_id not in intermediate_data[country][api_source]:
+                    intermediate_data[country][api_source][source_id] = []
+                    
+                intermediate_data[country][api_source][source_id].append(article_node)
 
-    except FileNotFoundError:
-        print(f"❌ Error: CSV file '{filename}' not found. Please ensure it exists and is correct.")
-        return None
     except Exception as e:
-        print(f"❌ An error occurred during CSV processing: {e}")
-        return None
+        print(f"An error occurred while reading the CSV: {e}")
+        return {}
 
-    # --- Convert to Nested JSON Hierarchy ---
-    
+    # --- Convert Intermediate Dictionary to D3 Hierarchy (List of Lists) ---
     hierarchical_output = []
-
-    # Outer Loop: Country (Tier 2)
-    for country, sources in data_by_country_and_source.items():
+    
+    # Tier 1: Country
+    for country, api_sources_data in intermediate_data.items():
         country_node = {
             "name": country,
-            "children": [] # List of sources
+            "children": []
         }
         
-        # Middle Loop: Source (Tier 3)
-        for source, articles in sources.items():
-            source_node = {
-                "name": source,
-                "children": articles # List of articles (leaves)
+        # Tier 2: API Source
+        for api_source, sources_data in api_sources_data.items():
+            api_source_node = {
+                "name": api_source,
+                "children": []
             }
-            country_node["children"].append(source_node)
             
+            # Tier 3: Source ID
+            for source_id, articles in sources_data.items():
+                source_node = {
+                    "name": source_id,
+                    "children": []
+                }
+                
+                # Tier 4: Article Titles (Leaf Nodes)
+                for article in articles:
+                    # Append the article node data
+                    source_node['children'].append({
+                        "name": article['name'],
+                        "url": article['url'],
+                        "date": article['date'],
+                        "snippet": article['snippet'],
+                        "value": 1 # D3 visualization requires a value on leaf nodes
+                    })
+                
+                api_source_node['children'].append(source_node)
+            
+            country_node['children'].append(api_source_node)
+
         hierarchical_output.append(country_node)
-        
-    # Final Root Node (Tier 1)
-    final_json_structure = {
+
+    # Wrap the entire structure in a root node for D3 compatibility
+    final_root_node = {
+        # CHANGED: Use the new root_name parameter
         "name": root_name,
         "children": hierarchical_output
     }
-    
-    return final_json_structure
 
-def save_json(data, output_filename: str = 'news_data.json'):
+    print("Hierarchy successfully built.")
+    return final_root_node
+
+def save_json(data: dict, output_filename: str):
     """
-    Writes the Python dictionary to a JSON file.
+    Writes the Python dictionary data to a formatted JSON file.
     """
-    if data is None:
-        return
-        
-    print(f"\nWriting hierarchical data to {output_filename}...")
-    with open(output_filename, 'w', encoding='utf-8') as f:
-        # Use indent=4 for clean, readable output matching the user's example format
-        json.dump(data, f, ensure_ascii=False, indent=4)
-        
-    print(f"✅ JSON file saved successfully: {output_filename}")
+    try:
+        with open(output_filename, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+        print(f"✅ Success: Hierarchy written to '{output_filename}'")
+    except Exception as e:
+        print(f"❌ Error writing JSON file: {e}")
 
 
+# --- Example Usage (If run directly) ---
 if __name__ == '__main__':
-    # --- Example Usage ---
     
-    # 1. DEFINE THE INPUT CSV FILE PATH
-    # Ensure a file named 'political_news_combined.csv' exists in this directory 
-    # and has the columns 'Title', 'Source ID', 'Link', and 'Country Code'.
-    INPUT_CSV_FILE = 'political_news_combined.csv'
-    OUTPUT_JSON_FILE = 'political_news_tree.json'
+    # NOTE: You must run news_fetcher.py and newsapi_org_fetcher.py 
+    # to create this CSV file before running this script!
+    INPUT_CSV = 'political_news_combined.csv'
+    OUTPUT_JSON = 'country_news_tree.json'
 
-    # 2. Load and transform the data
-    tree_data = load_csv_to_json(INPUT_CSV_FILE, root_name="Combined Political News")
+    # 1. Read CSV and build the hierarchical structure (Now uses the default root name)
+    json_data = load_csv_to_json(INPUT_CSV)
     
-    # 3. Save the result to a JSON file
-    save_json(tree_data, OUTPUT_JSON_FILE)
+    # 2. Save the structure to the JSON file
+    if json_data:
+        save_json(json_data, OUTPUT_JSON)

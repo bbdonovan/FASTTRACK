@@ -7,6 +7,7 @@ import csv
 from flask import Flask, render_template, request, send_from_directory
 from requests.exceptions import Timeout, RequestException
 import newsdata_io as nd_io
+import newsapi_org as na_org
 from csv_to_json_converter import load_csv_to_json, save_json
 
 # --- Setup and Initialization ---
@@ -26,9 +27,9 @@ if not API_KEY:
 
 # --- Constants for News Source Selection ---
 NEWS_SOURCES = [
-    "No Preference",
+    "All",
     "NewsData.io",
-    "The Guardian"
+    "NewsApi.org"
 ]
 # --- Constants ---
 API_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent"
@@ -119,14 +120,14 @@ def generate_content_with_retry(prompt, system_instruction, response_schema=None
                     ]
             
             # Log sources for debugging (new feature)
-            try:
-                # Use os.getcwd() for logging stability
-                log_path = os.path.join(os.getcwd(), 'gemini_sources_log.json')
-                with open(log_path, 'w', encoding='utf-8') as log_file:
-                    json.dump(sources, log_file, indent=2)
-                print(f"Successfully logged {len(sources)} sources to gemini_sources_log.json")
-            except Exception as e:
-                print(f"Warning: Could not log sources: {e}")
+            #try:
+            #    # Use os.getcwd() for logging stability
+            #    log_path = os.path.join(os.getcwd(), 'gemini_sources_log.json')
+            #    with open(log_path, 'w', encoding='utf-8') as log_file:
+            #        json.dump(sources, log_file, indent=2)
+            #    print(f"Successfully logged {len(sources)} sources to gemini_sources_log.json")
+            #except Exception as e:
+            #    print(f"Warning: Could not log sources: {e}")
 
             # SUCCESS: Return a dictionary
             return {"text": text, "sources": sources}
@@ -147,54 +148,6 @@ def generate_content_with_retry(prompt, system_instruction, response_schema=None
     print("Max retries reached. Failing.")
     # FAILURE: Return a dictionary
     return {"text": "Error: Could not generate content after multiple retries.", "sources": []}
-
-
-#def generate_news_articles(final_prompt):
-def generate_news_articles(final_prompt, source_preference): # <--- New parameter
-    """Generates a structured list of relevant news articles."""
-
-    # Modify prompt to include the source preference
-    if source_preference != "No Preference":
-        source_instruction = f"from the news site: {source_preference}"
-    else:
-        source_instruction = "from reputable financial news sources"
-
-    prompt = (
-        f"Based on the following topic and context, identify 5 popular and recent news articles "
-        f"{source_instruction}. Provide a brief, single-sentence summary for each article in the description field."
-    )
-#    prompt = f"Based on the following topic and context, identify 5 popular and recent news articles from reliable global news sources (like Reuters, #AP, Financial Times, BBC, etc.): {final_prompt}. Provide a brief, single-sentence summary for each article in the description field."
-
-    response_schema = {
-        "type": "ARRAY",
-        "items": {
-            "type": "OBJECT",
-            "properties": {
-                "title": {"type": "STRING", "description": "The title of the news article."},
-                "description": {"type": "STRING", "description": "A brief summary of the article."},
-                "url": {"type": "STRING", "description": "The URL of the article. MUST start with http or https."}
-            },
-            "propertyOrdering": ["title", "description", "url"]
-        }
-    }
-
-    # FIX: Explicitly pass all required arguments
-    news_response = generate_content_with_retry(
-        prompt, 
-        SYSTEM_INSTRUCTION_NEWS, 
-        response_schema=response_schema, 
-        use_search=True
-    )
-    
-    # FIX: Access response content using .get("text") because the function returns a DICTIONARY.
-    if news_response.get("text") and not news_response.get("text").startswith("Error:"):
-        try:
-            return json.loads(news_response.get("text"))
-        except json.JSONDecodeError:
-            print("Warning: Failed to parse structured JSON response for news articles.")
-            return []
-    
-    return []
 
 
 # --- Flask Routes ---
@@ -219,14 +172,13 @@ def index():
     # Initialize all variables for rendering
     generated_response = None
     selected_codes = []
+    news_countries = []
     selected_time_code = "nl"
+    selected_news_source=[]
+    selected_news_source_temp=[]
     gemini_prompt = ""
-    general_sources = []
-    yahoo_sources = []
-    news_articles = []
     # FIX: Initialize input_topic here for the first GET request context
     input_topic = ''
-    selected_news_source = NEWS_SOURCES[0] # <--- ADDED FIX: Initialize here
 
     if request.method == 'POST':
         # 1. Retrieve and process form data
@@ -234,39 +186,60 @@ def index():
         selected_time_code = request.form.get('time_frame')
         topic = request.form.get('topic', '')
         print('selected_codes:',selected_codes)
+
         # Retrieve the new source preference input
-        selected_news_source = request.form.get('news_source', NEWS_SOURCES[0]) # <--- ADDED & FIXED
-        
-        # FIX: Store retrieved topic back into the variable for persistence
+        selected_news_source = request.form.getlist('news_source')
+        print('*****SELECTED_NEWS_SOURCE*************',selected_news_source, selected_news_source_temp)
+        if (selected_news_source == []) or (selected_news_source == ['All']):
+            selected_news_source_temp = NEWS_SOURCES[1:]
+        else:
+            selected_news_source_temp = selected_news_source.copy()
+        print('*****SELECTED_NEWS_SOURCE_TEMP*************',selected_news_source, selected_news_source_temp)
+
         input_topic = topic # <--- ADDED LINE: ensures topic persists in textarea
         
         # Map selected codes to full country names
         selected_names = [d['name'] for d in country_data if d['code'] in selected_codes]
         time_name = next((tf['name'] for tf in time_frames if tf['code'] == selected_time_code), "No Limit")
 
-        # API CALLS ADDED 11/10/25
+        # API CALLS ADDED ~11/10/25
         # Call news apis for each country code + topic and store results in csv file
-        #news_countries = [d['code'] for d in country_data if d['code'] in selected_codes]
-        news_countries = selected_codes.copy()
+        news_countries = [item for item in selected_codes]
         news_countries.append('US')
         news_countries = list(set(news_countries)) #so it doesn't repeat 'US' if already there
         write_mode = 'w' # set output to start with a new file
-        for code in news_countries:
-            query = f'{input_topic} AND ({' OR '.join(selected_names)})'
-            print('news api query:', query,' ...to country code...', code)
-            nd_io.fetch_news_to_csv(
-                query=query,
-                country_code=code,
-                filename=f'newsdata_io_output.csv',
-                max_articles=25,
-                from_date='2025-01-01',
-                to_date='2025-11-08', 
-                write_mode=write_mode
-            )
-            write_mode = 'a' # set output to append to the current csv file
+        if 'NewsData.io' in selected_news_source_temp:
+            for code in news_countries:
+                query = f'({input_topic}) AND ({' OR '.join(selected_names)})'
+                print('newsdata.io query:', query,' ...to country code...', code)
+                nd_io.fetch_news_to_csv(
+                    query=query,
+                    country_code=code,
+                    filename=f'newsdata_output.csv',
+                    max_articles=25,
+                    from_date='2025-11-01',
+                    to_date='2025-11-14', 
+                    write_mode=write_mode
+                )
+                write_mode = 'a' # set output to append to the current csv file
+
+        if 'NewsApi.org' in selected_news_source_temp:
+            for code in news_countries:
+                query = f'({input_topic}) AND ({' OR '.join(selected_names)})'
+                print('newsapi.org query:', query,' ...to country code...', code)
+                na_org.fetch_news_from_newsapi_org_to_csv(
+                    query=query,
+                    country_code=code,
+                    filename=f'newsdata_output.csv',
+                    max_articles=25,
+                    from_date='2025-11-01',
+                    to_date='2025-11-14', 
+                    write_mode=write_mode
+                )
+                write_mode = 'a' # set output to append to the current csv file
 
         # Load and transform the data
-        tree_data = load_csv_to_json('newsdata_io_output.csv', root_name="API Search Results")
+        tree_data = load_csv_to_json('newsdata_output.csv', root_name="API Search Results")
     
         # Save the result to a JSON file
         save_json(tree_data, 'country_news_tree.json')
@@ -292,18 +265,15 @@ def index():
         )
         # Unpack result from the returned DICTIONARY
         generated_response = main_response.get("text")
-        all_sources = main_response.get("sources")
+        #all_sources = main_response.get("sources")
         
         # 4. Filter sources into general and Yahoo Finance
-        for source in all_sources:
-            uri = source.get('uri', '').lower()
-            if 'finance.yahoo.com' in uri:
-                yahoo_sources.append(source)
-            else:
-                general_sources.append(source)
-
-        # 5. Call 2: Generate Structured News Articles
-        news_articles = generate_news_articles(gemini_prompt, selected_news_source) # <--- FIXED CALL
+        #for source in all_sources:
+        #    uri = source.get('uri', '').lower()
+        #    if 'finance.yahoo.com' in uri:
+        #        yahoo_sources.append(source)
+        #    else:
+        #        general_sources.append(source)
             
     # 6. Render Template with all variables
     return render_template(
@@ -314,9 +284,6 @@ def index():
         selected_codes=selected_codes,
         selected_time_code=selected_time_code,
         gemini_prompt=gemini_prompt,
-        general_sources=general_sources,
-        yahoo_sources=yahoo_sources,
-        news_articles=news_articles,
         input_topic=input_topic, # Pass the topic back to the template
     	news_sources=NEWS_SOURCES,             # <--- ADDED
     	selected_news_source=selected_news_source # <--- ADDED

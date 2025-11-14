@@ -9,7 +9,8 @@ API_KEY = 'pub_9619f9337fc44ef593a99b6e83fbf937'
 client = NewsDataApiClient(apikey=API_KEY)
 
 # Define the fields (column headers) we want to write to the CSV
-CSV_FIELDNAMES = ['Title', 'Publication Date', 'Link', 'Snippet', 'Source ID', 'Country Code']
+# MODIFIED: Added 'API Source'
+CSV_FIELDNAMES = ['Title', 'Publication Date', 'Link', 'Snippet', 'Source ID', 'Country Code', 'API Source']
 
 def fetch_news_to_csv(query: str, country_code: str, filename: str, language_code: str = 'en', max_articles: int = 0, write_mode: str = 'w', from_date: str = None, to_date: str = None):
     """
@@ -141,8 +142,9 @@ def fetch_news_to_csv(query: str, country_code: str, filename: str, language_cod
                 # Clean up newlines in the snippet
                 'Snippet': article.get('content', 'N/A').replace('\n', ' '), 
                 'Source ID': article.get('source_id', 'N/A'),
-                # NEW LINE: Add the country code used in the current search batch
-                'Country Code': country_code 
+                'Country Code': country_code,
+                # NEW LINE: Hardcode the API source name
+                'API Source': 'newsdata.io'
             }
             writer.writerow(data_row)
             written_count += 1

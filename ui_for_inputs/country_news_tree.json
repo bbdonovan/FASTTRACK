@@ -1,318 +1,799 @@
 {
-    "name": "API Search Results",
-    "children": [
+  "name": "API Search Results",
+  "children": [
+    {
+      "name": "US",
+      "children": [
         {
-            "name": "KR",
-            "children": [
+          "name": "newsdata.io",
+          "children": [
+            {
+              "name": "menafn",
+              "children": [
                 {
-                    "name": "koreajoongangdaily_joins",
-                    "children": [
-                        {
-                            "name": "From Rosé to Katseye, the 2026 Grammy nominations mark a breakthrough — or maybe an evolution",
-                            "url": "https://koreajoongangdaily.joins.com/news/2025-11-10/entertainment/kpop/From-Ros-to-Katseye-the-2026-Grammy-nominations-mark-a-breakthrough--or-maybe-an-evolution/2440763",
-                            "pubDate": "2025-11-10 10:11:14",
-                            "value": 1
-                        },
-                        {
-                            "name": "LS Electric quietly dominating key U.S. sector, sets sights on Texas data centers",
-                            "url": "https://koreajoongangdaily.joins.com/news/2025-11-10/business/industry/LS-Electric-quietly-dominating-key-US-sector-sets-sights-on-Texas-data-centers/2439319",
-                            "pubDate": "2025-11-09 22:00:01",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "koreatimes",
-                    "children": [
-                        {
-                            "name": "GKL hosts tourist event in DMZ",
-                            "url": "https://www.koreatimes.co.kr/business/companies/20251110/gkl-hosts-tourist-event-in-dmz",
-                            "pubDate": "2025-11-10 06:47:03",
-                            "value": 1
-                        }
-                    ]
+                  "name": "Gluten Free Snacks Market SWOT Analysis, Competitive Landscape And Massive Growth 2031",
+                  "url": "https://menafn.com/1110344264/Gluten-Free-Snacks-Market-SWOT-Analysis-Competitive-Landscape-And-Massive-Growth-2031",
+                  "date": "2025-11-14 07:01:19",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
                 }
-            ]
+              ]
+            },
+            {
+              "name": "travelandtourworld",
+              "children": [
+                {
+                  "name": "La Compagnie\u2019s All\u2010Business\u2010Class A321neo Service Between Newark and Milan Malpensa Launches \u2010 Premium Travel Option Between the U.S. and Italy",
+                  "url": "https://www.travelandtourworld.com/news/article/la-compagnies-all%E2%80%91business%E2%80%91class-a321neo-service-between-newark-and-milan-malpensa-launches-%E2%80%91-premium-travel-option-between-the-u-s-and-italy/",
+                  "date": "2025-11-14 01:00:59",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "davisenterprise",
+              "children": [
+                {
+                  "name": "Street Beat: Wine bar adds handmade pasta on Friday nights",
+                  "url": "https://www.davisenterprise.com/news/street-beat-wine-bar-adds-handmade-pasta-on-friday-nights/article_d630d6ba-51fc-4203-8a65-ab56295c98dd.html",
+                  "date": "2025-11-13 23:20:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "foxbusiness",
+              "children": [
+                {
+                  "name": "White House disputes reports that Italian pasta could vanish from store shelves nationwide",
+                  "url": "https://www.foxbusiness.com/politics/white-house-disputes-reports-italian-pasta-could-vanish-from-store-shelves-nationwide",
+                  "date": "2025-11-13 20:00:09",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "mlive",
+              "children": [
+                {
+                  "name": "Hidden gem in Southwest Michigan keeps menu creative, constantly changing",
+                  "url": "https://www.mlive.com/news/kalamazoo/2025/11/hidden-gem-in-southwest-michigan-keeps-menu-creative-constantly-changing.html",
+                  "date": "2025-11-13 19:56:22",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "forbes",
+              "children": [
+                {
+                  "name": "Brooklyn Beckham On Family, Italy And His Love Of Cooking",
+                  "url": "https://www.forbes.com/sites/jordilippemcgraw/2025/11/13/brooklyn-beckham-on-family-italy-and-his-love-of-cooking/",
+                  "date": "2025-11-13 19:19:51",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "lockportjournal",
+              "children": [
+                {
+                  "name": "Author Katie Parla celebrates Roman food at special event in Rochester",
+                  "url": "https://www.lockportjournal.com/news/lifestyles/author-katie-parla-celebrates-roman-food-at-special-event-in-rochester/article_d57dcfe7-5871-5d89-8574-32ff1a7130b7.html",
+                  "date": "2025-11-13 18:00:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "6abc",
+              "children": [
+                {
+                  "name": "The Dish: Italian sausage focaccia stuffing from Carlino's Market",
+                  "url": "https://6abc.com/post/dish-italian-sausage-focaccia-stuffing-recipe-carlinos-market-thanksgiving-day-dinner/18151139/",
+                  "date": "2025-11-13 16:12:48",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "newsgazette",
+              "children": [
+                {
+                  "name": "Cizzle Brands Places CWENCH HydrationTM and HappiEatsTM Sport PastaTM at 91 Popeye\u2019s Supplements Canada Locations",
+                  "url": "https://www.news-gazette.com/cizzle-brands-places-cwench-hydration-and-happieats-sport-pasta-at-91-popeye-s-supplements-canada/article_06474d60-7236-5692-8a67-c4335daf119f.html",
+                  "date": "2025-11-13 12:51:02",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "hastingstribune",
+              "children": [
+                {
+                  "name": "Cizzle Brands Places CWENCH HydrationTM and HappiEatsTM Sport PastaTM at 91 Popeye\u2019s Supplements Canada Locations",
+                  "url": "https://www.hastingstribune.com/ap/business/cizzle-brands-places-cwench-hydration-and-happieats-sport-pasta-at-91-popeye-s-supplements-canada/article_08169bd5-43ce-58cb-8748-c435b31b3735.html",
+                  "date": "2025-11-13 12:51:02",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "lufkindailynews",
+              "children": [
+                {
+                  "name": "Cizzle Brands Places CWENCH HydrationTM and HappiEatsTM Sport PastaTM at 91 Popeye\u2019s Supplements Canada Locations",
+                  "url": "https://lufkindailynews.com/anpa/sports/cizzle-brands-places-cwench-hydration-and-happieats-sport-pasta-at-91-popeye-s-supplements-canada/article_6508385c-db89-5b56-ba0c-e1eb57d97f5b.html",
+                  "date": "2025-11-13 12:51:02",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "thetakeout",
+              "children": [
+                {
+                  "name": "11 Differences Between US And European Restaurants You Need To Know Before Traveling",
+                  "url": "https://www.thetakeout.com/2022532/european-vs-american-restaurant-differences/",
+                  "date": "2025-11-13 12:40:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "today_com",
+              "children": [
+                {
+                  "name": "TODAY\u2019s All-Star Thanksgiving: 19 Chefs Share Recipes and Tips for 10th Anniversary",
+                  "url": "https://www.today.com/food/recipes/today-all-star-thanksgiving-2025-rcna240535",
+                  "date": "2025-11-13 11:42:23",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "theguardian",
+              "children": [
+                {
+                  "name": "\u2018What, no ziti now?\u2019: US pasta lovers fear Trump tariffs will cause shortage",
+                  "url": "https://www.theguardian.com/food/2025/nov/13/pasta-italian-imports-trump-tariffs",
+                  "date": "2025-11-13 11:00:41",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "capjournal",
+              "children": [
+                {
+                  "name": "James Beard Award-Winning Chef Launches \u2018Incredible\u2019 New Pasta Sauce Collection",
+                  "url": "https://www.capjournal.com/arena/men_s_journal/james-beard-award-winning-chef-launches-incredible-new-pasta-sauce-collection/article_3a353e10-ee76-5b08-80ae-01fc3b90513f.html",
+                  "date": "2025-11-13 02:45:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "headtopics",
+              "children": [
+                {
+                  "name": "County debuts Little Italy affordable housing development for seniors",
+                  "url": "https://us.headtopics.com/news/county-debuts-little-italy-affordable-housing-development-75742362",
+                  "date": "2025-11-12 22:39:52",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            }
+          ]
         },
         {
-            "name": "US",
-            "children": [
+          "name": "newsapi.org",
+          "children": [
+            {
+              "name": "MassLive.com",
+              "children": [
                 {
-                    "name": "latimes",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.latimes.com/world-nation/story/2025-11-10/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea",
-                            "pubDate": "2025-11-10 16:18:36",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "milescitystar",
-                    "children": [
-                        {
-                            "name": "HWAL Inc., to Collaborate with International Music Industry Veterans on K-Pop Music Venture",
-                            "url": "https://www.milescitystar.com/ap_news/montana/hwal-inc-to-collaborate-with-international-music-industry-veterans-on-k-pop-music-venture/article_2a18e089-c4db-598c-8004-945b056bdfb1.html",
-                            "pubDate": "2025-11-10 14:16:00",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "gizmodotech",
-                    "children": [
-                        {
-                            "name": "‘It: Welcome to Derry’ Stars Kimberly Guerrero and James Remar on Episode 3’s Big Reveals",
-                            "url": "https://gizmodo.com/it-welcome-to-derry-episode-3-spoilers-kimberly-guerrero-james-remar-2000680985",
-                            "pubDate": "2025-11-10 14:15:55",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "zerohedge",
-                    "children": [
-                        {
-                            "name": "Global Markets Soar As US Government Set To Reopen After Democrats Cave",
-                            "url": "https://www.zerohedge.com/markets/global-markets-soar-us-government-set-reopen-after-democrats-cave",
-                            "pubDate": "2025-11-10 14:15:50",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "messenger_inquirer",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.messenger-inquirer.com/ap/ap_international_news/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/article_97283568-bb23-561f-a80d-8a1a68fc455f.html",
-                            "pubDate": "2025-11-10 08:24:31",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "the_messenger",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.the-messenger.com/news/world/article_9f5aa0ff-e80b-5d30-b496-69d7e186185c.html",
-                            "pubDate": "2025-11-10 08:24:31",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "newser",
-                    "children": [
-                        {
-                            "name": "South Korea Has New Charges for Ousted Leader",
-                            "url": "https://www.newser.com/story/378385/south-koreas-ousted-leader-indicted-for-flying-drones-over-north.html",
-                            "pubDate": "2025-11-10 06:14:10",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "abcnews",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://abcnews.go.com/International/wireStory/south-koreas-ousted-leader-yoon-indicted-flying-drones-127367354",
-                            "pubDate": "2025-11-10 05:25:29",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "newsday",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.newsday.com/news/nation/south-korea-yoon-martial-law-drones-t37447",
-                            "pubDate": "2025-11-10 05:15:35",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "wsav",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.wsav.com/news/international-news/ap-south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "wfaa",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.wfaa.com/article/syndication/associatedpress/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/616-f564c599-6227-47a4-981d-aa745a9e96a0",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "kdhnews",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://kdhnews.com/news/world/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/article_5ca8f3c8-ff0c-5410-8cde-1e88fd36a375.html",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "dailysentinel",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.dailysentinel.com/anpa/international/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/article_f5647a7c-ce5e-5779-a0ae-9c0aac0f7bb5.html",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "chronicleonline",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.chronicleonline.com/news/world/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/article_d63d90f5-e046-5f16-b7a4-540e986dfad6.html",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "clickondetroit",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.clickondetroit.com/news/world/2025/11/10/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "kgw",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.kgw.com/article/syndication/associatedpress/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/616-f564c599-6227-47a4-981d-aa745a9e96a0",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "apnews",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://apnews.com/article/south-korea-yoon-martial-law-drones-ced9c2e3163b44ba8da5169e22ce479a",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "ksat",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.ksat.com/news/world/2025/11/10/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "kvue",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.kvue.com/article/syndication/associatedpress/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/616-f564c599-6227-47a4-981d-aa745a9e96a0",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "newspressnow",
-                    "children": [
-                        {
-                            "name": "South Korea’s ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.newspressnow.com/ap/ap-world-news/2025/11/09/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "dailygazette",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.dailygazette.com/ap/world/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/article_54858e33-c98d-5804-b4f4-605669b7fcc5.html",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "a12news",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.12news.com/article/syndication/associatedpress/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/616-f564c599-6227-47a4-981d-aa745a9e96a0",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "cbs17",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.cbs17.com/news/ap-south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "guardonline",
-                    "children": [
-                        {
-                            "name": "South Korea's ousted leader Yoon indicted for flying drones over North Korea",
-                            "url": "https://www.guardonline.com/news/world/south-koreas-ousted-leader-yoon-indicted-for-flying-drones-over-north-korea/article_a215f914-1589-5e40-88da-d4c9e29aadc7.html",
-                            "pubDate": "2025-11-10 05:12:14",
-                            "value": 1
-                        }
-                    ]
-                },
-                {
-                    "name": "thetakeout",
-                    "children": [
-                        {
-                            "name": "The Best Fried Chicken Restaurants In Every State",
-                            "url": "https://www.thetakeout.com/2018387/best-fried-chicken-restaurant-every-state/",
-                            "pubDate": "2025-11-09 16:40:00",
-                            "value": 1
-                        }
-                    ]
+                  "name": "Italian pasta could vanish from American grocery shelves. Here\u2019s why",
+                  "url": "https://www.masslive.com/news/2025/11/italian-pasta-could-vanish-from-american-grocery-shelves-heres-why.html",
+                  "date": "2025-11-11T16:46:59Z",
+                  "snippet": "Your favorite Italian pasta may soon cost double (or disappear entirely).",
+                  "value": 1
                 }
-            ]
+              ]
+            },
+            {
+              "name": "Jezebel",
+              "children": [
+                {
+                  "name": "Everyone's Getting a Bag of Dry Pasta for Christmas",
+                  "url": "https://www.jezebel.com/everyones-getting-a-bag-of-dry-pasta-for-christmas",
+                  "date": "2025-11-11T12:58:29Z",
+                  "snippet": "Italian pasta producers warn that the Trump administration's combined 107% tariffs and duties could force them to pull their products from U.S. shelves early next year.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Business Insider",
+              "children": [
+                {
+                  "name": "I'm a mom who drives an hour to stock up on pantry staples at Trader Joe's. Here are 13 items I always buy.",
+                  "url": "https://www.businessinsider.com/trader-joes-items-worth-long-drive-stock-up-family-2025-11",
+                  "date": "2025-11-01T11:47:02Z",
+                  "snippet": "The closest Trader Joe's to my home in Florida is an hour away. So, every couple of months, I stock up on staples like peanut butter and spaghetti.",
+                  "value": 1
+                },
+                {
+                  "name": "Gen Z diners are turning to social media to discover restaurants over Yelp and Michelin",
+                  "url": "https://www.businessinsider.com/gen-z-restaurant-discovery-social-media-2025-11",
+                  "date": "2025-11-01T09:12:01Z",
+                  "snippet": "For Gen Z and millennials, choosing a restaurant is less about Michelin stars or Yelp averages and more about what's in their social media feeds.",
+                  "value": 1
+                },
+                {
+                  "name": "The best way to have a smooth holiday season is to understand what type of mother-in-law you have",
+                  "url": "https://www.businessinsider.com/bi-today-saturday-smooth-holiday-mother-in-law-types-2025-11",
+                  "date": "2025-11-08T11:36:02Z",
+                  "snippet": "In this Saturday edition of BI Today, we're talking about the six different types of mothers-in-law and how to interact with them smoothly.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Creative Bloq",
+              "children": [
+                {
+                  "name": "New Olympic Rings Pasta boxes are a thing of beauty",
+                  "url": "https://www.creativebloq.com/design/branding/new-olympic-rings-pasta-boxes-are-a-thing-of-beauty",
+                  "date": "2025-11-01T10:00:00Z",
+                  "snippet": "And the shaped pasta is pretty cool, too.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "CBS News",
+              "children": [
+                {
+                  "name": "Italian imports store owner on threat of new pasta tariffs: \"We can only absorb so much\"",
+                  "url": "https://www.cbsnews.com/video/italian-imports-store-owner-on-threat-of-new-pasta-tariffs-we-can-only-absorb-so-much/",
+                  "date": "2025-11-12T00:25:00Z",
+                  "snippet": "Some popular pasta brands from Italy may have to say \"arrivederci\" to U.S. store shelves as President Trump is threatening heavy tariffs on the imports. Meg Oliver has more.",
+                  "value": 1
+                },
+                {
+                  "name": "A 107% U.S. import tax on Italian pasta could make your spaghetti pricier",
+                  "url": "https://www.cbsnews.com/news/italian-pasta-antidumping-duties-imports-disappear-barilla/",
+                  "date": "2025-11-11T20:19:14Z",
+                  "snippet": "The Trump administration is considering a new import duty on 13 of Italy's largest pasta exporters, including Barilla and La Molisana.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "NBC News",
+              "children": [
+                {
+                  "name": "Italian pasta exports to the U.S. could be 'virtually wiped out' by proposed 107% tariffs",
+                  "url": "https://www.nbcnews.com/business/business-news/italian-pasta-tariffs-trump-rcna243264",
+                  "date": "2025-11-11T19:04:31Z",
+                  "snippet": "U.S. tariff rates on pasta from 13 major Italian companies could soar to as high as 107% under a recent Commerce Department decision.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Twistedsifter.com",
+              "children": [
+                {
+                  "name": "Man Was Invited Over For Dinner With His Girlfriend\u2019s Parents, And He Decided To Be Honest When Asked How He Liked Her Mom\u2019s Cooking",
+                  "url": "http://twistedsifter.com/2025/11/man-was-invited-over-for-dinner-with-his-girlfriends-parents-and-he-decided-to-be-honest-when-asked-how-he-liked-her-moms-cooking/",
+                  "date": "2025-11-13T05:15:05Z",
+                  "snippet": "Honesty may be the best policy, but timing and tact matter too.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Forbes",
+              "children": [
+                {
+                  "name": "NYT Mini Crossword Clues And Answers For Tuesday, November 11",
+                  "url": "https://www.forbes.com/sites/erikkain/2025/11/10/nyt-mini-crossword-clues-and-answers-for-tuesday-november-11/",
+                  "date": "2025-11-11T04:02:17Z",
+                  "snippet": "Looking for help with today's NYT Mini Crossword puzzle? Here are some hints and answers for the puzzle.",
+                  "value": 1
+                },
+                {
+                  "name": "Dimmi Dimmi - An Italian Restaurant Everyone Can Love",
+                  "url": "https://www.forbes.com/sites/tomhyland/2025/11/03/dimmi-dimmian-italian-restaurant-everyone-can-love/",
+                  "date": "2025-11-03T12:45:00Z",
+                  "snippet": "For starters, the sesame focaccia, served with a variety of options is quite good; I went with the ricotta and honey dip, which added a nice tang.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "International Business Times",
+              "children": [
+                {
+                  "name": "Italian Pasta at Risk: US Tariffs of Up to 107% Threaten Shelf Presence of 13 Major Brands",
+                  "url": "https://www.ibtimes.com/italian-pasta-risk-us-tariffs-107-threaten-shelf-presence-13-major-brands-3790044",
+                  "date": "2025-11-10T20:03:52Z",
+                  "snippet": "US tariffs of up to 107% threaten 13 major Italian pasta brands, potentially doubling prices and reducing availability. Discover the impact on American consumers and Italy's export industry.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Memeorandum.com",
+              "children": [
+                {
+                  "name": "Italian Pasta Is Poised to Disappear From American Grocery Shelves (Wall Street Journal)",
+                  "url": "https://www.memeorandum.com/251110/p52",
+                  "date": "2025-11-10T15:30:00Z",
+                  "snippet": "Wall Street Journal: Italian Pasta Is Poised to Disappear From American Grocery Shelves\u00a0 \u2014\u00a0 Trump administration is set to impose duties of 107% on Italian pasta imports, among most punitive of tariffs it has levied\u00a0 \u2014\u00a0 / Photography by Alessio Paduano for WS\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "blogTO",
+              "children": [
+                {
+                  "name": "Eataly to open Toronto Eaton Centre location this month",
+                  "url": "https://www.blogto.com/eat_drink/2025/11/eataly-eaton-centre-toronto-open-this-month/",
+                  "date": "2025-11-10T19:26:11Z",
+                  "snippet": "Shopping in downtown Toronto's busiest mall will soon involve much more pasta, pizza and gelato than ever before, as Eataly has announced an opening date for its long-awaited location at the CF Toronto Eaton Centre.Opening on Tuesday, Nov. 25, Eataly Eaton Ce\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Lawyersgunsmoneyblog.com",
+              "children": [
+                {
+                  "name": "The Trump administration\u2019s greatest atrocity",
+                  "url": "https://www.lawyersgunsmoneyblog.com/2025/11/the-trump-administrations-greatest-atrocity",
+                  "date": "2025-11-10T20:53:27Z",
+                  "snippet": "Impeach. Remove. The Hague: Your favorite Italian-origin fusilli and macaroni are poised to disappear from U.S. supermarket shelves. Italy\u2019s biggest pasta exporters say import and antidumping duties totaling 107% on their pasta brands will make doing business\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Reason",
+              "children": [
+                {
+                  "name": "Tariffs Near 107 Percent Threaten to Pull Italian Pasta Brands From American Shelves",
+                  "url": "https://reason.com/2025/11/12/tariffs-near-107-percent-threaten-to-pull-italian-pasta-brands-from-american-shelves/",
+                  "date": "2025-11-12T17:36:32Z",
+                  "snippet": "The Commerce Department\u2019s new antidumping duties could double the cost of imported Italian pasta\u2014hurting consumers more than producers.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Space Daily",
+              "children": [
+                {
+                  "name": "G7 says it's 'serious' about confronting China's critical mineral dominance",
+                  "url": "https://www.spacedaily.com/reports/G7_says_its_serious_about_confronting_Chinas_critical_mineral_dominance_999.html",
+                  "date": "2025-11-02T09:14:42Z",
+                  "snippet": "Toronto, Canada (AFP) Oct 31, 2025   The G7 announced two dozen new projects Friday aimed at reducing China's dominance of critical mineral supply chains, as Canada's energy minister vowed the alliance was \"serious\" about reforming the global market.   The de\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Just-food.com",
+              "children": [
+                {
+                  "name": "Italian group BF\u00a0sells\u00a0control of couscous firm Bia",
+                  "url": "https://www.just-food.com/news/bf-to-sell-bia-control/",
+                  "date": "2025-11-05T13:56:43Z",
+                  "snippet": "Bia focuses on private-label couscous and has \u201crecognised leadership\u201d in Italy, France and Spain.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Eater",
+              "children": [
+                {
+                  "name": "D.C. Gets the Build-Your-Own Pasta Pad of Its Dreams",
+                  "url": "https://dc.eater.com/openings/164761/gigis-pasta-foggy-bottom-dc-restaurant-openings",
+                  "date": "2025-11-10T23:37:01Z",
+                  "snippet": "A bright new beacon for Italian cuisine is giving D.C. what it wants, one pasta fix at a time. Situated in the center of Western Market food hall (2000 Pennsylvania Avenue NW), week-old Gigi\u2019s Pasta specializes in sizable bowls (buckets, really) of pasta in a\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "CNET",
+              "children": [
+                {
+                  "name": "Today's NYT Mini Crossword Answers for Tuesday, Nov. 11",
+                  "url": "https://www.cnet.com/tech/gaming/todays-nyt-mini-crossword-answers-for-tuesday-nov-11/",
+                  "date": "2025-11-11T03:22:00Z",
+                  "snippet": "Here's today's NYT Mini Crossword answer. These answers will help you solve New York Times' popular crossword game, Mini Crossword, every day!",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "New York Post",
+              "children": [
+                {
+                  "name": "Big trouble in Little Italy as fears of pasta price hike, shortage are giving everyone agita",
+                  "url": "https://nypost.com/2025/11/11/us-news/big-trouble-in-little-italy-as-fears-of-pasta-price-hike-shortage-are-giving-everyone-agita/",
+                  "date": "2025-11-11T23:39:43Z",
+                  "snippet": "Your next bowl of spaghetti could cost a pretty penne.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "The Atlantic",
+              "children": [
+                {
+                  "name": "Stock Up on Fancy Pasta Now",
+                  "url": "https://www.theatlantic.com/health/2025/11/pasta-bronze-cut-tariffs-italy/684904/",
+                  "date": "2025-11-12T20:21:26Z",
+                  "snippet": "Just when Americans got hooked on Italian imports, they may slip away.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "mindbodygreen.com",
+              "children": [
+                {
+                  "name": "Anchovies vs. Sardines: Both Packed With Nutrients \u2014 But Is One Healthier?",
+                  "url": "https://www.mindbodygreen.com/articles/anchovies-vs-sardines-health-benefits",
+                  "date": "2025-11-07T12:09:00Z",
+                  "snippet": "We spoke to canned fish connoisseurs to find out.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "decanter.com",
+              "children": [
+                {
+                  "name": "International Merlot Day: Why Merlot still dominates despite its Sideways reputation",
+                  "url": "https://www.decanter.com/wine/international-merlot-day-why-merlot-still-dominates-despite-its-sideways-reputation-568387/",
+                  "date": "2025-11-06T06:00:11Z",
+                  "snippet": "Merlot grapes on a sorting table.\n Meh-lot or more-lot..? The post International Merlot Day: Why Merlot still dominates despite its Sideways reputation appeared first on Decanter.",
+                  "value": 1
+                }
+              ]
+            }
+          ]
         }
-    ]
+      ]
+    },
+    {
+      "name": "IT",
+      "children": [
+        {
+          "name": "newsdata.io",
+          "children": [
+            {
+              "name": "football-italia",
+              "children": [
+                {
+                  "name": "Parma confirm Suzuki surgery, Japan goalkeeper out for 3-4 months",
+                  "url": "https://football-italia.net/parma-confirm-suzuki-surgery-out-3-4-months/",
+                  "date": "2025-11-13 13:52:30",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "newsapi.org",
+          "children": [
+            {
+              "name": "MassLive.com",
+              "children": [
+                {
+                  "name": "Italian pasta could vanish from American grocery shelves. Here\u2019s why",
+                  "url": "https://www.masslive.com/news/2025/11/italian-pasta-could-vanish-from-american-grocery-shelves-heres-why.html",
+                  "date": "2025-11-11T16:46:59Z",
+                  "snippet": "Your favorite Italian pasta may soon cost double (or disappear entirely).",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Jezebel",
+              "children": [
+                {
+                  "name": "Everyone's Getting a Bag of Dry Pasta for Christmas",
+                  "url": "https://www.jezebel.com/everyones-getting-a-bag-of-dry-pasta-for-christmas",
+                  "date": "2025-11-11T12:58:29Z",
+                  "snippet": "Italian pasta producers warn that the Trump administration's combined 107% tariffs and duties could force them to pull their products from U.S. shelves early next year.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Business Insider",
+              "children": [
+                {
+                  "name": "I'm a mom who drives an hour to stock up on pantry staples at Trader Joe's. Here are 13 items I always buy.",
+                  "url": "https://www.businessinsider.com/trader-joes-items-worth-long-drive-stock-up-family-2025-11",
+                  "date": "2025-11-01T11:47:02Z",
+                  "snippet": "The closest Trader Joe's to my home in Florida is an hour away. So, every couple of months, I stock up on staples like peanut butter and spaghetti.",
+                  "value": 1
+                },
+                {
+                  "name": "Gen Z diners are turning to social media to discover restaurants over Yelp and Michelin",
+                  "url": "https://www.businessinsider.com/gen-z-restaurant-discovery-social-media-2025-11",
+                  "date": "2025-11-01T09:12:01Z",
+                  "snippet": "For Gen Z and millennials, choosing a restaurant is less about Michelin stars or Yelp averages and more about what's in their social media feeds.",
+                  "value": 1
+                },
+                {
+                  "name": "The best way to have a smooth holiday season is to understand what type of mother-in-law you have",
+                  "url": "https://www.businessinsider.com/bi-today-saturday-smooth-holiday-mother-in-law-types-2025-11",
+                  "date": "2025-11-08T11:36:02Z",
+                  "snippet": "In this Saturday edition of BI Today, we're talking about the six different types of mothers-in-law and how to interact with them smoothly.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Creative Bloq",
+              "children": [
+                {
+                  "name": "New Olympic Rings Pasta boxes are a thing of beauty",
+                  "url": "https://www.creativebloq.com/design/branding/new-olympic-rings-pasta-boxes-are-a-thing-of-beauty",
+                  "date": "2025-11-01T10:00:00Z",
+                  "snippet": "And the shaped pasta is pretty cool, too.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "CBS News",
+              "children": [
+                {
+                  "name": "Italian imports store owner on threat of new pasta tariffs: \"We can only absorb so much\"",
+                  "url": "https://www.cbsnews.com/video/italian-imports-store-owner-on-threat-of-new-pasta-tariffs-we-can-only-absorb-so-much/",
+                  "date": "2025-11-12T00:25:00Z",
+                  "snippet": "Some popular pasta brands from Italy may have to say \"arrivederci\" to U.S. store shelves as President Trump is threatening heavy tariffs on the imports. Meg Oliver has more.",
+                  "value": 1
+                },
+                {
+                  "name": "A 107% U.S. import tax on Italian pasta could make your spaghetti pricier",
+                  "url": "https://www.cbsnews.com/news/italian-pasta-antidumping-duties-imports-disappear-barilla/",
+                  "date": "2025-11-11T20:19:14Z",
+                  "snippet": "The Trump administration is considering a new import duty on 13 of Italy's largest pasta exporters, including Barilla and La Molisana.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "NBC News",
+              "children": [
+                {
+                  "name": "Italian pasta exports to the U.S. could be 'virtually wiped out' by proposed 107% tariffs",
+                  "url": "https://www.nbcnews.com/business/business-news/italian-pasta-tariffs-trump-rcna243264",
+                  "date": "2025-11-11T19:04:31Z",
+                  "snippet": "U.S. tariff rates on pasta from 13 major Italian companies could soar to as high as 107% under a recent Commerce Department decision.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Twistedsifter.com",
+              "children": [
+                {
+                  "name": "Man Was Invited Over For Dinner With His Girlfriend\u2019s Parents, And He Decided To Be Honest When Asked How He Liked Her Mom\u2019s Cooking",
+                  "url": "http://twistedsifter.com/2025/11/man-was-invited-over-for-dinner-with-his-girlfriends-parents-and-he-decided-to-be-honest-when-asked-how-he-liked-her-moms-cooking/",
+                  "date": "2025-11-13T05:15:05Z",
+                  "snippet": "Honesty may be the best policy, but timing and tact matter too.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Forbes",
+              "children": [
+                {
+                  "name": "NYT Mini Crossword Clues And Answers For Tuesday, November 11",
+                  "url": "https://www.forbes.com/sites/erikkain/2025/11/10/nyt-mini-crossword-clues-and-answers-for-tuesday-november-11/",
+                  "date": "2025-11-11T04:02:17Z",
+                  "snippet": "Looking for help with today's NYT Mini Crossword puzzle? Here are some hints and answers for the puzzle.",
+                  "value": 1
+                },
+                {
+                  "name": "Dimmi Dimmi - An Italian Restaurant Everyone Can Love",
+                  "url": "https://www.forbes.com/sites/tomhyland/2025/11/03/dimmi-dimmian-italian-restaurant-everyone-can-love/",
+                  "date": "2025-11-03T12:45:00Z",
+                  "snippet": "For starters, the sesame focaccia, served with a variety of options is quite good; I went with the ricotta and honey dip, which added a nice tang.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "International Business Times",
+              "children": [
+                {
+                  "name": "Italian Pasta at Risk: US Tariffs of Up to 107% Threaten Shelf Presence of 13 Major Brands",
+                  "url": "https://www.ibtimes.com/italian-pasta-risk-us-tariffs-107-threaten-shelf-presence-13-major-brands-3790044",
+                  "date": "2025-11-10T20:03:52Z",
+                  "snippet": "US tariffs of up to 107% threaten 13 major Italian pasta brands, potentially doubling prices and reducing availability. Discover the impact on American consumers and Italy's export industry.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Memeorandum.com",
+              "children": [
+                {
+                  "name": "Italian Pasta Is Poised to Disappear From American Grocery Shelves (Wall Street Journal)",
+                  "url": "https://www.memeorandum.com/251110/p52",
+                  "date": "2025-11-10T15:30:00Z",
+                  "snippet": "Wall Street Journal: Italian Pasta Is Poised to Disappear From American Grocery Shelves\u00a0 \u2014\u00a0 Trump administration is set to impose duties of 107% on Italian pasta imports, among most punitive of tariffs it has levied\u00a0 \u2014\u00a0 / Photography by Alessio Paduano for WS\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "blogTO",
+              "children": [
+                {
+                  "name": "Eataly to open Toronto Eaton Centre location this month",
+                  "url": "https://www.blogto.com/eat_drink/2025/11/eataly-eaton-centre-toronto-open-this-month/",
+                  "date": "2025-11-10T19:26:11Z",
+                  "snippet": "Shopping in downtown Toronto's busiest mall will soon involve much more pasta, pizza and gelato than ever before, as Eataly has announced an opening date for its long-awaited location at the CF Toronto Eaton Centre.Opening on Tuesday, Nov. 25, Eataly Eaton Ce\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Lawyersgunsmoneyblog.com",
+              "children": [
+                {
+                  "name": "The Trump administration\u2019s greatest atrocity",
+                  "url": "https://www.lawyersgunsmoneyblog.com/2025/11/the-trump-administrations-greatest-atrocity",
+                  "date": "2025-11-10T20:53:27Z",
+                  "snippet": "Impeach. Remove. The Hague: Your favorite Italian-origin fusilli and macaroni are poised to disappear from U.S. supermarket shelves. Italy\u2019s biggest pasta exporters say import and antidumping duties totaling 107% on their pasta brands will make doing business\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Reason",
+              "children": [
+                {
+                  "name": "Tariffs Near 107 Percent Threaten to Pull Italian Pasta Brands From American Shelves",
+                  "url": "https://reason.com/2025/11/12/tariffs-near-107-percent-threaten-to-pull-italian-pasta-brands-from-american-shelves/",
+                  "date": "2025-11-12T17:36:32Z",
+                  "snippet": "The Commerce Department\u2019s new antidumping duties could double the cost of imported Italian pasta\u2014hurting consumers more than producers.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Space Daily",
+              "children": [
+                {
+                  "name": "G7 says it's 'serious' about confronting China's critical mineral dominance",
+                  "url": "https://www.spacedaily.com/reports/G7_says_its_serious_about_confronting_Chinas_critical_mineral_dominance_999.html",
+                  "date": "2025-11-02T09:14:42Z",
+                  "snippet": "Toronto, Canada (AFP) Oct 31, 2025   The G7 announced two dozen new projects Friday aimed at reducing China's dominance of critical mineral supply chains, as Canada's energy minister vowed the alliance was \"serious\" about reforming the global market.   The de\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Just-food.com",
+              "children": [
+                {
+                  "name": "Italian group BF\u00a0sells\u00a0control of couscous firm Bia",
+                  "url": "https://www.just-food.com/news/bf-to-sell-bia-control/",
+                  "date": "2025-11-05T13:56:43Z",
+                  "snippet": "Bia focuses on private-label couscous and has \u201crecognised leadership\u201d in Italy, France and Spain.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Eater",
+              "children": [
+                {
+                  "name": "D.C. Gets the Build-Your-Own Pasta Pad of Its Dreams",
+                  "url": "https://dc.eater.com/openings/164761/gigis-pasta-foggy-bottom-dc-restaurant-openings",
+                  "date": "2025-11-10T23:37:01Z",
+                  "snippet": "A bright new beacon for Italian cuisine is giving D.C. what it wants, one pasta fix at a time. Situated in the center of Western Market food hall (2000 Pennsylvania Avenue NW), week-old Gigi\u2019s Pasta specializes in sizable bowls (buckets, really) of pasta in a\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "CNET",
+              "children": [
+                {
+                  "name": "Today's NYT Mini Crossword Answers for Tuesday, Nov. 11",
+                  "url": "https://www.cnet.com/tech/gaming/todays-nyt-mini-crossword-answers-for-tuesday-nov-11/",
+                  "date": "2025-11-11T03:22:00Z",
+                  "snippet": "Here's today's NYT Mini Crossword answer. These answers will help you solve New York Times' popular crossword game, Mini Crossword, every day!",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "New York Post",
+              "children": [
+                {
+                  "name": "Big trouble in Little Italy as fears of pasta price hike, shortage are giving everyone agita",
+                  "url": "https://nypost.com/2025/11/11/us-news/big-trouble-in-little-italy-as-fears-of-pasta-price-hike-shortage-are-giving-everyone-agita/",
+                  "date": "2025-11-11T23:39:43Z",
+                  "snippet": "Your next bowl of spaghetti could cost a pretty penne.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "The Atlantic",
+              "children": [
+                {
+                  "name": "Stock Up on Fancy Pasta Now",
+                  "url": "https://www.theatlantic.com/health/2025/11/pasta-bronze-cut-tariffs-italy/684904/",
+                  "date": "2025-11-12T20:21:26Z",
+                  "snippet": "Just when Americans got hooked on Italian imports, they may slip away.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "mindbodygreen.com",
+              "children": [
+                {
+                  "name": "Anchovies vs. Sardines: Both Packed With Nutrients \u2014 But Is One Healthier?",
+                  "url": "https://www.mindbodygreen.com/articles/anchovies-vs-sardines-health-benefits",
+                  "date": "2025-11-07T12:09:00Z",
+                  "snippet": "We spoke to canned fish connoisseurs to find out.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "decanter.com",
+              "children": [
+                {
+                  "name": "International Merlot Day: Why Merlot still dominates despite its Sideways reputation",
+                  "url": "https://www.decanter.com/wine/international-merlot-day-why-merlot-still-dominates-despite-its-sideways-reputation-568387/",
+                  "date": "2025-11-06T06:00:11Z",
+                  "snippet": "Merlot grapes on a sorting table.\n Meh-lot or more-lot..? The post International Merlot Day: Why Merlot still dominates despite its Sideways reputation appeared first on Decanter.",
+                  "value": 1
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 }
