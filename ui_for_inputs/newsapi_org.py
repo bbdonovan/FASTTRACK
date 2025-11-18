@@ -42,7 +42,7 @@ def fetch_news_from_newsapi_org_to_csv(
         print(f"❌ Error initializing NewsAPI client: {e}")
         return
 
-    # MODIFIED: Added 'API Source'
+    # UPDATED: Added 'API Source' to field names
     CSV_FIELDNAMES = ['Title', 'Publication Date', 'Link', 'Snippet', 'Source ID', 'Country Code', 'API Source']
     ALL_ARTICLES = []
     
@@ -62,7 +62,7 @@ def fetch_news_from_newsapi_org_to_csv(
                 from_param=from_date,
                 to=to_date,
                 page=current_page,
-                # FIX: Changed 'pageSize' to the correct snake_case 'page_size'
+                # FIXED: Using the correct snake_case parameter name
                 page_size=page_size 
             )
             
@@ -135,16 +135,21 @@ def fetch_news_from_newsapi_org_to_csv(
             # NewsAPI returns source as a nested dictionary: {'id': 'cnn', 'name': 'CNN'}
             source_info = article.get('source', {})
             
+            # Retrieve content, use empty string if it's None, then clean newlines
+            content = article.get('description') 
+            # FIX: Ensure content is a string before calling .replace()
+            clean_snippet = str(content) if content is not None else 'N/A'
+            clean_snippet = clean_snippet.replace('\n', ' ')
+            
             data_row = {
                 'Title': article.get('title', 'N/A'),
                 'Publication Date': article.get('publishedAt', 'N/A'),
                 'Link': article.get('url', 'N/A'),
-                # NewsAPI.org provides a 'description' and 'content' snippet. We use description.
-                'Snippet': article.get('description', 'N/A').replace('\n', ' '), 
+                'Snippet': clean_snippet, # Using the cleaned snippet
                 # Use the source name for consistency with NewsData.io's output
                 'Source ID': source_info.get('name', 'N/A'), 
                 'Country Code': country_code.upper(), # Use the input country code
-                # NEW LINE: Hardcode the API source name
+                # ADDED: Hardcode the API source name
                 'API Source': 'newsapi.org'
             }
             

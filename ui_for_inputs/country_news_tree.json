@@ -2,198 +2,151 @@
   "name": "API Search Results",
   "children": [
     {
-      "name": "US",
+      "name": "SG",
       "children": [
         {
           "name": "newsdata.io",
           "children": [
             {
-              "name": "menafn",
+              "name": "mothership",
               "children": [
                 {
-                  "name": "Gluten Free Snacks Market SWOT Analysis, Competitive Landscape And Massive Growth 2031",
-                  "url": "https://menafn.com/1110344264/Gluten-Free-Snacks-Market-SWOT-Analysis-Competitive-Landscape-And-Massive-Growth-2031",
-                  "date": "2025-11-14 07:01:19",
+                  "name": "Commentary: The \u2018Wicked\u2019 gatecrasher got a jail sentence. Good.",
+                  "url": "https://mothership.sg/2025/11/charge-wicked-gatecrasher-thank-goodness/",
+                  "date": "2025-11-17 15:34:55",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Australian man, 26, who grabbed Ariana Grande at S'pore 'Wicked' premiere, gets 9 days' jail",
+                  "url": "https://mothership.sg/2025/11/johnson-wen-jail-singapore/",
+                  "date": "2025-11-17 11:42:31",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "travelandtourworld",
+              "name": "dailymailuk",
               "children": [
                 {
-                  "name": "La Compagnie\u2019s All\u2010Business\u2010Class A321neo Service Between Newark and Milan Malpensa Launches \u2010 Premium Travel Option Between the U.S. and Italy",
-                  "url": "https://www.travelandtourworld.com/news/article/la-compagnies-all%E2%80%91business%E2%80%91class-a321neo-service-between-newark-and-milan-malpensa-launches-%E2%80%91-premium-travel-option-between-the-u-s-and-italy/",
-                  "date": "2025-11-14 01:00:59",
+                  "name": "Crazed fan who charged at Ariana Grande on Wicked red carpet gets JAIL time",
+                  "url": "https://www.dailymail.co.uk/tvshowbiz/article-15298865/Ariana-Grande-fan-Wicked-jail-time.html",
+                  "date": "2025-11-17 15:22:14",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "'Attention-seeking' Aussie influencer wannabe who rushed Ariana Grande at Wicked premiere is jailed for nine days",
+                  "url": "https://www.dailymail.co.uk/news/article-15297929/Attention-seeking-Aussie-influencer-wannabe-rushed-Ariana-Grande-Wicked-premiere-jailed.html",
+                  "date": "2025-11-17 10:57:06",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "davisenterprise",
+              "name": "stomp",
               "children": [
                 {
-                  "name": "Street Beat: Wine bar adds handmade pasta on Friday nights",
-                  "url": "https://www.davisenterprise.com/news/street-beat-wine-bar-adds-handmade-pasta-on-friday-nights/article_d630d6ba-51fc-4203-8a65-ab56295c98dd.html",
-                  "date": "2025-11-13 23:20:00",
+                  "name": "987FM draws fire for giving Ariana Grande and Cynthia Erivo alleged AI 'younger selves' photos",
+                  "url": "https://www.stomp.sg/trending-now/987fm-draws-fire-giving-ariana-grande-and-cynthia-erivo-alleged-ai-younger-selves",
+                  "date": "2025-11-17 09:58:06",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "foxbusiness",
+              "name": "google",
               "children": [
                 {
-                  "name": "White House disputes reports that Italian pasta could vanish from store shelves nationwide",
-                  "url": "https://www.foxbusiness.com/politics/white-house-disputes-reports-italian-pasta-could-vanish-from-store-shelves-nationwide",
-                  "date": "2025-11-13 20:00:09",
+                  "name": "One man\u2019s selfishness at Wicked event cost S\u2019pore its reputation \u2013 and possibly an Ariana Grande concert - The Straits Times",
+                  "url": "https://news.google.com/rss/articles/CBMi1wFBVV95cUxQS2hiQnctdms0cE5hOTlyNkRhYUlqdlE2TGdXcXlZOTZQWUdFU2NvRUUwdHZmQ2puMmh1bFJ0bU5rX010LWpram1GUVRjVkltRUVyeTJYTkxfVlljMF9scDRrUGNwRlRFdlNqbThLZTY1Z09NcmxUQWhQUlFIR2trLTFtb09JakxUNXkxZHd6OV9Tanh0Tk04YkdIbVBwcVFqS3VfNVdmTDR1R3ZhU1VXWlJicFZxYThDdEg4TUNERUlmRHFIUTJpNm94U1dsZVRnLW5ndGs3WQ?oc=5",
+                  "date": "2025-11-17 09:17:28",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Barricade jumper who rushed at Ariana Grande at Singapore event given 9 days' jail for public nuisance - CNA",
+                  "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxNY05wTEEtS1pPTU1ScXp0bVUwamVPd2lIRXM0TC1RSFhVU24xaW80MFlPQ3RWX0Z0dUJXZ21hSmFZaFdJOVJFLVRfT0FOSVRiTEVBb05rWU8xdXJSOTliZUJ4Y0MzVy1tQklqN1B4a3g0ZHU5TjJWUFE2UGx4VWk5NXBRYndfUlM0YjRmM0Q3VC1QMjBhSFZ5UHN2dUJkQzNiVkl2RERXUkJKUQ?oc=5",
+                  "date": "2025-11-17 07:13:54",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "\u2018We have come through some s***\u2019: Cynthia Erivo alludes to Ariana Grande\u2019s S\u2019pore premiere scare - The Straits Times",
+                  "url": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxOcmxldWpicE5Fejc2SHo1LVAzSFd2bFczdG9xR2VWWUV5Q2lCUUNZS0Nmb1ZtODZFZXVzTHpfNnQxYnhvNEc4MGRFQzFCTlE3RUk4MXNocEtYeUpqUmVacXY2VDlqUlRCRDMtTEI0Nl9RYmpZaGFYR09zY09DTUNUNmhRdHRsYWI0U3ZQZ1JHMzFCZHpwQlhJaUZfWHFJbnBlTnJrQUpRSVdoRDczWGNqM0E2bG1Pd1NfMWNHbDhsQ1pNc2ZJYlJhUjlLdnpTbzBVNlE?oc=5",
+                  "date": "2025-11-16 10:41:40",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "mlive",
+              "name": "straitstimes",
               "children": [
                 {
-                  "name": "Hidden gem in Southwest Michigan keeps menu creative, constantly changing",
-                  "url": "https://www.mlive.com/news/kalamazoo/2025/11/hidden-gem-in-southwest-michigan-keeps-menu-creative-constantly-changing.html",
-                  "date": "2025-11-13 19:56:22",
+                  "name": "One man\u2019s selfishness at Wicked event cost S\u2019pore its reputation \u2013 and possibly an Ariana Grande concert",
+                  "url": "https://www.straitstimes.com/life/entertainment/one-mans-selfishness-at-wicked-event-cost-spore-its-reputation-and-possibly-an-ariana-grande",
+                  "date": "2025-11-17 09:15:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Man who rushed at Ariana Grande at Universal Studios Singapore sentenced to 9 days\u2019 jail",
+                  "url": "https://www.straitstimes.com/singapore/courts-crime/man-who-rushed-at-ariana-grande-at-universal-studios-singapore-sentenced-to-9-days-jail",
+                  "date": "2025-11-17 07:14:52",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "\u2018We have come through some s***\u2019: Cynthia Erivo alludes to Ariana Grande\u2019s S\u2019pore premiere scare",
+                  "url": "https://www.straitstimes.com/life/entertainment/we-have-come-through-some-s-cynthia-erivo-alludes-to-ariana-grandes-spore-premiere-scare",
+                  "date": "2025-11-16 10:40:00",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "forbes",
+              "name": "malaymail",
               "children": [
                 {
-                  "name": "Brooklyn Beckham On Family, Italy And His Love Of Cooking",
-                  "url": "https://www.forbes.com/sites/jordilippemcgraw/2025/11/13/brooklyn-beckham-on-family-italy-and-his-love-of-cooking/",
-                  "date": "2025-11-13 19:19:51",
+                  "name": "Ariana Grande incident: Australian serial intruder jailed nine days in Singapore",
+                  "url": "https://www.malaymail.com/news/singapore/2025/11/17/ariana-grande-incident-australian-serial-intruder-jailed-nine-days-in-singapore/198710",
+                  "date": "2025-11-17 08:24:20",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "lockportjournal",
+              "name": "channelnewsasia",
               "children": [
                 {
-                  "name": "Author Katie Parla celebrates Roman food at special event in Rochester",
-                  "url": "https://www.lockportjournal.com/news/lifestyles/author-katie-parla-celebrates-roman-food-at-special-event-in-rochester/article_d57dcfe7-5871-5d89-8574-32ff1a7130b7.html",
-                  "date": "2025-11-13 18:00:00",
+                  "name": "Barricade jumper who rushed at Ariana Grande at Singapore event given 9 days' jail for public nuisance",
+                  "url": "https://www.channelnewsasia.com/singapore/barricade-jump-johnson-wen-troll-sentenced-ariana-grande-5471586",
+                  "date": "2025-11-17 07:13:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Wicked star Cynthia Erivo on grabbing incident at Singapore premiere: 'We have come through some s**t'",
+                  "url": "https://www.channelnewsasia.com/entertainment/cynthia-erivo-talks-ariana-grande-grabbing-incident-in-singapore-5471446",
+                  "date": "2025-11-17 05:16:30",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "6abc",
+              "name": "vogue",
               "children": [
                 {
-                  "name": "The Dish: Italian sausage focaccia stuffing from Carlino's Market",
-                  "url": "https://6abc.com/post/dish-italian-sausage-focaccia-stuffing-recipe-carlinos-market-thanksgiving-day-dinner/18151139/",
-                  "date": "2025-11-13 16:12:48",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "newsgazette",
-              "children": [
-                {
-                  "name": "Cizzle Brands Places CWENCH HydrationTM and HappiEatsTM Sport PastaTM at 91 Popeye\u2019s Supplements Canada Locations",
-                  "url": "https://www.news-gazette.com/cizzle-brands-places-cwench-hydration-and-happieats-sport-pasta-at-91-popeye-s-supplements-canada/article_06474d60-7236-5692-8a67-c4335daf119f.html",
-                  "date": "2025-11-13 12:51:02",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "hastingstribune",
-              "children": [
-                {
-                  "name": "Cizzle Brands Places CWENCH HydrationTM and HappiEatsTM Sport PastaTM at 91 Popeye\u2019s Supplements Canada Locations",
-                  "url": "https://www.hastingstribune.com/ap/business/cizzle-brands-places-cwench-hydration-and-happieats-sport-pasta-at-91-popeye-s-supplements-canada/article_08169bd5-43ce-58cb-8748-c435b31b3735.html",
-                  "date": "2025-11-13 12:51:02",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "lufkindailynews",
-              "children": [
-                {
-                  "name": "Cizzle Brands Places CWENCH HydrationTM and HappiEatsTM Sport PastaTM at 91 Popeye\u2019s Supplements Canada Locations",
-                  "url": "https://lufkindailynews.com/anpa/sports/cizzle-brands-places-cwench-hydration-and-happieats-sport-pasta-at-91-popeye-s-supplements-canada/article_6508385c-db89-5b56-ba0c-e1eb57d97f5b.html",
-                  "date": "2025-11-13 12:51:02",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "thetakeout",
-              "children": [
-                {
-                  "name": "11 Differences Between US And European Restaurants You Need To Know Before Traveling",
-                  "url": "https://www.thetakeout.com/2022532/european-vs-american-restaurant-differences/",
-                  "date": "2025-11-13 12:40:00",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "today_com",
-              "children": [
-                {
-                  "name": "TODAY\u2019s All-Star Thanksgiving: 19 Chefs Share Recipes and Tips for 10th Anniversary",
-                  "url": "https://www.today.com/food/recipes/today-all-star-thanksgiving-2025-rcna240535",
-                  "date": "2025-11-13 11:42:23",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "theguardian",
-              "children": [
-                {
-                  "name": "\u2018What, no ziti now?\u2019: US pasta lovers fear Trump tariffs will cause shortage",
-                  "url": "https://www.theguardian.com/food/2025/nov/13/pasta-italian-imports-trump-tariffs",
-                  "date": "2025-11-13 11:00:41",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "capjournal",
-              "children": [
-                {
-                  "name": "James Beard Award-Winning Chef Launches \u2018Incredible\u2019 New Pasta Sauce Collection",
-                  "url": "https://www.capjournal.com/arena/men_s_journal/james-beard-award-winning-chef-launches-incredible-new-pasta-sauce-collection/article_3a353e10-ee76-5b08-80ae-01fc3b90513f.html",
-                  "date": "2025-11-13 02:45:00",
-                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "headtopics",
-              "children": [
-                {
-                  "name": "County debuts Little Italy affordable housing development for seniors",
-                  "url": "https://us.headtopics.com/news/county-debuts-little-italy-affordable-housing-development-75742362",
-                  "date": "2025-11-12 22:39:52",
+                  "name": "Here are the most fantastical beauty looks from the Wicked: For Good press tour",
+                  "url": "https://vogue.sg/beauty-looks-from-the-wicked-for-good-press-tour/",
+                  "date": "2025-11-17 04:08:00",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
@@ -205,13 +158,63 @@
           "name": "newsapi.org",
           "children": [
             {
-              "name": "MassLive.com",
+              "name": "Gizmodo.com",
               "children": [
                 {
-                  "name": "Italian pasta could vanish from American grocery shelves. Here\u2019s why",
-                  "url": "https://www.masslive.com/news/2025/11/italian-pasta-could-vanish-from-american-grocery-shelves-heres-why.html",
-                  "date": "2025-11-11T16:46:59Z",
-                  "snippet": "Your favorite Italian pasta may soon cost double (or disappear entirely).",
+                  "name": "Why You\u2019ve Seen Way Less \u2018Wicked: For Good\u2019 Press Memes and Way More Merch",
+                  "url": "https://gizmodo.com/wicked-for-good-marketing-collabs-universal-2000686026",
+                  "date": "2025-11-14T15:00:42Z",
+                  "snippet": "Holding space has given up space for a lot more bizarre brand collaborations.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Rolling Stone",
+              "children": [
+                {
+                  "name": "Cynthia Erivo Guards Ariana Grande From Fan Attack Quicker Than Security at \u2018Wicked\u2019 Premiere",
+                  "url": "http://www.rollingstone.com/music/music-news/ariana-grande-wicked-premiere-attack-cynthia-erivo-defends-1235464349/",
+                  "date": "2025-11-13T15:43:57Z",
+                  "snippet": "Man known for charging at celebrities attacked Ariana Grande at the 'Wicked: For Good' premiere in Singapore. Cynthia Erivo stepped in to defend her.",
+                  "value": 1
+                },
+                {
+                  "name": "Ariana Grande \u2018Beyond Devastated\u2019 to Miss Brazil \u2018Wicked: For Good\u2019 Premiere Due to Flight Delays",
+                  "url": "http://www.rollingstone.com/music/music-news/ariana-grande-misses-wicked-for-good-brazil-premiere-1235459142/",
+                  "date": "2025-11-04T13:59:01Z",
+                  "snippet": "The musician hit dead ends in every route she tried to take to get there in time for the event, writing, \"Absolutely nothing was available or possible that would get us there in time\"",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "TMZ",
+              "children": [
+                {
+                  "name": "Man Who Grabbed Ariana Grande at 'Wicked' Premiere Charged",
+                  "url": "https://www.tmz.com/2025/11/14/man-who-grabbed-ariana-grande-at-wicked-premiere-charged/",
+                  "date": "2025-11-14T13:09:35Z",
+                  "snippet": "The crazed fan who jumped the barricade and sprinted to Ariana Grande at the Singapore \"Wicked: For Good\" premiere has been charged. The Australian man, named Johnson Wen, was charged with being a a public nuisance on Friday, BBC reports. The\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Boredpanda.com",
+              "children": [
+                {
+                  "name": "\u201cWhy She Dressed Up As A Wasp Nest?\u201d: Michelle Yeoh\u2019s Outfit At Premiere Triggers Meltdown Online",
+                  "url": "https://www.boredpanda.com/michelle-yeoh-wicked-singapore-premiere-dress-divided-reactions/",
+                  "date": "2025-11-14T11:20:43Z",
+                  "snippet": "\u201cWasn't Halloween last week?\u201d one asked after Michelle Yeoh\u2019s appearance at the Singapore premiere of \u2018Wicked: For Good.\u2019",
+                  "value": 1
+                },
+                {
+                  "name": "Fan Who \u201cAttacked\u201d Ariana Grande At Premiere Outs Himself Online And Is Met With Swift Backlash",
+                  "url": "https://www.boredpanda.com/fan-who-attacked-ariana-grande-premiere-outs-himself/",
+                  "date": "2025-11-13T17:07:46Z",
+                  "snippet": "\u201cHow has he not been arrested yet!?\u201d",
                   "value": 1
                 }
               ]
@@ -220,266 +223,191 @@
               "name": "Jezebel",
               "children": [
                 {
-                  "name": "Everyone's Getting a Bag of Dry Pasta for Christmas",
-                  "url": "https://www.jezebel.com/everyones-getting-a-bag-of-dry-pasta-for-christmas",
-                  "date": "2025-11-11T12:58:29Z",
-                  "snippet": "Italian pasta producers warn that the Trump administration's combined 107% tariffs and duties could force them to pull their products from U.S. shelves early next year.",
+                  "name": "Hold Some Space for Ariana Grande and SpongeBob",
+                  "url": "https://www.jezebel.com/hold-some-space-for-ariana-grande-and-spongebob",
+                  "date": "2025-11-13T09:34:52Z",
+                  "snippet": "Despite every rumor ever that says they're done, at least two tabloids report they're still going strong.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Business Insider",
+              "name": "Deadline",
               "children": [
                 {
-                  "name": "I'm a mom who drives an hour to stock up on pantry staples at Trader Joe's. Here are 13 items I always buy.",
-                  "url": "https://www.businessinsider.com/trader-joes-items-worth-long-drive-stock-up-family-2025-11",
-                  "date": "2025-11-01T11:47:02Z",
-                  "snippet": "The closest Trader Joe's to my home in Florida is an hour away. So, every couple of months, I stock up on staples like peanut butter and spaghetti.",
+                  "name": "Ariana Grande Charged By Fan On \u2018Wicked: For Good\u2019 Red Carpet In Singapore; Cynthia Erivo Fends Off Intruder",
+                  "url": "http://deadline.com/2025/11/ariana-grande-cynthia-erivo-wicked-red-carpet-fan-attack-1236616732/",
+                  "date": "2025-11-13T20:49:38Z",
+                  "snippet": "Ariana Grande was rushed by a social media influencer fan at the Wicked: For Good Singapore red carpet premieres per myriad posts on social media. The influencer is identified as Pyjamamann who even posted about the incident writing, \u201cDear Ariana Grande Thank\u2026",
                   "value": 1
                 },
                 {
-                  "name": "Gen Z diners are turning to social media to discover restaurants over Yelp and Michelin",
-                  "url": "https://www.businessinsider.com/gen-z-restaurant-discovery-social-media-2025-11",
-                  "date": "2025-11-01T09:12:01Z",
-                  "snippet": "For Gen Z and millennials, choosing a restaurant is less about Michelin stars or Yelp averages and more about what's in their social media feeds.",
+                  "name": "Serial Stage Invader Who Rushed Ariana Grande On Singapore \u2018Wicked: For Good\u2019 Red Carpet Charged With Being \u201cA Public Nuisance\u201d",
+                  "url": "http://deadline.com/2025/11/stage-invader-ariana-grande-singapore-wicked-charged-1236617589/",
+                  "date": "2025-11-14T16:30:56Z",
+                  "snippet": "A man who charged Ariana Grande on a Wicked: For Good red carpet in Singapore and attempted to embrace the star on Thursday has been charged with being \u201ca public nuisance\u201d. Multiple viral clips show 26-year-old Australian man Johnson Wen jumping the red carpe\u2026",
                   "value": 1
                 },
                 {
-                  "name": "The best way to have a smooth holiday season is to understand what type of mother-in-law you have",
-                  "url": "https://www.businessinsider.com/bi-today-saturday-smooth-holiday-mother-in-law-types-2025-11",
-                  "date": "2025-11-08T11:36:02Z",
-                  "snippet": "In this Saturday edition of BI Today, we're talking about the six different types of mothers-in-law and how to interact with them smoothly.",
+                  "name": "Ariana Grande Missing Brazil \u2018Wicked: For Good\u2019 Premiere Due To Flight Issues: \u201cBeyond Devastated\u201d",
+                  "url": "http://deadline.com/2025/11/ariana-grande-misses-brazil-wicked-for-good-premiere-1236606468/",
+                  "date": "2025-11-04T15:01:37Z",
+                  "snippet": "Ariana Grande was forced to cancel her appearance at Brazil\u2019s world premiere of Wicked: For Good due to flight delays. Grande, who is reprising her role as Glinda in the sequel, was due to be in Sao Paulo on Tuesday for the sequel\u2019s screening, but due to flig\u2026",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Creative Bloq",
+              "name": "CBC News",
               "children": [
                 {
-                  "name": "New Olympic Rings Pasta boxes are a thing of beauty",
-                  "url": "https://www.creativebloq.com/design/branding/new-olympic-rings-pasta-boxes-are-a-thing-of-beauty",
-                  "date": "2025-11-01T10:00:00Z",
-                  "snippet": "And the shaped pasta is pretty cool, too.",
+                  "name": "Ariana Grande rushed by fan on Wicked: For Good carpet in Singapore \u2014 then Cynthia Erivo stepped in",
+                  "url": "https://www.cbc.ca/news/entertainment/ariana-grande-wicked-for-good-cynthia-erivo-9.6977901",
+                  "date": "2025-11-14T15:23:02Z",
+                  "snippet": "Cynthia Erivo came to the rescue of The Wicked: For Good co-star Ariana Grande when a man rushed Grande, forcibly putting an arm around her, while on the yellow carpet for the Singapore premiere of the film, prompting security to take him away and a Singapore\u2026",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "CBS News",
+              "name": "Gofugyourself.com",
               "children": [
                 {
-                  "name": "Italian imports store owner on threat of new pasta tariffs: \"We can only absorb so much\"",
-                  "url": "https://www.cbsnews.com/video/italian-imports-store-owner-on-threat-of-new-pasta-tariffs-we-can-only-absorb-so-much/",
-                  "date": "2025-11-12T00:25:00Z",
-                  "snippet": "Some popular pasta brands from Italy may have to say \"arrivederci\" to U.S. store shelves as President Trump is threatening heavy tariffs on the imports. Meg Oliver has more.",
+                  "name": "Ariana Grande Needed a Bodyguard at \u201cWicked: For Good\u201d",
+                  "url": "https://www.gofugyourself.com/ariana-grande-needed-a-bodyguard-at-wicked-for-good-11-2025",
+                  "date": "2025-11-14T17:10:43Z",
+                  "snippet": "It came in the form of Cynthia Erivo. The post Ariana Grande Needed a Bodyguard at \u201cWicked: For Good\u201d first appeared on Go Fug Yourself.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "WWD",
+              "children": [
+                {
+                  "name": "Ariana Grande Returns to Her Signature Glinda Whimsy in Custom Thom Browne at \u2018Wicked: For Good\u2019 Singapore Premiere",
+                  "url": "http://wwd.com/pop-culture/celebrity-news/ariana-grande-thom-browne-dress-wicked-for-good-singapore-1238347158/",
+                  "date": "2025-11-13T15:20:41Z",
+                  "snippet": "The actress and singer attended the red carpet premiere of 'Wicked: For Good' in Singapore.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "The Cut",
+              "children": [
+                {
+                  "name": "The Man Who Accosted Ariana Grande in Singapore Was Charged",
+                  "url": "http://www.thecut.com/article/ariana-grande-fan-attacker-singapore-wicked-for-good.html",
+                  "date": "2025-11-14T18:56:48Z",
+                  "snippet": "Johnson Wen jumped a red-carpet barricade and grabbed Grande during the \u2018Wicked: For Good\u2019 Singapore premiere on Thursday. He\u2019s expected to plead guilty to public-nuisance charges.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Consequence.net",
+              "children": [
+                {
+                  "name": "Serial Celebrity-Assaulter Arrested After Assaulting Ariana Grande",
+                  "url": "https://consequence.net/2025/11/ariana-grande-assault-arrest-wicked/",
+                  "date": "2025-11-14T16:53:03Z",
+                  "snippet": "Johnson Wen was arrested in Singapore and charged with being a public nuisance after jumping on Grande at a Wicked rep-carpet event. Serial Celebrity-Assaulter Arrested After Assaulting Ariana Grande Wren Graves",
                   "value": 1
                 },
                 {
-                  "name": "A 107% U.S. import tax on Italian pasta could make your spaghetti pricier",
-                  "url": "https://www.cbsnews.com/news/italian-pasta-antidumping-duties-imports-disappear-barilla/",
-                  "date": "2025-11-11T20:19:14Z",
-                  "snippet": "The Trump administration is considering a new import duty on 13 of Italy's largest pasta exporters, including Barilla and La Molisana.",
+                  "name": "Cynthia Erivo Protects Ariana Grande from Fan Breach",
+                  "url": "https://consequence.net/2025/11/cynthia-erivo-protects-ariana-grande-fan/",
+                  "date": "2025-11-13T15:45:51Z",
+                  "snippet": "Like she does in Wicked, Erivo took matters into her own hands. Cynthia Erivo Protects Ariana Grande from Fan Breach Wren Graves",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "NBC News",
+              "name": "Thoughtcatalog.com",
               "children": [
                 {
-                  "name": "Italian pasta exports to the U.S. could be 'virtually wiped out' by proposed 107% tariffs",
-                  "url": "https://www.nbcnews.com/business/business-news/italian-pasta-tariffs-trump-rcna243264",
-                  "date": "2025-11-11T19:04:31Z",
-                  "snippet": "U.S. tariff rates on pasta from 13 major Italian companies could soar to as high as 107% under a recent Commerce Department decision.",
+                  "name": "Ariana Grande Will Miss The \u2018Wicked For Good\u2019 Brazil Premiere Tonight For A Reason You Won\u2019t Believe",
+                  "url": "https://thoughtcatalog.com/erinwhitten/2025/11/ariana-grande-will-miss-the-wicked-for-good-brazil-premiere-tonight-for-a-reason-you-wont-believe/",
+                  "date": "2025-11-04T20:42:55Z",
+                  "snippet": "In an upsetting and unexpected turn of events, Ariana Grande was forced to cancel her much-anticipated visit to Brazil for the S\u00e3o Paulo world premiere of Wicked For Good, the eagerly awaited sequel to the Jon M.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Twistedsifter.com",
+              "name": "Just Jared",
               "children": [
                 {
-                  "name": "Man Was Invited Over For Dinner With His Girlfriend\u2019s Parents, And He Decided To Be Honest When Asked How He Liked Her Mom\u2019s Cooking",
-                  "url": "http://twistedsifter.com/2025/11/man-was-invited-over-for-dinner-with-his-girlfriends-parents-and-he-decided-to-be-honest-when-asked-how-he-liked-her-moms-cooking/",
-                  "date": "2025-11-13T05:15:05Z",
-                  "snippet": "Honesty may be the best policy, but timing and tact matter too.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Forbes",
-              "children": [
-                {
-                  "name": "NYT Mini Crossword Clues And Answers For Tuesday, November 11",
-                  "url": "https://www.forbes.com/sites/erikkain/2025/11/10/nyt-mini-crossword-clues-and-answers-for-tuesday-november-11/",
-                  "date": "2025-11-11T04:02:17Z",
-                  "snippet": "Looking for help with today's NYT Mini Crossword puzzle? Here are some hints and answers for the puzzle.",
+                  "name": "Cynthia Erivo Protects Ariana Grande as Troll Crashes 'Wicked: For Good' Red Carpet in Singapore",
+                  "url": "https://www.justjared.com/2025/11/13/cynthia-erivo-protects-ariana-grande-as-troll-crashes-wicked-for-good-red-carpet-in-singapore/",
+                  "date": "2025-11-13T13:13:55Z",
+                  "snippet": "Cynthia Erivo is protecting Ariana Grande. The 38-year-old Wicked actress lept into action, protecting the 32-year-old eternal sunshine singer when a person unexpectedly crashed the red carpet during the Asia-Pacific premiere of Wicked: For Good on Thursday (\u2026",
                   "value": 1
                 },
                 {
-                  "name": "Dimmi Dimmi - An Italian Restaurant Everyone Can Love",
-                  "url": "https://www.forbes.com/sites/tomhyland/2025/11/03/dimmi-dimmian-italian-restaurant-everyone-can-love/",
-                  "date": "2025-11-03T12:45:00Z",
-                  "snippet": "For starters, the sesame focaccia, served with a variety of options is quite good; I went with the ricotta and honey dip, which added a nice tang.",
+                  "name": "See 'Wicked' Singapore Premiere Photos, Where Cynthia Erivo Became Ariana Grande's Hero!",
+                  "url": "https://www.justjared.com/2025/11/13/see-wicked-singapore-premiere-photos-where-cynthia-erivo-became-ariana-grandes-hero/",
+                  "date": "2025-11-13T23:47:59Z",
+                  "snippet": "The Wicked: For Good premiere in Singapore is always going to be known as the place where Cynthia Erivo showed off her superhero skills when she helped save Ariana Grande from a red carpet crasher. The 38-year-old actress, who plays Elphaba in the movie, help\u2026",
+                  "value": 1
+                },
+                {
+                  "name": "Man Who Grabbed Ariana Grande at 'Wicked: For Good' Singapore Premiere Faces Charges",
+                  "url": "https://www.justjared.com/2025/11/14/man-who-grabbed-ariana-grande-at-wicked-for-good-singapore-premiere-faces-charges/",
+                  "date": "2025-11-14T15:53:56Z",
+                  "snippet": "The man that grabbed Ariana Grande at the premiere of Wicked: For Good in Singapore has found himself in legal trouble. As the 32-year-old actress/singer arrived at the premiere with co-stars Cynthia Erivo and Michelle Yeoh on Thursday (November 13), a man, l\u2026",
+                  "value": 1
+                },
+                {
+                  "name": "Wicked's Marissa Bode Reacts After Ariana Grande Gets Rushed by Man at Singapore Premiere",
+                  "url": "https://www.justjared.com/2025/11/14/wickeds-marissa-bode-reacts-after-ariana-grande-gets-rushed-by-man-at-singapore-premiere/",
+                  "date": "2025-11-14T18:14:23Z",
+                  "snippet": "Marissa Bode is speaking out after the incident co-star Ariana Grande was involved in at the Singapore premiere of Wicked: For Good. As the 32-year-old actress/singer arrived at the premiere with co-stars Cynthia Erivo and Michelle Yeoh on Thursday (November \u2026",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "International Business Times",
+              "name": "The Hollywood Gossip",
               "children": [
                 {
-                  "name": "Italian Pasta at Risk: US Tariffs of Up to 107% Threaten Shelf Presence of 13 Major Brands",
-                  "url": "https://www.ibtimes.com/italian-pasta-risk-us-tariffs-107-threaten-shelf-presence-13-major-brands-3790044",
-                  "date": "2025-11-10T20:03:52Z",
-                  "snippet": "US tariffs of up to 107% threaten 13 major Italian pasta brands, potentially doubling prices and reducing availability. Discover the impact on American consumers and Italy's export industry.",
+                  "name": "Ariana Grande Attacked By Crazed Fan at \u2018Wicked\u2019 Premiere Event; Cynthia \u2026",
+                  "url": "http://www.thehollywoodgossip.com/2025/11/ariana-grande-attacked-by-crazed-fan-at-wicked-premiere-event-cynthia-erivo-comes-to-the-rescue/",
+                  "date": "2025-11-13T20:32:16Z",
+                  "snippet": "Reading Time: 3 minutesAriana Grande was accosted at a 'Wicked: For Good' premiere event today. Ariana Grande Attacked By Crazed Fan at \u2018Wicked\u2019 Premiere Event; Cynthia \u2026 was originally published on The Hollywood Gossip.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Memeorandum.com",
+              "name": "Vulture",
               "children": [
                 {
-                  "name": "Italian Pasta Is Poised to Disappear From American Grocery Shelves (Wall Street Journal)",
-                  "url": "https://www.memeorandum.com/251110/p52",
-                  "date": "2025-11-10T15:30:00Z",
-                  "snippet": "Wall Street Journal: Italian Pasta Is Poised to Disappear From American Grocery Shelves\u00a0 \u2014\u00a0 Trump administration is set to impose duties of 107% on Italian pasta imports, among most punitive of tariffs it has levied\u00a0 \u2014\u00a0 / Photography by Alessio Paduano for WS\u2026",
+                  "name": "Cynthia Erivo Is Ariana Grande\u2019s Fastest Bodyguard",
+                  "url": "http://www.vulture.com/article/cynthia-erivo-protects-ariana-grande-fan.html",
+                  "date": "2025-11-13T15:25:07Z",
+                  "snippet": "She\u2019s holding space for her co-star\u2019s personal space. Cynthia Erivo was the first to spring into action after a man jumped a barricade and rushed at Ariana Grande at the \u2018Wicked: For Good\u2019 premiere in Singapore.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "blogTO",
+              "name": "CNA",
               "children": [
                 {
-                  "name": "Eataly to open Toronto Eaton Centre location this month",
-                  "url": "https://www.blogto.com/eat_drink/2025/11/eataly-eaton-centre-toronto-open-this-month/",
-                  "date": "2025-11-10T19:26:11Z",
-                  "snippet": "Shopping in downtown Toronto's busiest mall will soon involve much more pasta, pizza and gelato than ever before, as Eataly has announced an opening date for its long-awaited location at the CF Toronto Eaton Centre.Opening on Tuesday, Nov. 25, Eataly Eaton Ce\u2026",
+                  "name": "Fan chaos, selfies, karaoke: Everything that happened at the Wicked: For Good premiere in Singapore",
+                  "url": "https://cnalifestyle.channelnewsasia.com/entertainment/wicked-singapore-premiere-ariana-grande-pyjama-man-473901",
+                  "date": "2025-11-14T00:56:45Z",
+                  "snippet": "Cynthia Erivo, Ariana Grande, Michelle Yeoh, Jeff Goldblum and Jon M Chu graced Resorts World Sentosa on Thursday (Nov 13) for the Asia premiere of the upcoming movie, Wicked: For Good.",
                   "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Lawyersgunsmoneyblog.com",
-              "children": [
+                },
                 {
-                  "name": "The Trump administration\u2019s greatest atrocity",
-                  "url": "https://www.lawyersgunsmoneyblog.com/2025/11/the-trump-administrations-greatest-atrocity",
-                  "date": "2025-11-10T20:53:27Z",
-                  "snippet": "Impeach. Remove. The Hague: Your favorite Italian-origin fusilli and macaroni are poised to disappear from U.S. supermarket shelves. Italy\u2019s biggest pasta exporters say import and antidumping duties totaling 107% on their pasta brands will make doing business\u2026",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Reason",
-              "children": [
-                {
-                  "name": "Tariffs Near 107 Percent Threaten to Pull Italian Pasta Brands From American Shelves",
-                  "url": "https://reason.com/2025/11/12/tariffs-near-107-percent-threaten-to-pull-italian-pasta-brands-from-american-shelves/",
-                  "date": "2025-11-12T17:36:32Z",
-                  "snippet": "The Commerce Department\u2019s new antidumping duties could double the cost of imported Italian pasta\u2014hurting consumers more than producers.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Space Daily",
-              "children": [
-                {
-                  "name": "G7 says it's 'serious' about confronting China's critical mineral dominance",
-                  "url": "https://www.spacedaily.com/reports/G7_says_its_serious_about_confronting_Chinas_critical_mineral_dominance_999.html",
-                  "date": "2025-11-02T09:14:42Z",
-                  "snippet": "Toronto, Canada (AFP) Oct 31, 2025   The G7 announced two dozen new projects Friday aimed at reducing China's dominance of critical mineral supply chains, as Canada's energy minister vowed the alliance was \"serious\" about reforming the global market.   The de\u2026",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Just-food.com",
-              "children": [
-                {
-                  "name": "Italian group BF\u00a0sells\u00a0control of couscous firm Bia",
-                  "url": "https://www.just-food.com/news/bf-to-sell-bia-control/",
-                  "date": "2025-11-05T13:56:43Z",
-                  "snippet": "Bia focuses on private-label couscous and has \u201crecognised leadership\u201d in Italy, France and Spain.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Eater",
-              "children": [
-                {
-                  "name": "D.C. Gets the Build-Your-Own Pasta Pad of Its Dreams",
-                  "url": "https://dc.eater.com/openings/164761/gigis-pasta-foggy-bottom-dc-restaurant-openings",
-                  "date": "2025-11-10T23:37:01Z",
-                  "snippet": "A bright new beacon for Italian cuisine is giving D.C. what it wants, one pasta fix at a time. Situated in the center of Western Market food hall (2000 Pennsylvania Avenue NW), week-old Gigi\u2019s Pasta specializes in sizable bowls (buckets, really) of pasta in a\u2026",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "CNET",
-              "children": [
-                {
-                  "name": "Today's NYT Mini Crossword Answers for Tuesday, Nov. 11",
-                  "url": "https://www.cnet.com/tech/gaming/todays-nyt-mini-crossword-answers-for-tuesday-nov-11/",
-                  "date": "2025-11-11T03:22:00Z",
-                  "snippet": "Here's today's NYT Mini Crossword answer. These answers will help you solve New York Times' popular crossword game, Mini Crossword, every day!",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "New York Post",
-              "children": [
-                {
-                  "name": "Big trouble in Little Italy as fears of pasta price hike, shortage are giving everyone agita",
-                  "url": "https://nypost.com/2025/11/11/us-news/big-trouble-in-little-italy-as-fears-of-pasta-price-hike-shortage-are-giving-everyone-agita/",
-                  "date": "2025-11-11T23:39:43Z",
-                  "snippet": "Your next bowl of spaghetti could cost a pretty penne.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "The Atlantic",
-              "children": [
-                {
-                  "name": "Stock Up on Fancy Pasta Now",
-                  "url": "https://www.theatlantic.com/health/2025/11/pasta-bronze-cut-tariffs-italy/684904/",
-                  "date": "2025-11-12T20:21:26Z",
-                  "snippet": "Just when Americans got hooked on Italian imports, they may slip away.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "mindbodygreen.com",
-              "children": [
-                {
-                  "name": "Anchovies vs. Sardines: Both Packed With Nutrients \u2014 But Is One Healthier?",
-                  "url": "https://www.mindbodygreen.com/articles/anchovies-vs-sardines-health-benefits",
-                  "date": "2025-11-07T12:09:00Z",
-                  "snippet": "We spoke to canned fish connoisseurs to find out.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "decanter.com",
-              "children": [
-                {
-                  "name": "International Merlot Day: Why Merlot still dominates despite its Sideways reputation",
-                  "url": "https://www.decanter.com/wine/international-merlot-day-why-merlot-still-dominates-despite-its-sideways-reputation-568387/",
-                  "date": "2025-11-06T06:00:11Z",
-                  "snippet": "Merlot grapes on a sorting table.\n Meh-lot or more-lot..? The post International Merlot Day: Why Merlot still dominates despite its Sideways reputation appeared first on Decanter.",
+                  "name": "Man who jumped barricade, rushed at Wicked star Ariana Grande in Singapore charged with public nuisance",
+                  "url": "https://www.channelnewsasia.com/singapore/ariana-grande-wicked-premiere-singapore-johnson-wen-pyjama-man-charged-5466746",
+                  "date": "2025-11-14T06:52:08Z",
+                  "snippet": "Ariana Grande's co-star\u00a0Cynthia Erivo rushed in to help after Johnson Wen jumped a barricade and charged at the actress.",
                   "value": 1
                 }
               ]
@@ -489,18 +417,286 @@
       ]
     },
     {
-      "name": "IT",
+      "name": "US",
       "children": [
         {
           "name": "newsdata.io",
           "children": [
             {
-              "name": "football-italia",
+              "name": "nypost",
               "children": [
                 {
-                  "name": "Parma confirm Suzuki surgery, Japan goalkeeper out for 3-4 months",
-                  "url": "https://football-italia.net/parma-confirm-suzuki-surgery-out-3-4-months/",
-                  "date": "2025-11-13 13:52:30",
+                  "name": "Ariana Grande attacker sentenced to jail after jumping actress at \u2018Wicked: For Good\u2019 Singapore premiere",
+                  "url": "https://pagesix.com/2025/11/17/celebrity-news/ariana-grande-attacker-sentenced-to-jail-after-jumping-actress-at-wicked-for-good-singapore-premiere/",
+                  "date": "2025-11-17 16:39:56",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Cynthia Erivo addresses crazed fan attacking Ariana Grande on \u2018Wicked: For Good\u2019 red carpet",
+                  "url": "https://pagesix.com/2025/11/17/celebrity-news/cynthia-erivo-addresses-fan-attacking-ariana-grande-on-wicked-for-good-red-carpet/",
+                  "date": "2025-11-17 16:19:19",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Cynthia Erivo speaks out about scary Ariana Grande red carpet incident as crazed fan gets prison time",
+                  "url": "https://nypost.com/2025/11/17/entertainment/cynthia-erivo-speaks-out-about-ariana-grande-incident-fan-sentenced-to-prison/",
+                  "date": "2025-11-17 13:05:19",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "billboard",
+              "children": [
+                {
+                  "name": "Man Who Grabbed Ariana Grande at \u2018Wicked: For Good\u2019 Singapore Premiere Sentenced to Jail Time",
+                  "url": "https://www.billboard.com/music/music-news/man-grabbed-ariana-grande-wicked-premiere-jail-sentence-1236114712/",
+                  "date": "2025-11-17 16:04:51",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "nbcdfw",
+              "children": [
+                {
+                  "name": "Here are the \u2018Saturday Night Live' hosts and musical guests for December shows",
+                  "url": "https://www.nbcdfw.com/entertainment/entertainment-news/snl-hosts-musical-guests-december/3945826/",
+                  "date": "2025-11-17 15:51:43",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "usatoday",
+              "children": [
+                {
+                  "name": "Man who grabbed Ariana Grande on 'Wicked' red carpet jailed, Cynthia Erivo speaks out",
+                  "url": "https://www.usatoday.com/story/entertainment/celebrities/2025/11/17/wicked-ariana-grande-attack-jail-cynthia-erivo/87317663007/",
+                  "date": "2025-11-17 15:50:57",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "justjared",
+              "children": [
+                {
+                  "name": "Man Who Ran Up & Grabbed Ariana Grande at 'Wicked' Singapore Premiere Is Going to Prison",
+                  "url": "https://www.justjared.com/2025/11/17/man-who-ran-up-grabbed-ariana-grande-at-wicked-singapore-premiere-is-going-to-prison/",
+                  "date": "2025-11-17 15:22:05",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "rollingstone",
+              "children": [
+                {
+                  "name": "Man Who Grabbed Ariana Grande at \u2018Wicked: For Good\u2019 Premiere Sentenced to Nine Days in Jail",
+                  "url": "https://www.rollingstone.com/tv-movies/tv-movie-news/ariana-grande-man-grabbed-wicked-sentenced-jail-1235466080/",
+                  "date": "2025-11-17 14:50:47",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "tmz",
+              "children": [
+                {
+                  "name": "'Serial Intruder' Who Grabbed Ariana Grande at 'Wicked: For Good' Premiere Sentenced",
+                  "url": "https://www.tmz.com/2025/11/17/man-rushing-at-ariana-grande-sentenced/",
+                  "date": "2025-11-17 14:48:13",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "nytimes",
+              "children": [
+                {
+                  "name": "Man Who Rushed Ariana Grande in Singapore Gets 9 Days in Jail",
+                  "url": "https://www.nytimes.com/2025/11/17/world/asia/ariana-grande-singapore-fan-attack-sentence.html",
+                  "date": "2025-11-17 14:20:20",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "google",
+              "children": [
+                {
+                  "name": "Man Who Rushed Ariana Grande in Singapore Gets 9 Days in Jail - The New York Times",
+                  "url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxONDJZV3U4LXExaFVwUzEwWmtIaXRDRXM3ZGhuYko1M0dLMnlCT09HTU56NlRYSU9tMG13MERmc1MzV1JEWmZ4TGZVTDhBb2FRcF83bE1ManRvX0lHcHdPR001ejlEbmt3aVo3T0hhWEN3eHBSOFFZZ2hHNDU5OEV3Z1hjSjU2T2pqT3BNMGVSREFhZmwxZGx5MDBB?oc=5",
+                  "date": "2025-11-17 14:18:15",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Stage Invader Who Grabbed Ariana Grande On \u2018Wicked: For Good\u2019 Red Carpet Jailed In Singapore - Deadline",
+                  "url": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQYVFqY1lYVGdEMWpETEt0LVhQUzVvdURHTjQ3LXY1WU5ZT2ltYmJ5VngxZU94czRhbW9FcU9XdGIxWGpDSm51a3pHRE9jZ0llV0pxN1EzX1A0OUoxS1ozNWMtN1JKVHJLbVk3QWdhMFJyclI3NURvRnd3eDNma3VDSWJXRUNnSV95WElWTHd4NU1qWW9OWHFKOHFneXQ?oc=5",
+                  "date": "2025-11-17 12:55:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                },
+                {
+                  "name": "Man Who Grabbed Ariana Grande at \u2018Wicked: For Good\u2019 Singapore Premiere Sentenced to Nine Days in Prison - Variety",
+                  "url": "https://news.google.com/rss/articles/CBMiqgFBVV95cUxQbVN3dGhNRmFRWEdJS3p5UW4yanRiYWwyTmVNZk42a3dxSW5OTVpBaGZUaHBDZjlPU3VjazZTakhWS1ZRUVNsZVlKb0k1SC10LWZFUERTTkhVbUVfS0plenVHaFZmWTh3YjV2NzE3V2tqQkRWVTBXUG41QWxHb0c5R2xiNWh2TkF0cWZZZFF3bnVOekRQaFVEUDZqMUd0VldDeXd6Rm1oQldyQQ?oc=5",
+                  "date": "2025-11-17 11:51:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "eonline",
+              "children": [
+                {
+                  "name": "Cynthia Erivo Reacts to Ariana Grande Fan Incident at Wicked Premiere",
+                  "url": "https://www.eonline.com/news/1425129/cynthia-erivo-on-ariana-grande-fan-incident-at-wicked-premiere",
+                  "date": "2025-11-17 14:00:12",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "deadline",
+              "children": [
+                {
+                  "name": "Stage Invader Who Grabbed Ariana Grande On \u2018Wicked: For Good\u2019 Red Carpet Jailed In Singapore",
+                  "url": "https://deadline.com/2025/11/ariana-grande-stage-invader-jailed-wicked-for-good-asia-1236620044/",
+                  "date": "2025-11-17 12:55:19",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "avclub",
+              "children": [
+                {
+                  "name": "\"Public nuisance\" who grabbed Ariana Grande sentenced to nine days in jail",
+                  "url": "https://www.avclub.com/ariana-grande-johnson-wen-sentenced",
+                  "date": "2025-11-17 12:39:29",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "hollywoodreporter",
+              "children": [
+                {
+                  "name": "Man Who Grabbed Ariana Grande at \u2018Wicked: For Good\u2019 Singapore Premiere Sentenced to Nine Days in Prison",
+                  "url": "https://www.hollywoodreporter.com/movies/movie-news/ariana-grande-grabbed-wicked-sentence-prison-singapore-1236428710/",
+                  "date": "2025-11-17 12:23:43",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "variety",
+              "children": [
+                {
+                  "name": "Man Who Grabbed Ariana Grande at \u2018Wicked: For Good\u2019 Singapore Premiere Sentenced to Nine Days in Prison",
+                  "url": "https://variety.com/2025/film/global/ariana-grande-man-who-grabbed-wicked-premiere-prison-time-1236583470/",
+                  "date": "2025-11-17 11:51:06",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "yahoo",
+              "children": [
+                {
+                  "name": "Man who rushed Ariana Grande at Wicked 2 premiere jailed in Singapore",
+                  "url": "https://www.yahoo.com/entertainment/celebrity/articles/man-rushed-ariana-grande-wicked-103340885.html",
+                  "date": "2025-11-17 10:33:40",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "newser",
+              "children": [
+                {
+                  "name": "Man Who Grabbed Ariana Grande Heads to Jail",
+                  "url": "https://www.newser.com/story/378826/man-who-grabbed-ariana-grande-heads-to-jail.html",
+                  "date": "2025-11-17 10:30:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "express",
+              "children": [
+                {
+                  "name": "Ariana Grande makes first red carpet appearance since terrifying fan ambush",
+                  "url": "https://www.the-express.com/entertainment/celebrity-news/190790/ariana-grande-red-carpet-ambush",
+                  "date": "2025-11-17 09:41:00",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "newsargus",
+              "children": [
+                {
+                  "name": "Singapore jails 'attention seeking' Australian over Ariana Grande incident",
+                  "url": "https://www.newsargus.com/news/national/singapore-jails-attention-seeking-australian-over-ariana-grande-incident/article_bcce87a0-c277-59fe-ad3b-d9bddbd1f487.html",
+                  "date": "2025-11-17 09:13:07",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "griffindailynews",
+              "children": [
+                {
+                  "name": "Singapore jails 'attention seeking' Australian over Ariana Grande incident",
+                  "url": "https://www.griffindailynews.com/news/national/singapore-jails-attention-seeking-australian-over-ariana-grande-incident/article_01efa527-0f68-50c3-867c-2f987ddcd334.html",
+                  "date": "2025-11-17 09:13:07",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "elkharttruth",
+              "children": [
+                {
+                  "name": "Singapore jails 'attention seeking' Australian over Ariana Grande incident",
+                  "url": "https://www.elkharttruth.com/news/national/singapore-jails-attention-seeking-australian-over-ariana-grande-incident/article_4e6f973b-dbc7-56d8-8946-0dc31f3dcb1c.html",
+                  "date": "2025-11-17 09:13:07",
+                  "snippet": "ONLY AVAILABLE IN PAID PLANS",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "djournal",
+              "children": [
+                {
+                  "name": "Singapore jails 'attention seeking' Australian over Ariana Grande incident",
+                  "url": "https://www.djournal.com/news/national/singapore-jails-attention-seeking-australian-over-ariana-grande-incident/article_92c8bbf5-dcab-5ff6-9f14-ac7617be68cb.html",
+                  "date": "2025-11-17 09:13:07",
                   "snippet": "ONLY AVAILABLE IN PAID PLANS",
                   "value": 1
                 }
@@ -512,13 +708,63 @@
           "name": "newsapi.org",
           "children": [
             {
-              "name": "MassLive.com",
+              "name": "Gizmodo.com",
               "children": [
                 {
-                  "name": "Italian pasta could vanish from American grocery shelves. Here\u2019s why",
-                  "url": "https://www.masslive.com/news/2025/11/italian-pasta-could-vanish-from-american-grocery-shelves-heres-why.html",
-                  "date": "2025-11-11T16:46:59Z",
-                  "snippet": "Your favorite Italian pasta may soon cost double (or disappear entirely).",
+                  "name": "Why You\u2019ve Seen Way Less \u2018Wicked: For Good\u2019 Press Memes and Way More Merch",
+                  "url": "https://gizmodo.com/wicked-for-good-marketing-collabs-universal-2000686026",
+                  "date": "2025-11-14T15:00:42Z",
+                  "snippet": "Holding space has given up space for a lot more bizarre brand collaborations.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Rolling Stone",
+              "children": [
+                {
+                  "name": "Cynthia Erivo Guards Ariana Grande From Fan Attack Quicker Than Security at \u2018Wicked\u2019 Premiere",
+                  "url": "http://www.rollingstone.com/music/music-news/ariana-grande-wicked-premiere-attack-cynthia-erivo-defends-1235464349/",
+                  "date": "2025-11-13T15:43:57Z",
+                  "snippet": "Man known for charging at celebrities attacked Ariana Grande at the 'Wicked: For Good' premiere in Singapore. Cynthia Erivo stepped in to defend her.",
+                  "value": 1
+                },
+                {
+                  "name": "Ariana Grande \u2018Beyond Devastated\u2019 to Miss Brazil \u2018Wicked: For Good\u2019 Premiere Due to Flight Delays",
+                  "url": "http://www.rollingstone.com/music/music-news/ariana-grande-misses-wicked-for-good-brazil-premiere-1235459142/",
+                  "date": "2025-11-04T13:59:01Z",
+                  "snippet": "The musician hit dead ends in every route she tried to take to get there in time for the event, writing, \"Absolutely nothing was available or possible that would get us there in time\"",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "TMZ",
+              "children": [
+                {
+                  "name": "Man Who Grabbed Ariana Grande at 'Wicked' Premiere Charged",
+                  "url": "https://www.tmz.com/2025/11/14/man-who-grabbed-ariana-grande-at-wicked-premiere-charged/",
+                  "date": "2025-11-14T13:09:35Z",
+                  "snippet": "The crazed fan who jumped the barricade and sprinted to Ariana Grande at the Singapore \"Wicked: For Good\" premiere has been charged. The Australian man, named Johnson Wen, was charged with being a a public nuisance on Friday, BBC reports. The\u2026",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Boredpanda.com",
+              "children": [
+                {
+                  "name": "\u201cWhy She Dressed Up As A Wasp Nest?\u201d: Michelle Yeoh\u2019s Outfit At Premiere Triggers Meltdown Online",
+                  "url": "https://www.boredpanda.com/michelle-yeoh-wicked-singapore-premiere-dress-divided-reactions/",
+                  "date": "2025-11-14T11:20:43Z",
+                  "snippet": "\u201cWasn't Halloween last week?\u201d one asked after Michelle Yeoh\u2019s appearance at the Singapore premiere of \u2018Wicked: For Good.\u2019",
+                  "value": 1
+                },
+                {
+                  "name": "Fan Who \u201cAttacked\u201d Ariana Grande At Premiere Outs Himself Online And Is Met With Swift Backlash",
+                  "url": "https://www.boredpanda.com/fan-who-attacked-ariana-grande-premiere-outs-himself/",
+                  "date": "2025-11-13T17:07:46Z",
+                  "snippet": "\u201cHow has he not been arrested yet!?\u201d",
                   "value": 1
                 }
               ]
@@ -527,266 +773,191 @@
               "name": "Jezebel",
               "children": [
                 {
-                  "name": "Everyone's Getting a Bag of Dry Pasta for Christmas",
-                  "url": "https://www.jezebel.com/everyones-getting-a-bag-of-dry-pasta-for-christmas",
-                  "date": "2025-11-11T12:58:29Z",
-                  "snippet": "Italian pasta producers warn that the Trump administration's combined 107% tariffs and duties could force them to pull their products from U.S. shelves early next year.",
+                  "name": "Hold Some Space for Ariana Grande and SpongeBob",
+                  "url": "https://www.jezebel.com/hold-some-space-for-ariana-grande-and-spongebob",
+                  "date": "2025-11-13T09:34:52Z",
+                  "snippet": "Despite every rumor ever that says they're done, at least two tabloids report they're still going strong.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Business Insider",
+              "name": "Deadline",
               "children": [
                 {
-                  "name": "I'm a mom who drives an hour to stock up on pantry staples at Trader Joe's. Here are 13 items I always buy.",
-                  "url": "https://www.businessinsider.com/trader-joes-items-worth-long-drive-stock-up-family-2025-11",
-                  "date": "2025-11-01T11:47:02Z",
-                  "snippet": "The closest Trader Joe's to my home in Florida is an hour away. So, every couple of months, I stock up on staples like peanut butter and spaghetti.",
+                  "name": "Ariana Grande Charged By Fan On \u2018Wicked: For Good\u2019 Red Carpet In Singapore; Cynthia Erivo Fends Off Intruder",
+                  "url": "http://deadline.com/2025/11/ariana-grande-cynthia-erivo-wicked-red-carpet-fan-attack-1236616732/",
+                  "date": "2025-11-13T20:49:38Z",
+                  "snippet": "Ariana Grande was rushed by a social media influencer fan at the Wicked: For Good Singapore red carpet premieres per myriad posts on social media. The influencer is identified as Pyjamamann who even posted about the incident writing, \u201cDear Ariana Grande Thank\u2026",
                   "value": 1
                 },
                 {
-                  "name": "Gen Z diners are turning to social media to discover restaurants over Yelp and Michelin",
-                  "url": "https://www.businessinsider.com/gen-z-restaurant-discovery-social-media-2025-11",
-                  "date": "2025-11-01T09:12:01Z",
-                  "snippet": "For Gen Z and millennials, choosing a restaurant is less about Michelin stars or Yelp averages and more about what's in their social media feeds.",
+                  "name": "Serial Stage Invader Who Rushed Ariana Grande On Singapore \u2018Wicked: For Good\u2019 Red Carpet Charged With Being \u201cA Public Nuisance\u201d",
+                  "url": "http://deadline.com/2025/11/stage-invader-ariana-grande-singapore-wicked-charged-1236617589/",
+                  "date": "2025-11-14T16:30:56Z",
+                  "snippet": "A man who charged Ariana Grande on a Wicked: For Good red carpet in Singapore and attempted to embrace the star on Thursday has been charged with being \u201ca public nuisance\u201d. Multiple viral clips show 26-year-old Australian man Johnson Wen jumping the red carpe\u2026",
                   "value": 1
                 },
                 {
-                  "name": "The best way to have a smooth holiday season is to understand what type of mother-in-law you have",
-                  "url": "https://www.businessinsider.com/bi-today-saturday-smooth-holiday-mother-in-law-types-2025-11",
-                  "date": "2025-11-08T11:36:02Z",
-                  "snippet": "In this Saturday edition of BI Today, we're talking about the six different types of mothers-in-law and how to interact with them smoothly.",
+                  "name": "Ariana Grande Missing Brazil \u2018Wicked: For Good\u2019 Premiere Due To Flight Issues: \u201cBeyond Devastated\u201d",
+                  "url": "http://deadline.com/2025/11/ariana-grande-misses-brazil-wicked-for-good-premiere-1236606468/",
+                  "date": "2025-11-04T15:01:37Z",
+                  "snippet": "Ariana Grande was forced to cancel her appearance at Brazil\u2019s world premiere of Wicked: For Good due to flight delays. Grande, who is reprising her role as Glinda in the sequel, was due to be in Sao Paulo on Tuesday for the sequel\u2019s screening, but due to flig\u2026",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Creative Bloq",
+              "name": "CBC News",
               "children": [
                 {
-                  "name": "New Olympic Rings Pasta boxes are a thing of beauty",
-                  "url": "https://www.creativebloq.com/design/branding/new-olympic-rings-pasta-boxes-are-a-thing-of-beauty",
-                  "date": "2025-11-01T10:00:00Z",
-                  "snippet": "And the shaped pasta is pretty cool, too.",
+                  "name": "Ariana Grande rushed by fan on Wicked: For Good carpet in Singapore \u2014 then Cynthia Erivo stepped in",
+                  "url": "https://www.cbc.ca/news/entertainment/ariana-grande-wicked-for-good-cynthia-erivo-9.6977901",
+                  "date": "2025-11-14T15:23:02Z",
+                  "snippet": "Cynthia Erivo came to the rescue of The Wicked: For Good co-star Ariana Grande when a man rushed Grande, forcibly putting an arm around her, while on the yellow carpet for the Singapore premiere of the film, prompting security to take him away and a Singapore\u2026",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "CBS News",
+              "name": "Gofugyourself.com",
               "children": [
                 {
-                  "name": "Italian imports store owner on threat of new pasta tariffs: \"We can only absorb so much\"",
-                  "url": "https://www.cbsnews.com/video/italian-imports-store-owner-on-threat-of-new-pasta-tariffs-we-can-only-absorb-so-much/",
-                  "date": "2025-11-12T00:25:00Z",
-                  "snippet": "Some popular pasta brands from Italy may have to say \"arrivederci\" to U.S. store shelves as President Trump is threatening heavy tariffs on the imports. Meg Oliver has more.",
+                  "name": "Ariana Grande Needed a Bodyguard at \u201cWicked: For Good\u201d",
+                  "url": "https://www.gofugyourself.com/ariana-grande-needed-a-bodyguard-at-wicked-for-good-11-2025",
+                  "date": "2025-11-14T17:10:43Z",
+                  "snippet": "It came in the form of Cynthia Erivo. The post Ariana Grande Needed a Bodyguard at \u201cWicked: For Good\u201d first appeared on Go Fug Yourself.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "WWD",
+              "children": [
+                {
+                  "name": "Ariana Grande Returns to Her Signature Glinda Whimsy in Custom Thom Browne at \u2018Wicked: For Good\u2019 Singapore Premiere",
+                  "url": "http://wwd.com/pop-culture/celebrity-news/ariana-grande-thom-browne-dress-wicked-for-good-singapore-1238347158/",
+                  "date": "2025-11-13T15:20:41Z",
+                  "snippet": "The actress and singer attended the red carpet premiere of 'Wicked: For Good' in Singapore.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "The Cut",
+              "children": [
+                {
+                  "name": "The Man Who Accosted Ariana Grande in Singapore Was Charged",
+                  "url": "http://www.thecut.com/article/ariana-grande-fan-attacker-singapore-wicked-for-good.html",
+                  "date": "2025-11-14T18:56:48Z",
+                  "snippet": "Johnson Wen jumped a red-carpet barricade and grabbed Grande during the \u2018Wicked: For Good\u2019 Singapore premiere on Thursday. He\u2019s expected to plead guilty to public-nuisance charges.",
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "name": "Consequence.net",
+              "children": [
+                {
+                  "name": "Serial Celebrity-Assaulter Arrested After Assaulting Ariana Grande",
+                  "url": "https://consequence.net/2025/11/ariana-grande-assault-arrest-wicked/",
+                  "date": "2025-11-14T16:53:03Z",
+                  "snippet": "Johnson Wen was arrested in Singapore and charged with being a public nuisance after jumping on Grande at a Wicked rep-carpet event. Serial Celebrity-Assaulter Arrested After Assaulting Ariana Grande Wren Graves",
                   "value": 1
                 },
                 {
-                  "name": "A 107% U.S. import tax on Italian pasta could make your spaghetti pricier",
-                  "url": "https://www.cbsnews.com/news/italian-pasta-antidumping-duties-imports-disappear-barilla/",
-                  "date": "2025-11-11T20:19:14Z",
-                  "snippet": "The Trump administration is considering a new import duty on 13 of Italy's largest pasta exporters, including Barilla and La Molisana.",
+                  "name": "Cynthia Erivo Protects Ariana Grande from Fan Breach",
+                  "url": "https://consequence.net/2025/11/cynthia-erivo-protects-ariana-grande-fan/",
+                  "date": "2025-11-13T15:45:51Z",
+                  "snippet": "Like she does in Wicked, Erivo took matters into her own hands. Cynthia Erivo Protects Ariana Grande from Fan Breach Wren Graves",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "NBC News",
+              "name": "Thoughtcatalog.com",
               "children": [
                 {
-                  "name": "Italian pasta exports to the U.S. could be 'virtually wiped out' by proposed 107% tariffs",
-                  "url": "https://www.nbcnews.com/business/business-news/italian-pasta-tariffs-trump-rcna243264",
-                  "date": "2025-11-11T19:04:31Z",
-                  "snippet": "U.S. tariff rates on pasta from 13 major Italian companies could soar to as high as 107% under a recent Commerce Department decision.",
+                  "name": "Ariana Grande Will Miss The \u2018Wicked For Good\u2019 Brazil Premiere Tonight For A Reason You Won\u2019t Believe",
+                  "url": "https://thoughtcatalog.com/erinwhitten/2025/11/ariana-grande-will-miss-the-wicked-for-good-brazil-premiere-tonight-for-a-reason-you-wont-believe/",
+                  "date": "2025-11-04T20:42:55Z",
+                  "snippet": "In an upsetting and unexpected turn of events, Ariana Grande was forced to cancel her much-anticipated visit to Brazil for the S\u00e3o Paulo world premiere of Wicked For Good, the eagerly awaited sequel to the Jon M.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Twistedsifter.com",
+              "name": "Just Jared",
               "children": [
                 {
-                  "name": "Man Was Invited Over For Dinner With His Girlfriend\u2019s Parents, And He Decided To Be Honest When Asked How He Liked Her Mom\u2019s Cooking",
-                  "url": "http://twistedsifter.com/2025/11/man-was-invited-over-for-dinner-with-his-girlfriends-parents-and-he-decided-to-be-honest-when-asked-how-he-liked-her-moms-cooking/",
-                  "date": "2025-11-13T05:15:05Z",
-                  "snippet": "Honesty may be the best policy, but timing and tact matter too.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Forbes",
-              "children": [
-                {
-                  "name": "NYT Mini Crossword Clues And Answers For Tuesday, November 11",
-                  "url": "https://www.forbes.com/sites/erikkain/2025/11/10/nyt-mini-crossword-clues-and-answers-for-tuesday-november-11/",
-                  "date": "2025-11-11T04:02:17Z",
-                  "snippet": "Looking for help with today's NYT Mini Crossword puzzle? Here are some hints and answers for the puzzle.",
+                  "name": "Cynthia Erivo Protects Ariana Grande as Troll Crashes 'Wicked: For Good' Red Carpet in Singapore",
+                  "url": "https://www.justjared.com/2025/11/13/cynthia-erivo-protects-ariana-grande-as-troll-crashes-wicked-for-good-red-carpet-in-singapore/",
+                  "date": "2025-11-13T13:13:55Z",
+                  "snippet": "Cynthia Erivo is protecting Ariana Grande. The 38-year-old Wicked actress lept into action, protecting the 32-year-old eternal sunshine singer when a person unexpectedly crashed the red carpet during the Asia-Pacific premiere of Wicked: For Good on Thursday (\u2026",
                   "value": 1
                 },
                 {
-                  "name": "Dimmi Dimmi - An Italian Restaurant Everyone Can Love",
-                  "url": "https://www.forbes.com/sites/tomhyland/2025/11/03/dimmi-dimmian-italian-restaurant-everyone-can-love/",
-                  "date": "2025-11-03T12:45:00Z",
-                  "snippet": "For starters, the sesame focaccia, served with a variety of options is quite good; I went with the ricotta and honey dip, which added a nice tang.",
+                  "name": "See 'Wicked' Singapore Premiere Photos, Where Cynthia Erivo Became Ariana Grande's Hero!",
+                  "url": "https://www.justjared.com/2025/11/13/see-wicked-singapore-premiere-photos-where-cynthia-erivo-became-ariana-grandes-hero/",
+                  "date": "2025-11-13T23:47:59Z",
+                  "snippet": "The Wicked: For Good premiere in Singapore is always going to be known as the place where Cynthia Erivo showed off her superhero skills when she helped save Ariana Grande from a red carpet crasher. The 38-year-old actress, who plays Elphaba in the movie, help\u2026",
+                  "value": 1
+                },
+                {
+                  "name": "Man Who Grabbed Ariana Grande at 'Wicked: For Good' Singapore Premiere Faces Charges",
+                  "url": "https://www.justjared.com/2025/11/14/man-who-grabbed-ariana-grande-at-wicked-for-good-singapore-premiere-faces-charges/",
+                  "date": "2025-11-14T15:53:56Z",
+                  "snippet": "The man that grabbed Ariana Grande at the premiere of Wicked: For Good in Singapore has found himself in legal trouble. As the 32-year-old actress/singer arrived at the premiere with co-stars Cynthia Erivo and Michelle Yeoh on Thursday (November 13), a man, l\u2026",
+                  "value": 1
+                },
+                {
+                  "name": "Wicked's Marissa Bode Reacts After Ariana Grande Gets Rushed by Man at Singapore Premiere",
+                  "url": "https://www.justjared.com/2025/11/14/wickeds-marissa-bode-reacts-after-ariana-grande-gets-rushed-by-man-at-singapore-premiere/",
+                  "date": "2025-11-14T18:14:23Z",
+                  "snippet": "Marissa Bode is speaking out after the incident co-star Ariana Grande was involved in at the Singapore premiere of Wicked: For Good. As the 32-year-old actress/singer arrived at the premiere with co-stars Cynthia Erivo and Michelle Yeoh on Thursday (November \u2026",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "International Business Times",
+              "name": "The Hollywood Gossip",
               "children": [
                 {
-                  "name": "Italian Pasta at Risk: US Tariffs of Up to 107% Threaten Shelf Presence of 13 Major Brands",
-                  "url": "https://www.ibtimes.com/italian-pasta-risk-us-tariffs-107-threaten-shelf-presence-13-major-brands-3790044",
-                  "date": "2025-11-10T20:03:52Z",
-                  "snippet": "US tariffs of up to 107% threaten 13 major Italian pasta brands, potentially doubling prices and reducing availability. Discover the impact on American consumers and Italy's export industry.",
+                  "name": "Ariana Grande Attacked By Crazed Fan at \u2018Wicked\u2019 Premiere Event; Cynthia \u2026",
+                  "url": "http://www.thehollywoodgossip.com/2025/11/ariana-grande-attacked-by-crazed-fan-at-wicked-premiere-event-cynthia-erivo-comes-to-the-rescue/",
+                  "date": "2025-11-13T20:32:16Z",
+                  "snippet": "Reading Time: 3 minutesAriana Grande was accosted at a 'Wicked: For Good' premiere event today. Ariana Grande Attacked By Crazed Fan at \u2018Wicked\u2019 Premiere Event; Cynthia \u2026 was originally published on The Hollywood Gossip.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "Memeorandum.com",
+              "name": "Vulture",
               "children": [
                 {
-                  "name": "Italian Pasta Is Poised to Disappear From American Grocery Shelves (Wall Street Journal)",
-                  "url": "https://www.memeorandum.com/251110/p52",
-                  "date": "2025-11-10T15:30:00Z",
-                  "snippet": "Wall Street Journal: Italian Pasta Is Poised to Disappear From American Grocery Shelves\u00a0 \u2014\u00a0 Trump administration is set to impose duties of 107% on Italian pasta imports, among most punitive of tariffs it has levied\u00a0 \u2014\u00a0 / Photography by Alessio Paduano for WS\u2026",
+                  "name": "Cynthia Erivo Is Ariana Grande\u2019s Fastest Bodyguard",
+                  "url": "http://www.vulture.com/article/cynthia-erivo-protects-ariana-grande-fan.html",
+                  "date": "2025-11-13T15:25:07Z",
+                  "snippet": "She\u2019s holding space for her co-star\u2019s personal space. Cynthia Erivo was the first to spring into action after a man jumped a barricade and rushed at Ariana Grande at the \u2018Wicked: For Good\u2019 premiere in Singapore.",
                   "value": 1
                 }
               ]
             },
             {
-              "name": "blogTO",
+              "name": "CNA",
               "children": [
                 {
-                  "name": "Eataly to open Toronto Eaton Centre location this month",
-                  "url": "https://www.blogto.com/eat_drink/2025/11/eataly-eaton-centre-toronto-open-this-month/",
-                  "date": "2025-11-10T19:26:11Z",
-                  "snippet": "Shopping in downtown Toronto's busiest mall will soon involve much more pasta, pizza and gelato than ever before, as Eataly has announced an opening date for its long-awaited location at the CF Toronto Eaton Centre.Opening on Tuesday, Nov. 25, Eataly Eaton Ce\u2026",
+                  "name": "Fan chaos, selfies, karaoke: Everything that happened at the Wicked: For Good premiere in Singapore",
+                  "url": "https://cnalifestyle.channelnewsasia.com/entertainment/wicked-singapore-premiere-ariana-grande-pyjama-man-473901",
+                  "date": "2025-11-14T00:56:45Z",
+                  "snippet": "Cynthia Erivo, Ariana Grande, Michelle Yeoh, Jeff Goldblum and Jon M Chu graced Resorts World Sentosa on Thursday (Nov 13) for the Asia premiere of the upcoming movie, Wicked: For Good.",
                   "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Lawyersgunsmoneyblog.com",
-              "children": [
+                },
                 {
-                  "name": "The Trump administration\u2019s greatest atrocity",
-                  "url": "https://www.lawyersgunsmoneyblog.com/2025/11/the-trump-administrations-greatest-atrocity",
-                  "date": "2025-11-10T20:53:27Z",
-                  "snippet": "Impeach. Remove. The Hague: Your favorite Italian-origin fusilli and macaroni are poised to disappear from U.S. supermarket shelves. Italy\u2019s biggest pasta exporters say import and antidumping duties totaling 107% on their pasta brands will make doing business\u2026",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Reason",
-              "children": [
-                {
-                  "name": "Tariffs Near 107 Percent Threaten to Pull Italian Pasta Brands From American Shelves",
-                  "url": "https://reason.com/2025/11/12/tariffs-near-107-percent-threaten-to-pull-italian-pasta-brands-from-american-shelves/",
-                  "date": "2025-11-12T17:36:32Z",
-                  "snippet": "The Commerce Department\u2019s new antidumping duties could double the cost of imported Italian pasta\u2014hurting consumers more than producers.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Space Daily",
-              "children": [
-                {
-                  "name": "G7 says it's 'serious' about confronting China's critical mineral dominance",
-                  "url": "https://www.spacedaily.com/reports/G7_says_its_serious_about_confronting_Chinas_critical_mineral_dominance_999.html",
-                  "date": "2025-11-02T09:14:42Z",
-                  "snippet": "Toronto, Canada (AFP) Oct 31, 2025   The G7 announced two dozen new projects Friday aimed at reducing China's dominance of critical mineral supply chains, as Canada's energy minister vowed the alliance was \"serious\" about reforming the global market.   The de\u2026",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Just-food.com",
-              "children": [
-                {
-                  "name": "Italian group BF\u00a0sells\u00a0control of couscous firm Bia",
-                  "url": "https://www.just-food.com/news/bf-to-sell-bia-control/",
-                  "date": "2025-11-05T13:56:43Z",
-                  "snippet": "Bia focuses on private-label couscous and has \u201crecognised leadership\u201d in Italy, France and Spain.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "Eater",
-              "children": [
-                {
-                  "name": "D.C. Gets the Build-Your-Own Pasta Pad of Its Dreams",
-                  "url": "https://dc.eater.com/openings/164761/gigis-pasta-foggy-bottom-dc-restaurant-openings",
-                  "date": "2025-11-10T23:37:01Z",
-                  "snippet": "A bright new beacon for Italian cuisine is giving D.C. what it wants, one pasta fix at a time. Situated in the center of Western Market food hall (2000 Pennsylvania Avenue NW), week-old Gigi\u2019s Pasta specializes in sizable bowls (buckets, really) of pasta in a\u2026",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "CNET",
-              "children": [
-                {
-                  "name": "Today's NYT Mini Crossword Answers for Tuesday, Nov. 11",
-                  "url": "https://www.cnet.com/tech/gaming/todays-nyt-mini-crossword-answers-for-tuesday-nov-11/",
-                  "date": "2025-11-11T03:22:00Z",
-                  "snippet": "Here's today's NYT Mini Crossword answer. These answers will help you solve New York Times' popular crossword game, Mini Crossword, every day!",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "New York Post",
-              "children": [
-                {
-                  "name": "Big trouble in Little Italy as fears of pasta price hike, shortage are giving everyone agita",
-                  "url": "https://nypost.com/2025/11/11/us-news/big-trouble-in-little-italy-as-fears-of-pasta-price-hike-shortage-are-giving-everyone-agita/",
-                  "date": "2025-11-11T23:39:43Z",
-                  "snippet": "Your next bowl of spaghetti could cost a pretty penne.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "The Atlantic",
-              "children": [
-                {
-                  "name": "Stock Up on Fancy Pasta Now",
-                  "url": "https://www.theatlantic.com/health/2025/11/pasta-bronze-cut-tariffs-italy/684904/",
-                  "date": "2025-11-12T20:21:26Z",
-                  "snippet": "Just when Americans got hooked on Italian imports, they may slip away.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "mindbodygreen.com",
-              "children": [
-                {
-                  "name": "Anchovies vs. Sardines: Both Packed With Nutrients \u2014 But Is One Healthier?",
-                  "url": "https://www.mindbodygreen.com/articles/anchovies-vs-sardines-health-benefits",
-                  "date": "2025-11-07T12:09:00Z",
-                  "snippet": "We spoke to canned fish connoisseurs to find out.",
-                  "value": 1
-                }
-              ]
-            },
-            {
-              "name": "decanter.com",
-              "children": [
-                {
-                  "name": "International Merlot Day: Why Merlot still dominates despite its Sideways reputation",
-                  "url": "https://www.decanter.com/wine/international-merlot-day-why-merlot-still-dominates-despite-its-sideways-reputation-568387/",
-                  "date": "2025-11-06T06:00:11Z",
-                  "snippet": "Merlot grapes on a sorting table.\n Meh-lot or more-lot..? The post International Merlot Day: Why Merlot still dominates despite its Sideways reputation appeared first on Decanter.",
+                  "name": "Man who jumped barricade, rushed at Wicked star Ariana Grande in Singapore charged with public nuisance",
+                  "url": "https://www.channelnewsasia.com/singapore/ariana-grande-wicked-premiere-singapore-johnson-wen-pyjama-man-charged-5466746",
+                  "date": "2025-11-14T06:52:08Z",
+                  "snippet": "Ariana Grande's co-star\u00a0Cynthia Erivo rushed in to help after Johnson Wen jumped a barricade and charged at the actress.",
                   "value": 1
                 }
               ]

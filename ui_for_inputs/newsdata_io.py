@@ -9,7 +9,7 @@ API_KEY = 'pub_9619f9337fc44ef593a99b6e83fbf937'
 client = NewsDataApiClient(apikey=API_KEY)
 
 # Define the fields (column headers) we want to write to the CSV
-# MODIFIED: Added 'API Source'
+# ADDED: 'API Source'
 CSV_FIELDNAMES = ['Title', 'Publication Date', 'Link', 'Snippet', 'Source ID', 'Country Code', 'API Source']
 
 def fetch_news_to_csv(query: str, country_code: str, filename: str, language_code: str = 'en', max_articles: int = 0, write_mode: str = 'w', from_date: str = None, to_date: str = None):
@@ -49,7 +49,7 @@ def fetch_news_to_csv(query: str, country_code: str, filename: str, language_cod
     while True:
         try:
             # 1. API Call with Pagination, Inputs, and Date Filters
-            # REMOVED from_date and to_date from this call to fix the TypeError
+            # Removed invalid date params (from_date, to_date) to prevent TypeError crash
             response = client.latest_api(
                 q=query, 
                 language=language_code, 
@@ -135,15 +135,20 @@ def fetch_news_to_csv(query: str, country_code: str, filename: str, language_cod
         written_count = 0
         
         for article in ALL_ARTICLES:
+            # Retrieve content, use empty string if it's None, then clean newlines
+            content = article.get('content')
+            clean_snippet = str(content) if content is not None else 'N/A'
+            clean_snippet = clean_snippet.replace('\n', ' ')
+            
             data_row = {
                 'Title': article.get('title', 'N/A'),
                 'Publication Date': article.get('pubDate', 'N/A'),
                 'Link': article.get('link', 'N/A'),
-                # Clean up newlines in the snippet
-                'Snippet': article.get('content', 'N/A').replace('\n', ' '), 
+                # FIXED: The problematic line now uses the pre-cleaned snippet:
+                'Snippet': clean_snippet, 
                 'Source ID': article.get('source_id', 'N/A'),
                 'Country Code': country_code,
-                # NEW LINE: Hardcode the API source name
+                # Hardcode the API source name
                 'API Source': 'newsdata.io'
             }
             writer.writerow(data_row)
