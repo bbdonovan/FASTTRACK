@@ -17,6 +17,7 @@ INPUT_FOLDER = os.getenv("INPUT_FOLDER", "input_docs")
 
 INPUT_DOCS_DIR = BASE_DIR / INPUT_FOLDER
 
+KUZU_DB_DIRECTORY = BASE_DIR / os.getenv("KUZU_PERSIST_DIRECTORY", "kuzu_db")
 
 # Function to read the content of each document from the example_text directory
 def read_documents_from_files_old():
