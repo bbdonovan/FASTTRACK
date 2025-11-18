@@ -3,537 +3,524 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FASTTRACK Explorer</title> 
+    <title>FASTTRACK Explorer</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load D3 and Plot for Visualization -->
+    <!-- D3 for tree + graph -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
+
     <style>
-        /* Custom styles for the collapsible tree */
         .collapsible-tree svg {
             font: 10px sans-serif;
             user-select: none;
             cursor: pointer;
         }
-        /* Custom styling for multi-select dropdown to look cleaner */
         .custom-select {
-            background-color: #f7f9fc; /* Light background for contrast */
-            border: 1px solid #d1d5db; /* Light gray border */
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* subtle inner shadow */
+            background-color: #f7f9fc;
+            border: 1px solid #d1d5db;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
         }
         .custom-select option:checked {
-            background-color: #4f46e5; /* Indigo for selected items */
+            background-color: #4f46e5;
             color: white;
         }
     </style>
 </head>
 <body class="bg-gray-50 font-sans p-4 sm:p-8">
-    <div class="max-w-7xl mx-auto">
-        
-        <!-- Header -->
-        <header class="text-center py-6 bg-white rounded-t-xl shadow-md">
-            <h1 class="text-4xl font-extrabold text-indigo-700 tracking-tight">FASTTRACK Explorer</h1>
-            <p class="mt-2 text-lg text-gray-500">   </p>
-            
-            <!-- Sonic Image Banner -->
-            <div class="mt-4">
-                <img src="../static/sonic.jpg" class="mx-auto rounded-lg shadow-lg" style="max-height: 150px; object-fit: cover;">
-            </div>
-            
-        </header>
+<div class="max-w-7xl mx-auto">
 
-        <!-- Main Form Area -->
-        <!-- NOTE: Grid columns changed from 3 to 4 on medium screens to accommodate the new dropdown -->
-        <div class="bg-white p-6 sm:p-8 rounded-b-xl shadow-2xl border-t-4 border-indigo-600">
-            <form method="POST" action="/" id="generation-form">
-                
-                <!-- Input Selectors Grid (Changed to grid-cols-1 md:grid-cols-4) -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    
-                    <!-- Country Selector (col-span-1) -->
-                    <div class="md:col-span-1">
-                        <label for="countries" class="block text-sm font-bold text-gray-800 mb-2">1. Select Countries (Hold Ctrl/Cmd)</label>
-                        <select name="countries" id="countries" multiple required 
-                                class="w-full h-48 border border-gray-300 rounded-xl shadow-inner custom-select p-3 text-gray-800 transition duration-150 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
-                            {% for country in country_data %}
-                                <option value="{{ country.code }}" 
-                                    {% if country.code in selected_codes %}selected{% endif %}>
-                                    {{ country.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
+    <!-- Header -->
+    <header class="text-center py-6 bg-white rounded-t-xl shadow-md">
+        <h1 class="text-4xl font-extrabold text-indigo-700 tracking-tight">FASTTRACK Explorer</h1>
+        <p class="mt-2 text-lg text-gray-500"></p>
 
-                    <!-- Time Frame Selector (col-span-1) -->
-                    <div class="md:col-span-1">
-                        <label for="time_frame" class="block text-sm font-bold text-gray-800 mb-2">2. Select Time Context</label>
-                        <select name="time_frame" id="time_frame" required
-                                class="w-full border border-gray-300 rounded-xl shadow-md p-3 text-gray-800 bg-green-50 transition duration-150 focus:border-green-500 focus:ring-1 focus:ring-green-500">
-                            {% for frame in time_frames %}
-                                <option value="{{ frame.code }}" 
-                                    {% if frame.code == selected_time_code %}selected{% endif %}>
-                                    {{ frame.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <!-- New: News Source Preference Selector (col-span-1) -->
-                    <div class="md:col-span-1">
-                        <label for="news_source" class="block text-sm font-bold text-gray-800 mb-2">3. Source Preference</label>
-                        <select name="news_source" id="news_source"
-                                class="w-full border border-gray-300 rounded-xl shadow-md p-3 text-gray-800 bg-yellow-50 transition duration-150 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
-                            {% for source in news_sources %}
-                                <option value="{{ source }}" 
-                                    {% if source == selected_news_source %}selected{% endif %}>
-                                    {{ source }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Empty Column for spacing/layout (col-span-1) -->
-                    <div class="md:col-span-1 hidden md:block"></div>
-
-                    <!-- Topic Input Box (Full width on all screens, spans 4 columns on md+) -->
-                    <div class="md:col-span-4">
-                        <label for="topic" class="block text-sm font-bold text-gray-800 mb-2">4. Input Topic / Idea</label>
-                        <textarea name="topic" id="topic" rows="4" required 
-                                  class="w-full border border-gray-300 rounded-xl shadow-md p-4 text-gray-900 resize-y transition duration-150 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500" 
-                                  placeholder="Type your topic here...">{{ input_topic }}</textarea>
-                    </div>
-                </div>
-                
-                <!-- Submit Button -->
-                <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
-                    <button type="submit" id="generate-button"
-                            class="w-full sm:w-auto px-10 py-3 bg-indigo-600 text-white font-extrabold rounded-full shadow-lg hover:bg-indigo-700 hover:shadow-xl transform hover:scale-105 transition duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
-                        Submit
-                    </button>
-                    <div id="loading-indicator" class="hidden flex items-center space-x-2 text-indigo-600 font-semibold">
-                        <svg class="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span id="processing-text">Processing...</span>
-                    </div>
-                </div>
-            </form>
+        <div class="mt-4">
+            <img src="../static/sonic.jpg"
+                 class="mx-auto rounded-lg shadow-lg"
+                 style="max-height: 150px; object-fit: cover;">
         </div>
+    </header>
 
-        <!-- Output Sections -->
-        {% if generated_response %}
-        
-            <!-- 1. Collapsible Tree Visualization Section (placeholder) -->
-            <!--
-            <div class="bg-white p-6 rounded-xl shadow-2xl mt-8 collapsible-tree">
-                <h2 class="text-xl font-bold text-indigo-700 mb-4 flex items-center border-b pb-2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-9h2a1 1 0 011 1v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+    <!-- Main Form Area -->
+    <div class="bg-white p-6 sm:p-8 rounded-b-xl shadow-2xl border-t-4 border-indigo-600">
+        <!-- MAIN "SEARCH" FORM -->
+        <form method="POST" action="/" id="generation-form">
+            <!-- NEW: distinguish this as the main search form -->
+            <input type="hidden" name="form_type" value="search">
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <!-- 1. Countries -->
+                <div class="md:col-span-1">
+                    <label for="countries" class="block text-sm font-bold text-gray-800 mb-2">
+                        1. Select Countries (Hold Ctrl/Cmd)
+                    </label>
+                    <select name="countries" id="countries" multiple required
+                            class="w-full h-48 border border-gray-300 rounded-xl shadow-inner custom-select p-3 text-gray-800 transition duration-150 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500">
+                        {% for country in country_data %}
+                        <option value="{{ country.code }}"
+                                {% if country.code in selected_codes %}selected{% endif %}>
+                            {{ country.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 2. Time Frame -->
+                <div class="md:col-span-1">
+                    <label for="time_frame" class="block text-sm font-bold text-gray-800 mb-2">
+                        2. Select Time Context
+                    </label>
+                    <select name="time_frame" id="time_frame" required
+                            class="w-full border border-gray-300 rounded-xl shadow-md p-3 text-gray-800 bg-green-50 transition duration-150 focus:border-green-500 focus:ring-1 focus:ring-green-500">
+                        {% for frame in time_frames %}
+                        <option value="{{ frame.code }}"
+                                {% if frame.code == selected_time_code %}selected{% endif %}>
+                            {{ frame.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- 3. Source Preference -->
+                <div class="md:col-span-1">
+                    <label for="news_source" class="block text-sm font-bold text-gray-800 mb-2">
+                        3. Source Preference
+                    </label>
+                    <select name="news_source" id="news_source"
+                            class="w-full border border-gray-300 rounded-xl shadow-md p-3 text-gray-800 bg-yellow-50 transition duration-150 focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500">
+                        {% for source in news_sources %}
+                        <option value="{{ source }}"
+                                {% if source == selected_news_source %}selected{% endif %}>
+                            {{ source }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- spacer -->
+                <div class="md:col-span-1 hidden md:block"></div>
+
+                <!-- 4. Topic -->
+                <div class="md:col-span-4">
+                    <label for="topic" class="block text-sm font-bold text-gray-800 mb-2">
+                        4. Input Topic / Idea
+                    </label>
+                    <textarea name="topic" id="topic" rows="4" required
+                              class="w-full border border-gray-300 rounded-xl shadow-md p-4 text-gray-900 resize-y transition duration-150 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                              placeholder="Type your topic here...">{{ input_topic }}</textarea>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-6">
+                <button type="submit" id="generate-button"
+                        class="w-full sm:w-auto px-10 py-3 bg-indigo-600 text-white font-extrabold rounded-full shadow-lg hover:bg-indigo-700 hover:shadow-xl transform hover:scale-105 transition duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50">
+                    Submit
+                </button>
+                <div id="loading-indicator"
+                     class="hidden flex items-center space-x-2 text-indigo-600 font-semibold">
+                    <svg class="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg"
+                         fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10"
+                                stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2
+                                 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824
+                                 3 7.938l3-2.647z"></path>
                     </svg>
-                    Project Document Visualization
-                </h2>
-                <div id="plot-container" class="w-full overflow-x-auto min-h-[600px] border border-gray-200 rounded-lg bg-white p-4">
-                    <p class="p-4 text-gray-500">Loading visualization...</p>
+                    <span id="processing-text">Processing...</span>
                 </div>
             </div>
-            -->
-            <!-- Graph / KG Visualization -->
-            <div class="bg-white p-6 rounded-xl shadow-2xl mt-8 collapsible-tree">
-                <h2 class="text-xl font-bold text-indigo-700 mb-4 border-b pb-2">
-                    Project Knowledge Graph
-                </h2>
-                <div id="plot-container"
-                     class="w-full overflow-x-auto min-h-[400px] border border-gray-200 rounded-lg bg-white p-4">
-                    <p class="p-4 text-gray-500">Rendering knowledge graph...</p>
-                </div>
-            </div>
-
-
-		<br><h2>Your FASTTRACK request is being processed. You will receive an email soon with instructions to access your custom application.</h2>
-		<br>
-		<hr>
-		<br>
-		<h2 style="text-align:center;">***THIS SECTION FOR TESTING ONLY***</h2>
-		       <!--
-		       "Send This Prompt to Gemini" now shows the exact query used.
-             In GraphRAG mode, this is the same text sent to hybrid_retrieve_and_answer(). 
-             -->
-            <!-- Gemini Prompt -->
-            <div class="bg-white p-6 rounded-xl shadow-lg mt-8">
-                <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Send This Prompt to Gemini</h2>
-                <div class="p-4 bg-gray-100 border border-gray-300 rounded-lg text-gray-600 text-sm italic overflow-x-auto">
-                    {{ gemini_prompt }}
-                </div>
-            </div>
-
-            <!-- Gemin Response / GraphRAG Answer -->
-            <!-- 6. Generated Response -->
-            <div class="bg-white p-6 rounded-xl shadow-lg mt-8">
-                <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Gemini Response</h2>
-                <div class="p-4 bg-indigo-50 border-l-4 border-indigo-600 rounded-r-lg text-gray-800 text-lg">
-                    <p>{{ generated_response }}</p>
-                </div>
-            </div>
-            
-        {% endif %}
+        </form>
     </div>
 
-    <!-- JavaScript for Loading Indicator -->
-    <script>
-        document.getElementById('generation-form').addEventListener('submit', function() {
-            document.getElementById('generate-button').classList.add('hidden');
-            document.getElementById('loading-indicator').classList.remove('hidden');
-        });
-    </script>
-    
-    
-    <!-- Graph rendering script: use graph_json / subgraph_json if present -->
-    <script>
-    async function renderCollapsibleTree() {
+    <!-- Output sections (only render if we have a response) -->
+    {% if generated_response %}
+
+    <!-- 1. Project Document Visualization (Tree) -->
+    <div class="bg-white p-6 rounded-xl shadow-2xl mt-8 collapsible-tree">
+        <h2 class="text-xl font-bold text-indigo-700 mb-4 flex items-center border-b pb-2">
+            Project Document Visualization
+        </h2>
+        <div id="plot-container"
+             class="w-full overflow-x-auto min-h-[400px] border border-gray-200 rounded-lg bg-white p-4">
+            <p class="p-4 text-gray-500">Loading document tree...</p>
+        </div>
+    </div>
+
+    <!-- 2. Project Knowledge Graph -->
+    <div class="bg-white p-6 rounded-xl shadow-2xl mt-8">
+        <h2 class="text-xl font-bold text-indigo-700 mb-4 border-b pb-2">
+            Project Knowledge Graph
+        </h2>
+        <div id="kg-container"
+             class="w-full overflow-x-auto min-h-[400px] border border-gray-200 rounded-lg bg-white p-4">
+            <p class="p-4 text-gray-500">Rendering knowledge graph...</p>
+        </div>
+    </div>
+
+    <br>
+    <h2>Your FASTTRACK request is being processed. You will receive an email soon with instructions
+        to access your custom application.</h2>
+    <br>
+    <hr>
+    <br>
+    <h2 class="text-center font-bold">***THIS SECTION FOR TESTING ONLY***</h2>
+
+    <!-- 3. Follow-up Question Form ("Send This Prompt to Gemini") -->
+    <div class="bg-white p-6 rounded-xl shadow-lg mt-8">
+        <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">
+            Send This Prompt to Gemini
+        </h2>
+
+        <!-- NEW FORM: lets user ask follow-up questions.
+             It preserves all the previous choices via hidden inputs.
+        -->
+        <form method="POST" action="/" id="question-form" class="space-y-4">
+            <input type="hidden" name="form_type" value="ask">
+
+            <!-- preserve countries -->
+            {% for code in selected_codes %}
+            <input type="hidden" name="countries" value="{{ code }}">
+            {% endfor %}
+            <!-- preserve time frame -->
+            <input type="hidden" name="time_frame" value="{{ selected_time_code }}">
+            <!-- preserve topic -->
+            <input type="hidden" name="topic" value="{{ input_topic }}">
+            <!-- preserve news source -->
+            <input type="hidden" name="news_source" value="{{ selected_news_source }}">
+
+            <label for="followup_query" class="block text-sm font-bold text-gray-800 mb-2">
+                Enter a follow-up question about the retrieved documents:
+            </label>
+            <textarea id="followup_query" name="followup_query" rows="3"
+                      class="w-full border border-gray-300 rounded-xl shadow-md p-3 text-gray-900 resize-y transition duration-150 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                      placeholder="Ask something about the Xiaomi documents...">{{ gemini_prompt }}</textarea>
+
+            <div class="flex items-center space-x-4 mt-2">
+                <button type="submit"
+                        class="px-6 py-2 bg-emerald-600 text-white font-semibold rounded-full shadow hover:bg-emerald-700 transition">
+                    Submit Question
+                </button>
+                <p class="text-xs text-gray-500">
+                    Each question re-runs the hybrid GraphRAG pipeline over the same document corpus.
+                </p>
+            </div>
+        </form>
+    </div>
+
+    <!-- 4. Gemini / GraphRAG Answer -->
+    <div class="bg-white p-6 rounded-xl shadow-lg mt-8">
+        <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Gemini Response</h2>
+        <div class="p-4 bg-indigo-50 border-l-4 border-indigo-600 rounded-r-lg text-gray-800 text-lg">
+            <p>{{ generated_response }}</p>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<!-- Loading indicator JS -->
+<script>
+    document.getElementById('generation-form').addEventListener('submit', function () {
+        document.getElementById('generate-button').classList.add('hidden');
+        document.getElementById('loading-indicator').classList.remove('hidden');
+    });
+</script>
+
+<!-- === DOCUMENT TREE RENDERING (Sources/root -> Source -> Files) === -->
+<script>
+    async function renderDocumentTree() {
         const container = document.getElementById('plot-container');
         if (!container) return;
-    
-        // Data from backend (GraphRAG mode)
-        const fullGraph = {{ graph_json|safe if graph_json else 'null' }};
-        const subGraph = {{ subgraph_json|safe if subgraph_json else 'null' }};
-    
-        let data = null;
-    
-        if (subGraph) {
-            data = subGraph;           // show subgraph relevant to the answer
-        } else if (fullGraph) {
-            data = fullGraph;          // show full KG after pipeline
-        }
-    
+
+        // NEW: prefer the server-supplied document tree if available, else fall back
+        const docTree = {{ doc_tree_full|tojson|safe if doc_tree_full else 'null' }};
+
+        let data = docTree;
         if (!data) {
-            // Fallback to legacy JSON if no GraphRAG data exists
+            // fallback to country_news_tree.json if GraphRAG wasn't used
             try {
                 const resp = await fetch('country_news_tree.json');
-                if (!resp.ok) throw new Error('Failed to load fallback JSON');
+                if (!resp.ok) throw new Error('Failed to load fallback document tree JSON');
                 data = await resp.json();
             } catch (err) {
-                container.innerHTML = `<p class="p-4 text-red-500">No graph data available.</p>`;
+                container.innerHTML = `<p class="p-4 text-red-500">No document tree data available.</p>`;
                 return;
             }
         }
-    
-        try {
-            // Build collapsible tree like before
-            container.innerHTML = "";
-    
-            const width = container.clientWidth > 928 ? 928 : container.clientWidth;
-            const marginTop = 10, marginRight = 10, marginBottom = 10, marginLeft = 40;
-            const root = d3.hierarchy(data);
-            const dx = 12;
-            const dy = (width - marginRight - marginLeft) / (1 + root.height);
-    
-            const tree = d3.tree().nodeSize([dx, dy]);
-            const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
-    
-            const svg = d3.create("svg")
-                .attr("width", width)
-                .attr("height", dx)
-                .attr("viewBox", [-marginLeft, -marginTop, width, dx])
-                .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif;");
-    
-            const gLink = svg.append("g")
-                .attr("fill", "none")
-                .attr("stroke", "#555")
-                .attr("stroke-opacity", 0.4)
-                .attr("stroke-width", 1.5);
-    
-            const gNode = svg.append("g")
-                .attr("cursor", "pointer")
-                .attr("pointer-events", "all");
-    
-            container.append(svg.node());
-    
-            root.x0 = dx / 2;
-            root.y0 = 0;
-    
-            function update(source) {
-                const nodes = root.descendants().reverse();
-                const links = root.links();
-    
-                tree(root);
-    
-                let left = root, right = root;
-                root.eachBefore(d => {
-                    if (d.x < left.x) left = d;
-                    if (d.x > right.x) right = d;
-                });
-    
-                const height = right.x - left.x + marginTop + marginBottom;
-    
-                const transition = svg.transition()
-                    .duration(250)
-                    .attr("height", height)
-                    .attr("viewBox", [-marginLeft, left.x - marginTop, width, height]);
-    
-                const node = gNode.selectAll("g")
-                    .data(nodes, d => d.id || (d.id = ++window.__nodeId || 1));
-    
-                const nodeEnter = node.enter().append("g")
-                    .attr("transform", d => `translate(${source.y0},${source.x0})`)
-                    .attr("fill-opacity", 0)
-                    .attr("stroke-opacity", 0)
-                    .on("click", (event, d) => {
-                        d.children = d.children ? null : d._children || d.children;
-                        update(d);
-                    });
-    
-                nodeEnter.append("circle")
-                    .attr("r", 3)
-                    .attr("fill", d => d._children ? "#555" : "#999");
-    
-                nodeEnter.append("text")
-                    .attr("dy", "0.31em")
-                    .attr("x", 6)
-                    .attr("text-anchor", "start")
-                    .text(d => d.data.name)
-                    .attr("stroke-linejoin", "round")
-                    .attr("stroke-width", 3)
-                    .attr("stroke", "white")
-                    .attr("paint-order", "stroke");
-    
-                const nodeUpdate = node.merge(nodeEnter).transition(transition)
-                    .attr("transform", d => `translate(${d.y},${d.x})`)
-                    .attr("fill-opacity", 1)
-                    .attr("stroke-opacity", 1);
-    
-                node.exit().transition(transition).remove()
-                    .attr("transform", d => `translate(${source.y},${source.x})`)
-                    .attr("fill-opacity", 0)
-                    .attr("stroke-opacity", 0);
-    
-                const link = gLink.selectAll("path")
-                    .data(links, d => d.target.id);
-    
-                const linkEnter = link.enter().append("path")
-                    .attr("d", d => {
-                        const o = {x: source.x0, y: source.y0};
-                        return diagonal({source: o, target: o});
-                    });
-    
-                link.merge(linkEnter).transition(transition)
-                    .attr("d", diagonal);
-    
-                link.exit().transition(transition).remove()
-                    .attr("d", d => {
-                        const o = {x: source.x, y: source.y};
-                        return diagonal({source: o, target: o});
-                    });
-    
-                root.eachBefore(d => {
-                    d.x0 = d.x;
-                    d.y0 = d.y;
-                });
-            }
-    
-            update(root);
-    
-        } catch (error) {
-            console.error(error);
-            container.innerHTML = `<p class="p-4 text-red-500">Error rendering visualization: ${error.message}</p>`;
-        }
-    }
-    
-    window.onload = function () {
-        renderCollapsibleTree();
-        window.addEventListener('resize', () => {
-            setTimeout(renderCollapsibleTree, 200);
+
+        container.innerHTML = '';
+        const width = container.clientWidth > 928 ? 928 : container.clientWidth;
+        const marginTop = 10, marginRight = 10, marginBottom = 10, marginLeft = 40;
+
+        const root = d3.hierarchy(data);
+        const dx = 12;
+        const dy = (width - marginRight - marginLeft) / (1 + root.height);
+
+        const tree = d3.tree().nodeSize([dx, dy]);
+        const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", dx)
+            .attr("viewBox", [-marginLeft, -marginTop, width, dx])
+            .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif; user-select:none;");
+
+        const gLink = svg.append("g")
+            .attr("fill", "none")
+            .attr("stroke", "#555")
+            .attr("stroke-opacity", 0.4)
+            .attr("stroke-width", 1.5);
+
+        const gNode = svg.append("g")
+            .attr("cursor", "pointer")
+            .attr("pointer-events", "all");
+
+        container.append(svg.node());
+
+        // Collapse everything except root and its first-level children
+        root.x0 = dx / 2;
+        root.y0 = 0;
+        root.descendants().forEach((d, i) => {
+            d.id = i;
+            d._children = d.children;
+            if (d.depth > 1) d.children = null;
         });
-    };
-    </script>
-    
-    
-    <!-- JavaScript for Collapsible Tree -->
-    <!--
-    <script>
-        // This script implements a D3.js Collapsible Tree based on the user's provided logic.
-        async function renderCollapsibleTree() {
-            const container = document.getElementById('plot-container');
 
-            try {
-                // Fetch the local JSON file (Updated to the new file name)
-                const response = await fetch('country_news_tree.json');
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch country_news_tree.json. Make sure the file is in the same directory as app.py. Status: ${response.statusText}`);
-                }
-                const data = await response.json();
-                
-                // --- D3 Collapsible Tree Setup ---
-                
-                // Specify the charts’ dimensions.
-                const width = container.clientWidth > 928 ? 928 : container.clientWidth;
-                const marginTop = 10;
-                const marginRight = 10;
-                const marginBottom = 10;
-                const marginLeft = 40;
+        function update(source) {
+            const nodes = root.descendants().reverse();
+            const links = root.links();
 
-                // Rows are separated by dx pixels, columns by dy pixels.
-                const root = d3.hierarchy(data);
-                const dx = 10;
-                // Calculate dy dynamically based on width and height of the tree
-                const dy = (width - marginRight - marginLeft) / (1 + root.height); 
+            tree(root);
 
-                // Define the tree layout and the shape for links.
-                const tree = d3.tree().nodeSize([dx, dy]);
-                const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+            let left = root, right = root;
+            root.eachBefore(node => {
+                if (node.x < left.x) left = node;
+                if (node.x > right.x) right = node;
+            });
 
-                // Clear existing content and create the SVG container.
-                container.innerHTML = '';
-                const svg = d3.create("svg")
-                    .attr("width", width)
-                    .attr("height", dx)
-                    .attr("viewBox", [-marginLeft, -marginTop, width, dx])
-                    .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif; user-select: none;");
+            const height = right.x - left.x + marginTop + marginBottom;
 
-                const gLink = svg.append("g")
-                    .attr("fill", "none")
-                    .attr("stroke", "#555")
-                    .attr("stroke-opacity", 0.4)
-                    .attr("stroke-width", 1.5);
+            const transition = svg.transition()
+                .duration(250)
+                .attr("height", height)
+                .attr("viewBox", [-marginLeft, left.x - marginTop, width, height]);
 
-                const gNode = svg.append("g")
-                    .attr("cursor", "pointer")
-                    .attr("pointer-events", "all");
-                
-                container.append(svg.node());
+            const node = gNode.selectAll("g")
+                .data(nodes, d => d.id);
 
-                // The main update function to draw and animate the tree
-                function update(event, source) {
-                    const duration = event?.altKey ? 2500 : 250; 
-                    const nodes = root.descendants().reverse();
-                    const links = root.links();
+            const nodeEnter = node.enter().append("g")
+                .attr("transform", d => `translate(${source.y0},${source.x0})`)
+                .attr("fill-opacity", 0)
+                .attr("stroke-opacity", 0)
+                .on("click", (event, d) => {
+                    d.children = d.children ? null : d._children;
+                    update(d);
+                });
 
-                    // Compute the new tree layout.
-                    tree(root);
+            nodeEnter.append("circle")
+                .attr("r", 3)
+                .attr("fill", d => d._children ? "#555" : "#999");
 
-                    let left = root;
-                    let right = root;
-                    root.eachBefore(node => {
-                        if (node.x < left.x) left = node;
-                        if (node.x > right.x) right = node;
-                    });
+            nodeEnter.append("text")
+                .attr("dy", "0.31em")
+                .attr("x", d => d._children ? -6 : 6)
+                .attr("text-anchor", d => d._children ? "end" : "start")
+                .text(d => d.data.name)
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-width", 3)
+                .attr("stroke", "white")
+                .attr("paint-order", "stroke");
 
-                    const height = right.x - left.x + marginTop + marginBottom;
+            const nodeUpdate = node.merge(nodeEnter).transition(transition)
+                .attr("transform", d => `translate(${d.y},${d.x})`)
+                .attr("fill-opacity", 1)
+                .attr("stroke-opacity", 1);
 
-                    const transition = svg.transition()
-                        .duration(duration)
-                        .attr("height", height)
-                        .attr("viewBox", [-marginLeft, left.x - marginTop, width, height]);
-                    
-                    // Update the nodes…
-                    const node = gNode.selectAll("g")
-                        .data(nodes, d => d.id);
+            nodeUpdate.select("circle")
+                .attr("fill", d => d._children ? "#555" : "#999");
 
-                    // Enter any new nodes at the parent's previous position.
-                    const nodeEnter = node.enter().append("g")
-                        .attr("transform", d => `translate(${source.y0},${source.x0})`)
-                        .attr("fill-opacity", 0)
-                        .attr("stroke-opacity", 0)
-                        .on("click", (event, d) => {
-                            // Toggle children and stash them in _children
-                            d.children = d.children ? null : d._children; 
-                            update(event, d);
-                        });
+            node.exit().transition(transition).remove()
+                .attr("transform", d => `translate(${source.y},${source.x})`)
+                .attr("fill-opacity", 0)
+                .attr("stroke-opacity", 0);
 
-                    nodeEnter.append("circle")
-                        .attr("r", 2.5)
-                        // Color circle if node has children that are collapsed
-                        .attr("fill", d => d._children ? "#555" : "#999") 
-                        .attr("stroke-width", 10);
+            const link = gLink.selectAll("path")
+                .data(links, d => d.target.id);
 
-                    nodeEnter.append("text")
-                        .attr("dy", "0.31em")
-                        // Position text based on whether node has collapsed children
-                        .attr("x", d => d._children ? -6 : 6) 
-                        .attr("text-anchor", d => d._children ? "end" : "start")
-                        .text(d => d.data.name)
-                        // Apply stroke for better visibility against links
-                        .attr("stroke-linejoin", "round")
-                        .attr("stroke-width", 3)
-                        .attr("stroke", "white")
-                        .attr("paint-order", "stroke");
+            const linkEnter = link.enter().append("path")
+                .attr("d", d => {
+                    const o = {x: source.x0, y: source.y0};
+                    return diagonal({source: o, target: o});
+                });
 
-                    // Transition nodes to their new position.
-                    const nodeUpdate = node.merge(nodeEnter).transition(transition)
-                        .attr("transform", d => `translate(${d.y},${d.x})`)
-                        .attr("fill-opacity", 1)
-                        .attr("stroke-opacity", 1);
-                    
-                    // Update circle colors
-                    nodeUpdate.select('circle')
-                        .attr("fill", d => d._children ? "#555" : "#999");
+            link.merge(linkEnter).transition(transition)
+                .attr("d", diagonal);
 
-                    // Transition exiting nodes to the parent's new position.
-                    node.exit().transition(transition).remove()
-                        .attr("transform", d => `translate(${source.y},${source.x})`)
-                        .attr("fill-opacity", 0)
-                        .attr("stroke-opacity", 0);
+            link.exit().transition(transition).remove()
+                .attr("d", d => {
+                    const o = {x: source.x, y: source.y};
+                    return diagonal({source: o, target: o});
+                });
 
-                    // Update the links…
-                    const link = gLink.selectAll("path")
-                        .data(links, d => d.target.id);
-
-                    // Enter any new links at the parent's previous position.
-                    const linkEnter = link.enter().append("path")
-                        .attr("d", d => {
-                            const o = {x: source.x0, y: source.y0};
-                            return diagonal({source: o, target: o});
-                        });
-
-                    // Transition links to their new position.
-                    link.merge(linkEnter).transition(transition)
-                        .attr("d", diagonal);
-
-                    // Transition exiting nodes to the parent's new position.
-                    link.exit().transition(transition).remove()
-                        .attr("d", d => {
-                            const o = {x: source.x, y: source.y};
-                            return diagonal({source: o, target: o});
-                        });
-
-                    // Stash the old positions for transition.
-                    root.eachBefore(d => {
-                        d.x0 = d.x;
-                        d.y0 = d.y;
-                    });
-                }
-
-                // Initial setup: Collapse all nodes by default
-                root.x0 = dy / 2;
-                root.y0 = 0;
-                // root.descendants().forEach((d, i) => {
-                //     d.id = i;
-                //     d._children = d.children; // Stash children
-                    // Collapse all children, except for the immediate root children (depth 1)
-                //     if (d.depth > 0) d.children = null; 
-                // });
-
-                // Kick off the first render
-                update(null, root);
-
-            } catch (error) {
-                console.error("Error loading or rendering plot:", error);
-                container.innerHTML = `<p class="p-4 text-red-500">Error rendering visualization: ${error.message}</p>`;
-            }
-        }
-        
-        // Ensure the render function runs only after D3 and Plot scripts are fully loaded
-        window.onload = function() {
-            renderCollapsibleTree();
-            
-            // Re-render on window resize (important for responsiveness)
-            window.addEventListener('resize', () => {
-                // Throttle resize event for performance (simplified)
-                setTimeout(renderCollapsibleTree, 200);
+            root.eachBefore(d => {
+                d.x0 = d.x;
+                d.y0 = d.y;
             });
         }
-    </script>
-    -->
+
+        update(root);
+    }
+</script>
+
+<!-- === KNOWLEDGE GRAPH RENDERING (FULL THEN SUBGRAPH) === -->
+<script>
+    async function renderKnowledgeGraphDynamic() {
+        const container = document.getElementById('kg-container');
+        if (!container) return;
+
+        const fullGraph = {{ kg_full_json|tojson|safe if kg_full_json else 'null' }};
+        const subGraph  = {{ kg_subgraph_json|tojson|safe if kg_subgraph_json else 'null' }};
+
+        if (!fullGraph) {
+            container.innerHTML = `<p class="p-4 text-gray-500">No knowledge graph data available.</p>`;
+            return;
+        }
+
+        container.innerHTML = "";
+        const width = container.clientWidth;
+        const height = 550;
+
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("style", "max-width: 100%; height: auto; background-color: #fafafa; border: 1px solid #ccc;");
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        function drag(simulation) {
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+            return d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended);
+        }
+
+        function edgeDistance(d) {
+            // NEW: shorter “contains” edges, longer for entity/entity
+            if (d.relation === "contains") return 20;
+            if (d.relation === "mentions") return 40;
+            return 110;
+        }
+
+        function drawGraph(graphData) {
+            svg.selectAll("*").remove();
+
+            const simulation = d3.forceSimulation(graphData.nodes)
+                .force("link", d3.forceLink(graphData.links).id(d => d.id).distance(edgeDistance))
+                .force("charge", d3.forceManyBody().strength(-140))
+                .force("center", d3.forceCenter(width / 2, height / 2));
+
+            const link = svg.append("g")
+                .attr("stroke", "#aaa")
+                .attr("stroke-opacity", 0.7)
+                .selectAll("line")
+                .data(graphData.links)
+                .join("line")
+                .attr("stroke-width", 1.5);
+
+            const node = svg.append("g")
+                .attr("stroke", "#fff")
+                .attr("stroke-width", 1.0)
+                .selectAll("circle")
+                .data(graphData.nodes)
+                .join("circle")
+                .attr("r", d => {
+                    if (d.group === "source") return 10;
+                    if (d.group === "chunk") return 6;
+                    return 5;
+                })
+                .attr("fill", d => color(d.group))
+                .call(drag(simulation));
+
+            const label = svg.append("g")
+                .selectAll("text")
+                .data(graphData.nodes)
+                .join("text")
+                .text(d => d.label || d.id)
+                .attr("font-size", 9)
+                .attr("dx", 8)
+                .attr("dy", 3)
+                .attr("fill", "#333");
+
+            node.on("mouseover", function () {
+                d3.select(this).transition().attr("r", 12);
+            }).on("mouseout", function () {
+                d3.select(this).transition().attr("r", d => {
+                    if (d.group === "source") return 10;
+                    if (d.group === "chunk") return 6;
+                    return 5;
+                });
+            });
+
+            simulation.on("tick", () => {
+                link
+                    .attr("x1", d => d.source.x)
+                    .attr("y1", d => d.source.y)
+                    .attr("x2", d => d.target.x)
+                    .attr("y2", d => d.target.y);
+
+                node
+                    .attr("cx", d => d.x)
+                    .attr("cy", d => d.y);
+
+                label
+                    .attr("x", d => d.x)
+                    .attr("y", d => d.y);
+            });
+        }
+
+        function animateTransition(newData) {
+            svg.transition().duration(600).style("opacity", 0).on("end", () => {
+                drawGraph(newData);
+                svg.transition().duration(600).style("opacity", 1);
+            });
+        }
+
+        // Start with full KG
+        drawGraph(fullGraph);
+        container.append(svg.node());
+
+        // If a subgraph exists (i.e., after a question), re-render with it
+        if (subGraph) {
+            setTimeout(() => animateTransition(subGraph), 1200);
+        }
+    }
+</script>
+
+<script>
+    // Call tree + KG renderers only when we have a generated_response (output section present)
+    {% if generated_response %}
+    window.addEventListener('load', function () {
+        renderDocumentTree();
+        renderKnowledgeGraphDynamic();
+    });
+    {% endif %}
+</script>
+
 </body>
 </html>

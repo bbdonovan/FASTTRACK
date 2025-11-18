@@ -247,75 +247,204 @@ def index():
     ######################
     # added for GraphRAG #
     ######################
-    graph_json = None
-    subgraph_json = None
-    
+    #graph_json = None # doc-tree (full)
+    #subgraph_json = None # doc-tree subgraph
+    #network_graph_json = None # force-directed KG (full)
+    #network_subgraph_json = None # force-directed KG subgraph
+    doc_tree_full = None       # full document tree (root "Sources" -> source -> files)
+    doc_tree_sub = None        # we don’t currently use a doc sub-tree, but keep for completeness
+    kg_full_json = None        # full KG (files, chunks, entities)
+    kg_subgraph_json = None    # KG subgraph relevant to the latest query
+    graphrag_active = False    # for template logic
+    last_query = ""            # exact query that went through GraphRAG
+
     if request.method == 'POST':
-        # 1. Retrieve and process form data
+        # Distinguish between the main "Submit" and the follow-up "Ask" form
+        form_type = request.form.get('form_type', 'search')  # 'search' or 'ask'
+
+        # Common fields (we keep them persistent across both forms)
         selected_codes = request.form.getlist('countries')
-        selected_time_code = request.form.get('time_frame')
+        selected_time_code = request.form.get('time_frame', 'nl')
         topic = request.form.get('topic', '').strip()
+        selected_news_source = request.form.get('news_source', NEWS_SOURCES[0])
+        input_topic = topic  # keep topic visible in the textarea
 
-        # 1. Retrieve the new source preference input
-        selected_news_source = request.form.get('news_source', NEWS_SOURCES[0]) # <--- ADDED & FIXED
-        
-        # FIX: Store retrieved topic back into the variable for persistence
-        input_topic = topic # <--- ADDED LINE: ensures topic persists in textarea
-
-        # Map selected codes to full country names
+        # Map selected codes to full country names (for Gemini text prompt)
         selected_names = [d['name'] for d in country_data if d['code'] in selected_codes]
         time_name = next((tf['name'] for tf in time_frames if tf['code'] == selected_time_code), "No Limit")
         
-        # 2. Construct the core prompt
-        country_context = f"Ensure the response heavily features elements related to the following countries: {', '.join(selected_names)}." if selected_names else ""
+        country_context = ""
+        if selected_names:
+            country_context = (
+                f"Ensure the response heavily features elements related "
+                f"to the following countries: {', '.join(selected_names)}."
+            )
+
         if time_name != "No Limit":
-            time_context = f"Focus the context of the writing on information and events that occurred within the {time_name}." if time_name else ""
+            time_context = (
+                f"Focus the context of the writing on information and events "
+                f"that occurred within the {time_name}."
+            )
         else:
             time_context = ""
-        
-        gemini_prompt = (
-            f"{country_context} {time_context} "
-            f"Elaborate on this idea: '{topic}'"
-        ).strip()
 
-        ##############################
-        # GraphRAG trigger condition #
-        ##############################
+        # Determine the text we show in "Send This Prompt to Gemini" AND
+        # the query we pass to GraphRAG (when active)
+        if form_type == 'search':
+            # Initial run: build a descriptive prompt from topic + context
+            gemini_prompt = (
+                f"{country_context} {time_context} "
+                f"Elaborate on this idea: '{topic}'"
+            ).strip()
+            graphrag_query = gemini_prompt
+        else:
+            # Follow-up question: use the followup text directly
+            followup_query = request.form.get('followup_query', '').strip()
+            # Show this text in the "Send This Prompt to Gemini" section
+            gemini_prompt = followup_query
+            graphrag_query = followup_query
+
+        # Decide whether to use GraphRAG or normal Gemini behavior
         use_graphrag = (
             selected_news_source == "CNN"
             and topic.lower().startswith("xiaomi cell")
         )
+        graphrag_active = use_graphrag
 
         if use_graphrag:
-            # Route this request through your GraphRAG pipeline
-            answer, graph_json, subgraph_json = run_graphrag_pipeline(gemini_prompt)
+            # --- GraphRAG path ---
+            answer, doc_tree_full, doc_tree_sub, kg_full_json, kg_subgraph_json = run_graphrag_pipeline(
+                graphrag_query,
+                source_label=selected_news_source or "CNN",
+                chunk_size=500,
+                overlap_size=100,
+            )
+            
             generated_response = answer
-            # Skip Gemini news-article generation in GraphRAG mode
+            last_query = graphrag_query
+
+            if form_type == 'search':
+                kg_subgraph_json = None
+            
+            # For the initial "search" submit, show the FULL KG first.
+            # For follow-up questions, we still compute full & sub; the JS will pick the
+            # subgraph when kg_subgraph_json is present, so it “zooms in” on the answer.
+            # No call to Gemini news article generator in GraphRAG mode.
             news_articles = []
             general_sources = []
             yahoo_sources = []
-        else: # original, Gemini-based behavior
 
-            # 3. Call 1: Generate Main Response and Grounded Sources
+        else:
+            # --- Original Gemini-only path ---
             main_response = generate_content_with_retry(
                 gemini_prompt,
                 SYSTEM_INSTRUCTION_TEXT,
-                use_search=True
+                use_search=True,
             )
-            # Unpack result from the returned DICTIONARY
             generated_response = main_response.get("text")
-            all_sources = main_response.get("sources")
-            
-            # 4. Filter sources into general and Yahoo Finance
+            all_sources = main_response.get("sources", [])
+
             for source in all_sources:
                 uri = source.get('uri', '').lower()
                 if 'finance.yahoo.com' in uri:
                     yahoo_sources.append(source)
                 else:
                     general_sources.append(source)
+
+            news_articles = generate_news_articles(gemini_prompt, selected_news_source)
+
+
+        
+        """
+        # which form was submitted?
+        action = request.form.get('action', 'generate') # generate or ask
+        
+        if action == 'ask':
+            # follow-up question always runs GraphRAG with provided follow-up text
+            followup = request.form.get('followup_query', '').strip()
+            gemini_prompt = followup  # show it back in the box
+            if followup:
+                ans, doc_tree_full, doc_tree_sub, net_full, net_sub = run_graphrag_pipeline(followup)
+                generated_response = ans
+                graph_json = doc_tree_full
+                subgraph_json = doc_tree_sub
+                network_graph_json = net_full
+                network_subgraph_json = net_sub
+            # Keep the rest of the page state as-is
+            
+        else: # action=='request'
+            
+            # 1. Retrieve and process form data
+            selected_codes = request.form.getlist('countries')
+            selected_time_code = request.form.get('time_frame')
+            topic = request.form.get('topic', '').strip()
     
-            # 5. Call 2: Generate Structured News Articles
-            news_articles = generate_news_articles(gemini_prompt, selected_news_source) # <--- FIXED CALL
+            # 1. Retrieve the new source preference input
+            selected_news_source = request.form.get('news_source', NEWS_SOURCES[0]) # <--- ADDED & FIXED
+            
+            # FIX: Store retrieved topic back into the variable for persistence
+            input_topic = topic # <--- ADDED LINE: ensures topic persists in textarea
+    
+            # Map selected codes to full country names
+            selected_names = [d['name'] for d in country_data if d['code'] in selected_codes]
+            time_name = next((tf['name'] for tf in time_frames if tf['code'] == selected_time_code), "No Limit")
+            
+            # 2. Construct the core prompt
+            country_context = f"Ensure the response heavily features elements related to the following countries: {', '.join(selected_names)}." if selected_names else ""
+            if time_name != "No Limit":
+                time_context = f"Focus the context of the writing on information and events that occurred within the {time_name}." if time_name else ""
+            else:
+                time_context = ""
+            
+            gemini_prompt = (
+                f"{country_context} {time_context} "
+                f"Elaborate on this idea: '{topic}'"
+            ).strip()
+            
+            ##############################
+            # GraphRAG trigger condition #
+            ##############################
+            use_graphrag = (
+                selected_news_source == "CNN"
+                and topic.lower().startswith("xiaomi cell")
+            )
+    
+            if use_graphrag:
+                # Route this request through your GraphRAG pipeline
+                ans, doc_tree_full, doc_tree_sub, net_full, net_sub = run_graphrag_pipeline(gemini_prompt)
+                generated_response = ans
+                graph_json = doc_tree_full
+                subgraph_json = doc_tree_sub
+                network_graph_json = net_full
+                network_subgraph_json = net_sub
+
+                # Skip Gemini news-article generation in GraphRAG mode
+                #news_articles = []
+                #general_sources = []
+                #yahoo_sources = []
+            else: # original, Gemini-based behavior
+    
+                # 3. Call 1: Generate Main Response and Grounded Sources
+                main_response = generate_content_with_retry(
+                    gemini_prompt,
+                    SYSTEM_INSTRUCTION_TEXT,
+                    use_search=True
+                )
+                # Unpack result from the returned DICTIONARY
+                generated_response = main_response.get("text")
+                all_sources = main_response.get("sources")
+                
+                # 4. Filter sources into general and Yahoo Finance
+                for source in all_sources:
+                    uri = source.get('uri', '').lower()
+                    if 'finance.yahoo.com' in uri:
+                        yahoo_sources.append(source)
+                    else:
+                        general_sources.append(source)
+        
+                # 5. Call 2: Generate Structured News Articles
+                news_articles = generate_news_articles(gemini_prompt, selected_news_source) # <--- FIXED CALL
+        """
             
     # 6. Render Template with all variables
     return render_template(
@@ -333,8 +462,12 @@ def index():
         news_sources=NEWS_SOURCES,             # <--- ADDED
         selected_news_source=selected_news_source, # <--- ADDED
         # pass graph json to template
-        graph_json=graph_json,
-        subgraph_json=subgraph_json,
+        doc_tree_full=doc_tree_full, #graph_json=graph_json,
+        doc_tree_sub=doc_tree_sub, #subgraph_json=subgraph_json,
+        kg_full_json=kg_full_json, #network_graph_json=network_graph_json,
+        kg_subgraph_json=kg_subgraph_json, #network_subgraph_json=network_subgraph_json,
+        graphrag_active=graphrag_active,
+        last_query=last_query,
     )
 
 # --- Main Runner ---

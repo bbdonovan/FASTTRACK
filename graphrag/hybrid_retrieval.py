@@ -1,9 +1,19 @@
 # -*- coding: utf-8 -*-
 """
+Hybrid retrieval utilities:
+ - Normalize metadata["links"] from GLiNER / link extractors
+ - Build a NetworkX knowledge graph
+    - file nodes
+    - chunk nodes
+    - entity nodes
+- Hybrid retrieval: vector search + graph subgraph + LLM answer
+- Graph JSON helpers for D3 visualisation
 """
 
 import networkx as nx
-from typing import Dict, List, Iterable, Tuple
+import matplotlib.pyplot as plt
+import json
+from typing import Dict, List, Iterable, Tuple, Any
 from langchain_core.documents import Document
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
@@ -19,6 +29,7 @@ def normalize_links_for_metadata(doc: Document) -> Tuple[Document, List[str]]:
     if raw is None:
         return doc, tags
 
+    # GLiNER + other link extractors often put a list of objects in metadata["links"].
     if isinstance(raw, list):
         tags = [str(getattr(x, "tag", x)) for x in raw]
         doc.metadata["links"] = ",".join(tags)
@@ -30,10 +41,86 @@ def normalize_links_for_metadata(doc: Document) -> Tuple[Document, List[str]]:
     return doc, tags
 
 
-#########################################
-# Build a doc -> entity index and graph #
-#########################################
+###################################################
+# Build a file -> chunk -> entity index and graph #
+###################################################
 def build_entity_index_and_graph(docs: Iterable[Document]) -> Tuple[Dict[str, List[str]], nx.Graph]:
+    """
+    Expect each Document to represent a *chunk* and carry metadata:
+      - file_id:   e.g. "file_0"
+      - file_name: original filename, e.g. "file_0.txt"
+      - node_id or chunk_id: unique chunk node id, e.g. "chunk_0_3"
+      - links: entity/link objects or strings (set by GLiNERLinkExtractor)
+
+    Build graph with:
+      - file nodes:   kind="file"
+      - chunk nodes:  kind="chunk"
+      - entity nodes: kind="entity"
+
+    Edges:
+      - file --(contains)--> chunk
+      - chunk --(mentions)--> entity
+      - entity --(related)--> entity (co-occur in same chunk)
+    """
+    G = nx.Graph()
+    entity_index: Dict[str, List[str]] = {}
+
+    for i, doc in enumerate(docs):
+        # Identify this chunk and its parent file
+        file_id = doc.metadata.get("file_id")
+        file_name = doc.metadata.get("file_name", file_id or "unknown_file")
+
+        if file_id and not G.has_node(file_id):
+            G.add_node(
+                file_id,
+                kind="file",
+                title=file_name,
+            )
+
+        chunk_id = (
+            doc.metadata.get("node_id")
+            or doc.metadata.get("chunk_id")
+            or doc.metadata.get("id")
+            or doc.metadata.get("source")
+            or f"chunk_{i}"
+        )
+        chunk_title = doc.metadata.get("chunk_label", chunk_id)
+
+        if not G.has_node(chunk_id):
+            G.add_node(
+                chunk_id,
+                kind="chunk",
+                title=chunk_title,
+            )
+
+        # file -> chunk edge (contains)
+        if file_id:
+            G.add_edge(file_id, chunk_id, relation="contains")
+
+        # Normalize links into tags and store in entity_index
+        doc, tags = normalize_links_for_metadata(doc)
+        entity_index[chunk_id] = tags
+
+        # Connect chunk to entity nodes
+        ent_nodes_for_chunk: List[str] = []
+        for tag in tags:
+            ent_node = f"ent::{tag}"
+            if not G.has_node(ent_node):
+                G.add_node(ent_node, kind="entity", label=tag)
+            # chunk -> entity edge (mentions)
+            G.add_edge(chunk_id, ent_node, relation="mentions")
+            ent_nodes_for_chunk.append(ent_node)
+
+        # Add entity-entity 'related' edges within this chunk (co-occurrence)
+        for idx_a in range(len(ent_nodes_for_chunk)):
+            for idx_b in range(idx_a + 1, len(ent_nodes_for_chunk)):
+                a = ent_nodes_for_chunk[idx_a]
+                b = ent_nodes_for_chunk[idx_b]
+                if not G.has_edge(a, b):
+                    G.add_edge(a, b, relation="related")
+
+    return entity_index, G
+def build_entity_index_and_graph_old(docs: Iterable[Document]) -> Tuple[Dict[str, List[str]], nx.Graph]:
     G = nx.Graph()
     entity_index: Dict[str, List[str]] = {}
     
@@ -60,22 +147,31 @@ def hybrid_retrieve_and_answer(query: str, vectorstore: Chroma, llm: ChatOpenAI,
     G: nx.Graph, entity_index: Dict[str, List[str]], *,
     k_docs: int=4, hop_depth: int=1, return_subgraph: bool=False): # -> str:
 
-    # 1 - Vector Similarity
+    """
+    - Seeds for the graph subgraph use chunk-level node_id / chunk_id
+      (so the subgraph is rooted at relevant chunks, not whole-doc nodes).
+    - Treat 'file' and 'chunk' nodes as doc-like when summarizing the graph.
+    """
+    # 1 - Vector Similarity (returns chunk Documents)
     top_docs: List[Document] = vectorstore.similarity_search(query, k=k_docs)
-    
-    #seed_ids = [d.metadata.get("id") or d.metadata.get("source") or f"doc_{i}" for i, d in enumerate(top_docs)]
+
     seed_doc_ids: List[str] = []
     for i, d in enumerate(top_docs):
-        doc_id = d.metadata.get("id") or d.metadata.get("source") or f"doc_{i}"
+        doc_id = (
+            d.metadata.get("node_id")
+            or d.metadata.get("chunk_id")
+            or d.metadata.get("id")
+            or d.metadata.get("source")
+            or f"chunk_{i}"
+        )
         seed_doc_ids.append(doc_id)
 
-    # 2 - Subgraph expansion
+    # 2 - Subgraph expansion from these chunk seeds
     sub_nodes = set(seed_doc_ids)
     frontier = set(seed_doc_ids)
     for _ in range(hop_depth):
         next_frontier = set()
         for n in frontier:
-            #next_frontier.update(G.neighbors(n))
             if n in G:
                 next_frontier.update(G.neighbors(n))
         sub_nodes.update(next_frontier)
@@ -84,58 +180,54 @@ def hybrid_retrieve_and_answer(query: str, vectorstore: Chroma, llm: ChatOpenAI,
     SG = G.subgraph(sub_nodes).copy()
 
     # 3 - Build a lightweight textual summary of the subgraph
-    graph_summary_lines = []
+    graph_summary_lines: List[str] = []
     for n, data in SG.nodes(data=True):
-        if data.get("kind") == "doc":
-            graph_summary_lines.append(f"- DOC {n}: connected to {len(list(SG.neighbors(n)))} entities")
-        elif data.get("kind") == "entity":
+        kind = data.get("kind")
+        if kind in ("file", "chunk"):
+            graph_summary_lines.append(
+                f"- {kind.upper()} {n}: connected to {len(list(SG.neighbors(n)))} neighbors"
+            )
+        elif kind == "entity":
             label = data.get("label", n)
-            nbr_docs = [x for x in SG.neighbors(n) if SG.nodes[x].get("kind") == "doc"]
-            graph_summary_lines.append(f"- ENTITY '{label}': mentioned in {len(nbr_docs)} docs -> {nbr_docs}")
+            nbr_docs = [
+                x
+                for x in SG.neighbors(n)
+                if SG.nodes[x].get("kind") in ("file", "chunk")
+            ]
+            graph_summary_lines.append(
+                f"- ENTITY '{label}': linked to {len(nbr_docs)} file/chunk nodes -> {nbr_docs}"
+            )
 
     graph_text = "\n".join(graph_summary_lines)
-    
+
     # 4 - Compose prompt for the LLM
-    passage_block = "\n\n".join([f"[Doc {i+1}] {d.page_content}" for i, d in enumerate(top_docs)])
-
-    
-    prompt_0 = f"""
-Answer the following user query using both:
-1. The top {k_docs} similar documents, and
-2. The following subgraph of entities and document relationships.
-
-Query:
-{query}
-
-Documents:
-{[d.page_content for d in top_docs]}
-
-Graph:
-{chr(10).join(graph_summary_lines)}
-"""
+    passage_block = "\n\n".join(
+        [f"[Chunk {i+1}] {d.page_content}" for i, d in enumerate(top_docs)]
+    )
 
     prompt = f"""You are answering a user query using:
-1) Top {k_docs} passages from a vector search.
-2) A small knowledge subgraph of docs and entities.
+1) Top {k_docs} CHUNKS from a vector search over a document collection.
+2) A small knowledge subgraph of files, chunks, and entities.
 
 User Query:
 {query}
 
-Vector Passages:
+Vector Passages (chunks):
 {passage_block}
 
 Knowledge Subgraph:
 {graph_text}
 
-Provide a clear, concise answer based only on this information.
+Provide a clear, concise answer based ONLY on this information.
+If the context is insufficient, say so explicitly.
 """
 
     response = llm.invoke(prompt)
     answer_text = getattr(response, "content", str(response))
-    
+
     if return_subgraph:
         return answer_text, SG
-    
+
     return answer_text
 
 
@@ -143,7 +235,7 @@ Provide a clear, concise answer based only on this information.
 # Subgraph Visualisation #
 ##########################
 def show_subgraph(G: nx.Graph, seed_doc_ids: List[str], hop_depth: int = 1):
-    import matplotlib.pyplot as plt
+    
     sub_nodes = set(seed_doc_ids)
     frontier = set(seed_doc_ids)
     for _ in range(hop_depth):
@@ -161,6 +253,67 @@ def show_subgraph(G: nx.Graph, seed_doc_ids: List[str], hop_depth: int = 1):
     plt.title("Subgraph for Hybrid Retrieval")
     plt.axis("off")
     plt.show()
+
+#################################################
+# Convert NetworkX graph to force-directed JSON #
+#################################################
+def generate_graph_json(G: nx.Graph) -> Dict[str, Any]:
+    """
+    Convert a NetworkX graph to a D3-friendly force-directed format:
+      {
+        "nodes": [
+          {"id": "file_0", "group": 1, "label": "file_0.txt", "kind": "file"},
+          {"id": "chunk_0_0", "group": 2, "label": "chunk_0_0", "kind": "chunk"},
+          {"id": "ent::Xiaomi", "group": 3, "label": "Xiaomi", "kind": "entity"},
+          ...
+        ],
+        "links": [
+          {"source": "file_0", "target": "chunk_0_0", "value": 1, "relation": "contains"},
+          {"source": "chunk_0_0", "target": "ent::Xiaomi", "value": 1, "relation": "mentions"},
+          {"source": "ent::Xiaomi", "target": "ent::Android", "value": 1, "relation": "related"},
+          ...
+        ]
+      }
+
+    The frontend can then set different link distances for:
+      - relation === "contains"  (short)
+      - relation === "mentions"  (medium)
+      - relation === "related"   (longer)
+    """
+    nodes = []
+    for n, data in G.nodes(data=True):
+        kind = data.get("kind", "other")
+        if kind == "file":
+            group = 1
+        elif kind == "chunk":
+            group = 2
+        elif kind == "entity":
+            group = 3
+        else:
+            group = 4
+
+        nodes.append(
+            {
+                "id": n,
+                "group": group,
+                "label": data.get("title") or data.get("label", n),
+                "kind": kind,
+            }
+        )
+
+    links = []
+    for u, v, data in G.edges(data=True):
+        relation = data.get("relation", "related")
+        links.append(
+            {
+                "source": u,
+                "target": v,
+                "value": 1,
+                "relation": relation,
+            }
+        )
+
+    return {"nodes": nodes, "links": links}
 
 
 ############################################################
