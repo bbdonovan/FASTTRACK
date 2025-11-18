@@ -7,25 +7,32 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Load D3 and Plot for Visualization -->
+    <!-- Load D3 for Visualization -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6"></script>
     <style>
         /* Custom styles for the collapsible tree */
         .collapsible-tree svg {
             font: 10px sans-serif;
             user-select: none;
-            cursor: pointer;
         }
         /* Custom styling for multi-select dropdown to look cleaner */
         .custom-select {
-            background-color: #f7f9fc; /* Light background for contrast */
-            border: 1px solid #d1d5db; /* Light gray border */
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); /* subtle inner shadow */
+            background-color: #f7f9fc;
+            border: 1px solid #d1d5db;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
         }
         .custom-select option:checked {
-            background-color: #4f46e5; /* Indigo for selected items */
+            background-color: #4f46e5;
             color: white;
+        }
+        /* Style for clickable text (article titles) */
+        .article-link {
+            cursor: pointer;
+            fill: #3b82f6; /* Tailwind blue-500 */
+        }
+        .article-link:hover {
+            fill: #1d4ed8; /* Tailwind blue-700 */
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -40,8 +47,7 @@
             <!-- Sonic Image Banner -->
             <div class="mt-4">
                 <img src="../static/sonic.jpg" class="mx-auto rounded-lg shadow-lg" style="max-height: 150px; object-fit: cover;">
-            </div>
-            
+            </div>   
         </header>
 
         <!-- Main Form Area -->
@@ -128,24 +134,25 @@
         <!-- Output Sections -->
         {% if generated_response %}
         
-            <!-- 1. Collapsible Tree Visualization Section (placeholder) -->
-            <div class="bg-white p-6 rounded-xl shadow-2xl mt-8 collapsible-tree">
-                <h2 class="text-xl font-bold text-indigo-700 mb-4 flex items-center border-b pb-2">
-                    <!--svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"-->
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-9h2a1 1 0 011 1v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                    Project Document Visualization
-                </h2>
-                <div id="plot-container" class="w-full overflow-x-auto min-h-[600px] border border-gray-200 rounded-lg bg-white p-4">
-                    <p class="p-4 text-gray-500">Loading visualization...</p>
-                </div>
+        <!-- Collapsible Tree Visualization Section -->
+        <div class="bg-white p-6 rounded-xl shadow-2xl mt-8 collapsible-tree">
+            <h2 class="text-xl font-bold text-indigo-700 mb-4 flex items-center border-b pb-2">
+                <!--svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-9h2a1 1 0 011 1v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg-->
+                Project Document Visualization
+            </h2>
+            <div id="plot-container" class="w-full overflow-x-auto min-h-[600px] border border-gray-200 rounded-lg bg-white p-4">
+                <p class="p-4 text-gray-500">Visualization will appear here after data processing.</p>
             </div>
+        </div>
 
-		<br><h2>Your FASTTRACK request is being processed. You will receive an email soon with instructions to access your custom application.</h2>
+		<br>
+                <h2 style="text-align:center;">Your FASTTRACK request is being processed. You will receive an email soon with instructions to access your custom application.</h2>
 		<br>
 		<hr>
 		<br>
-		<h2 style="text-align:center;">***THIS SECTION IS A PLACEHOLDER TO TEST LLM RESPONSE***</h2>
+		<h2 style="text-align:center;">***PLACEHOLDER TO TEST LLM RESPONSE***</h2>
             <!-- Gemini Prompt -->
             <div class="bg-white p-6 rounded-xl shadow-lg mt-8">
                 <h2 class="text-xl font-bold text-gray-700 mb-4 border-b pb-2">Send This Prompt to Gemini</h2>
@@ -175,15 +182,18 @@
     
     <!-- JavaScript for Collapsible Tree -->
     <script>
-        // This script implements a D3.js Collapsible Tree based on the user's provided logic.
+        // Define IDs globally for D3
+        let i = 0; 
+        const duration = 750;
+
         async function renderCollapsibleTree() {
             const container = document.getElementById('plot-container');
 
             try {
-                // Fetch the local JSON file (Updated to the new file name)
+                // Fetch the local JSON file
                 const response = await fetch('country_news_tree.json');
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch country_news_tree.json. Make sure the file is in the same directory as app.py. Status: ${response.statusText}`);
+                    throw new Error(`Failed to fetch country_news_tree.json. Status: ${response.statusText}`);
                 }
                 const data = await response.json();
                 
@@ -196,21 +206,18 @@
                 const marginBottom = 10;
                 const marginLeft = 40;
 
-                // Rows are separated by dx pixels, columns by dy pixels.
                 const root = d3.hierarchy(data);
                 const dx = 10;
-                // Calculate dy dynamically based on width and height of the tree
                 const dy = (width - marginRight - marginLeft) / (1 + root.height); 
 
-                // Define the tree layout and the shape for links.
                 const tree = d3.tree().nodeSize([dx, dy]);
                 const diagonal = d3.linkHorizontal().x(d => d.y).y(d => d.x);
 
-                // Clear existing content and create the SVG container.
                 container.innerHTML = '';
                 const svg = d3.create("svg")
                     .attr("width", width)
-                    .attr("height", dx)
+                    // The height will be adjusted in the update function
+                    .attr("height", dx) 
                     .attr("viewBox", [-marginLeft, -marginTop, width, dx])
                     .attr("style", "max-width: 100%; height: auto; font: 10px sans-serif; user-select: none;");
 
@@ -226,9 +233,23 @@
                 
                 container.append(svg.node());
 
-                // The main update function to draw and animate the tree
+                // --------------------- INITIAL COLLAPSE ---------------------
+
+                root.x0 = dy / 2;
+                root.y0 = 0;
+                
+                // Stash children and collapse deeper nodes
+                //root.descendants().forEach((d, index) => {
+                //    d.id = index;
+                //    d._children = d.children; // Stash current children
+                    // Collapse all children, except for the immediate root children (Country and API Source nodes)
+                    // d.depth 3 contains the Source ID, which we want collapsed initially
+                //    if (d.depth >= 2) d.children = null; 
+                //});
+                
+                // --------------------- UPDATE FUNCTION ---------------------
+
                 function update(event, source) {
-                    const duration = event?.altKey ? 2500 : 250; 
                     const nodes = root.descendants().reverse();
                     const links = root.links();
 
@@ -259,28 +280,55 @@
                         .attr("fill-opacity", 0)
                         .attr("stroke-opacity", 0)
                         .on("click", (event, d) => {
-                            // Toggle children and stash them in _children
+                            // Fix for collapse/expand: correctly swap children properties
                             d.children = d.children ? null : d._children; 
                             update(event, d);
                         });
 
                     nodeEnter.append("circle")
                         .attr("r", 2.5)
-                        // Color circle if node has children that are collapsed
+                        // Color circle if node has collapsed children
                         .attr("fill", d => d._children ? "#555" : "#999") 
                         .attr("stroke-width", 10);
-
-                    nodeEnter.append("text")
+                        
+                    // --------------------- TEXT / HYPERLINK LOGIC ---------------------
+                    
+                    // Create a text selection for all entering nodes
+                    const textSelection = nodeEnter.append('text')
                         .attr("dy", "0.31em")
-                        // Position text based on whether node has collapsed children
                         .attr("x", d => d._children ? -6 : 6) 
                         .attr("text-anchor", d => d._children ? "end" : "start")
                         .text(d => d.data.name)
-                        // Apply stroke for better visibility against links
                         .attr("stroke-linejoin", "round")
                         .attr("stroke-width", 3)
                         .attr("stroke", "white")
                         .attr("paint-order", "stroke");
+
+                    // Add hyperlink wrapping ONLY to leaf nodes (articles)
+                    textSelection.filter(d => !d.children && !d._children)
+                        .each(function(d) {
+                            const textNode = d3.select(this);
+                            const url = d.data.url;
+                            
+                            // Check for valid URL before creating the anchor
+                            if (url && url !== 'N/A') {
+                                // 1. Insert the SVG anchor tag <a> before the <text> element
+                                const anchor = d3.select(this.parentNode)
+                                    .insert('a', function() { return textNode.node(); })
+                                    // 2. Set the hyperlink destination and target
+                                    .attr('href', url) 
+                                    .attr('target', '_blank');
+
+                                // 3. Move the text node inside the anchor
+                                anchor.node().appendChild(textNode.node());
+                                
+                                // Apply the article link style for visual feedback
+                                textNode.attr("class", "article-link");
+                            }
+                        });
+
+
+                    // --------------------- TRANSITIONS ---------------------
 
                     // Transition nodes to their new position.
                     const nodeUpdate = node.merge(nodeEnter).transition(transition)
@@ -327,16 +375,6 @@
                     });
                 }
 
-                // Initial setup: Collapse all nodes by default
-                root.x0 = dy / 2;
-                root.y0 = 0;
-                // root.descendants().forEach((d, i) => {
-                //     d.id = i;
-                //     d._children = d.children; // Stash children
-                    // Collapse all children, except for the immediate root children (depth 1)
-                //     if (d.depth > 0) d.children = null; 
-                // });
-
                 // Kick off the first render
                 update(null, root);
 
@@ -346,7 +384,7 @@
             }
         }
         
-        // Ensure the render function runs only after D3 and Plot scripts are fully loaded
+        // Ensure the render function runs only after D3 is fully loaded
         window.onload = function() {
             renderCollapsibleTree();
             
