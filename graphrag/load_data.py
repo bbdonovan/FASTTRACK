@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-loads, processes, and visualizes documents for the GraphRAG-like pipeline used by the Flask UI.
+loads, processes, and visualizes documents for the GraphRAG pipeline used by the Flask UI.
 
 - Load .txt docs from INPUT_FOLDER.
 - Split docs into overlapping chunks (default: 500 tokens ~ chars, 100 overlap).
@@ -17,11 +17,13 @@ loads, processes, and visualizes documents for the GraphRAG-like pipeline used b
     * same doc tree as "subgraph" placeholder
     * full KG JSON (for #kg-container)
     * KG subgraph JSON for the specific query
+- Persist full graph to Kùzu with File/Chunk/Entity nodes and CONTAINS/MENTIONS/RELATED edges.
 """
+
 import os
 from pathlib import Path
 import warnings
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Any, Optional
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -44,12 +46,15 @@ from openai import OpenAI
 from util.config import LOGGER, DB, NODE_TABLE, BASE_URL, MODEL_NAME, INPUT_DOCS_DIR
 
 from constants import DOCUMENTS, DOCUMENT_FILE_NAMES
-from util.config import LOGGER, DB, BASE_URL, MODEL_NAME
 from hybrid_retrieval import (
     build_entity_index_and_graph,
     hybrid_retrieve_and_answer,
     generate_graph_json,
 )
+
+import kuzu
+from constants import KUZU_DB_DIRECTORY, KUZU_DB_PATH
+
 
 #########
 # SETUP #
@@ -257,6 +262,13 @@ def _init_vectorstore_and_graph(chunk_size: int = 500, overlap_size: int = 100) 
     LOGGER.info("Running GLiNERLinkExtractor over %d chunks...", len(chunk_docs))
     chunk_docs = link_extractor.transform_documents(chunk_docs)
     
+    embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+
+    # Persist chunk + entity graph into Kùzu (with embeddings)
+    LOGGER.info("Writing graph to Kùzu (chunks + entities + embeddings)...")
+    write_graph_to_kuzu_from_chunks(chunk_docs, embeddings)
+
+
     # Normalize metadata["links"] BEFORE adding to Chroma
     from hybrid_retrieval import normalize_links_for_metadata    
     normalized_chunks = []
@@ -266,7 +278,7 @@ def _init_vectorstore_and_graph(chunk_size: int = 500, overlap_size: int = 100) 
     chunk_docs = normalized_chunks
 
     # 4. Embeddings + Chroma
-    embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+    #embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
     vdb_client = chromadb.Client(Settings(persist_directory=CHROMA_PERSIST_DIRECTORY))
     collection = vdb_client.get_or_create_collection(CHROMA_COLLECTION_NAME)
     vdb_store = Chroma(
@@ -344,6 +356,239 @@ def _ensure_pipeline_initialized(chunk_size: int = 500, overlap_size: int = 100)
         _PIPELINE_CACHE["file_names"] = file_names
         _PIPELINE_CACHE["initialized"] = True
 
+
+####################################################
+# Kùzu graph persistence – files, chunks, entities #
+####################################################
+def write_graph_to_kuzu_from_chunks(chunk_docs: List[Document], embeddings_model: OpenAIEmbeddings) -> None:
+    """
+    Persist the current file + chunk + entity graph into a Kùzu database.
+
+    NODE TABLES:
+      - File(
+          id   STRING,   -- e.g. "file_0"
+          name STRING,   -- e.g. "file_0.txt"
+          PRIMARY KEY (id)
+        )
+      - Chunk(
+          id        STRING,
+          text      STRING,
+          embedding DOUBLE[],
+          PRIMARY KEY (id)
+        )
+      - Entity(
+          id    STRING,  -- e.g. "Organization:Xiaomi"
+          name  STRING,  -- "Xiaomi"
+          label STRING,  -- "Organization"
+          PRIMARY KEY (id)
+        )
+
+    REL TABLES:
+      - CONTAINS(FROM File TO Chunk)
+      - MENTIONS(FROM Chunk TO Entity)
+      - RELATED(FROM Entity TO Entity)
+    """
+    #logger = LOGGER.getLogger(__name__)
+
+    # Ensure directory exists
+    KUZU_DB_DIRECTORY.mkdir(parents=True, exist_ok=True)
+
+    LOGGER.info("Initializing Kùzu database at %s", KUZU_DB_DIRECTORY)
+    db = kuzu.Database(str(KUZU_DB_PATH))
+    conn = kuzu.Connection(db)
+
+    # --- Schema: node + rel tables ---
+    LOGGER.debug("Ensuring Kùzu schema...")
+
+    conn.execute(
+        """
+        CREATE NODE TABLE IF NOT EXISTS File (
+            id STRING,
+            name STRING,
+            PRIMARY KEY (id)
+        );
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE NODE TABLE IF NOT EXISTS Chunk (
+            id STRING,
+            text STRING,
+            embedding DOUBLE[],
+            PRIMARY KEY (id)
+        );
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE NODE TABLE IF NOT EXISTS Entity (
+            id STRING,
+            name STRING,
+            label STRING,
+            PRIMARY KEY (id)
+        );
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE REL TABLE IF NOT EXISTS CONTAINS (
+            FROM File TO Chunk
+        );
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE REL TABLE IF NOT EXISTS MENTIONS (
+            FROM Chunk TO Entity
+        );
+        """
+    )
+
+    conn.execute(
+        """
+        CREATE REL TABLE IF NOT EXISTS RELATED (
+            FROM Entity TO Entity
+        );
+        """
+    )
+
+    # For now, clear previous contents for a fresh run
+    #TODO: add versioning instead of full wipe
+    LOGGER.info("Clearing previous Kùzu graph contents...")
+    conn.execute("MATCH ()-[m:MENTIONS]->() DELETE m;")
+    conn.execute("MATCH ()-[m:CONTAINS]->() DELETE m;")
+    conn.execute("MATCH ()-[m:RELATED]->() DELETE m;")
+    conn.execute("MATCH (c:Chunk) DELETE c;")
+    conn.execute("MATCH (e:Entity) DELETE e;")
+    conn.execute("MATCH (f:File) DELETE f;")
+
+    # Compute embeddings for chunks
+    texts = [doc.page_content for doc in chunk_docs]
+    LOGGER.info("Computing embeddings for %d chunks to store in Kùzu...", len(texts))
+    chunk_embeddings = embeddings_model.embed_documents(texts)
+
+    # Ingest files, chunks, entities, relationships
+    LOGGER.info("Writing files + chunks + entities to Kùzu...")
+    for idx, (doc, emb) in enumerate(zip(chunk_docs, chunk_embeddings)):
+        # Chunk ID: try to reuse existing metadata; fall back to a stable synthetic ID
+        chunk_id = str(
+            doc.metadata.get("chunk_id")
+            or doc.metadata.get("id")
+            or doc.metadata.get("source")
+            or f"chunk_{idx}"
+        )
+
+        file_id = str(doc.metadata.get("file_id") or "file_unknown")
+        file_name = str(doc.metadata.get("file_name") or file_id)
+
+        # Create/update file node
+        conn.execute(
+            """
+            MERGE (f:File {id: $id})
+            SET f.name = $name
+            """,
+            parameters={"id": file_id, "name": file_name},
+        )
+
+        # Create/update chunk node
+        conn.execute(
+            """
+            MERGE (c:Chunk {id: $id})
+            SET c.text = $text,
+                c.embedding = $embedding
+            """,
+            parameters={"id": chunk_id, "text": doc.page_content, "embedding": emb},
+        )
+
+        # Create/update CONTAINS relationship File -> Chunk
+        conn.execute(
+            """
+            MATCH (f:File {id: $file_id}),
+                  (c:Chunk {id: $chunk_id})
+            MERGE (f)-[:CONTAINS]->(c)
+            """,
+            parameters={"file_id": file_id, "chunk_id": chunk_id},
+        )
+
+        # Entities come from GLiNER: doc.metadata["links"] is a list of Link(...)
+        raw_links = doc.metadata.get("links") or []
+        ent_ids_for_chunk: List[str] = []
+
+        for link in raw_links:
+            # Defensive: support both Link objects and plain dicts if needed
+            kind = getattr(link, "kind", None) or getattr(link, "type", None)
+            tag = getattr(link, "tag", None) or getattr(link, "name", None)
+
+            if not kind or not tag:
+                continue
+
+            # kind looks like "entity:Organization" -> label = "Organization"
+            if ":" in kind:
+                _, label = kind.split(":", 1)
+            else:
+                label = kind
+
+            entity_name = str(tag)
+            # Build a stable entity ID, suitable as PK
+            entity_id = f"{label}:{entity_name}"
+
+            ent_ids_for_chunk.append(entity_id)
+
+            # Create/update entity node
+            conn.execute(
+                """
+                MERGE (e:Entity {id: $id})
+                SET e.name = $name,
+                    e.label = $label
+                """,
+                parameters={
+                    "id": entity_id,
+                    "name": entity_name,
+                    "label": label,
+                },
+            )
+
+            # Create/update MENTIONS relationship Chunk -> Entity
+            conn.execute(
+                """
+                MATCH (c:Chunk {id: $chunk_id}),
+                      (e:Entity {id: $entity_id})
+                MERGE (c)-[:MENTIONS]->(e)
+                """,
+                parameters={"chunk_id": chunk_id, "entity_id": entity_id},
+            )
+
+        # Add RELATED edges between all entity pairs within this chunk
+        for i in range(len(ent_ids_for_chunk)):
+            for j in range(i + 1, len(ent_ids_for_chunk)):
+                e1 = ent_ids_for_chunk[i]
+                e2 = ent_ids_for_chunk[j]
+                # Make edges in both directions so traversal is easy
+                conn.execute(
+                    """
+                    MATCH (e1:Entity {id: $id1}),
+                          (e2:Entity {id: $id2})
+                    MERGE (e1)-[:RELATED]->(e2)
+                    """,
+                    parameters={"id1": e1, "id2": e2},
+                )
+                conn.execute(
+                    """
+                    MATCH (e1:Entity {id: $id1}),
+                          (e2:Entity {id: $id2})
+                    MERGE (e2)-[:RELATED]->(e1)
+                    """,
+                    parameters={"id1": e1, "id2": e2},
+                )
+
+    LOGGER.info("Finished writing graph to Kùzu: %d chunks", len(chunk_docs))
+
+
+
 #####################################
 # public API: called from ui/app.py #
 #####################################
@@ -398,6 +643,17 @@ def run_graphrag_pipeline(query: str, *, source_label: str = "source", chunk_siz
 
 
 if __name__ == "__main__":
-    demo_query = "Who are Xiaomi's competitors and what OS do they use?"
+    demo_query = "Tell me about Xiaomi cellphones in the context of China, their Chinese competitors and investments in future technology?"
     ans, *_ = run_graphrag_pipeline(demo_query)
     print(ans)
+
+    """
+    Some good queries:
+        What OS does Xiaomi use in its cellphones? How does this compare to its competitors?
+        Tell me about Xiaomi's investments in new technology, especially as it relates to next generation cellphones. Compare these investments to those of Huawei and other competitors.
+    """
+
+
+
+
+

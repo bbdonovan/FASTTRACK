@@ -18,6 +18,8 @@ from langchain_core.documents import Document
 from langchain_chroma import Chroma
 from langchain_openai import ChatOpenAI
 
+import kuzu
+from constants import KUZU_DB_PATH
 
 ##############################################################
 # Normalize metadata["links"] into tags + Chroma-safe values #
@@ -140,6 +142,139 @@ def build_entity_index_and_graph_old(docs: Iterable[Document]) -> Tuple[Dict[str
     return entity_index, G
 
 
+###################################
+# Kùzu-powered subgraph expansion #
+###################################
+
+# cache a single Kùzu connection per process
+_KUZU_CONN = None
+
+def _get_kuzu_conn() -> kuzu.Connection:
+    """Get or create a kuzu connection."""
+    global _KUZU_CONN
+    if _KUZU_CONN is None:
+        db = kuzu.Database(str(KUZU_DB_PATH))
+        _KUZU_CONN = kuzu.Connection(db)
+    return _KUZU_CONN
+
+
+def kuzu_expand_subgraph_nodes(seed_ids: List[str], G: nx.Graph, hop_depth: int = 1) -> set:
+    """
+    Use Kuzu as the 'source of truth' to expand from the seed nodes.
+
+    - Rely on the Kuzu schema created in load_data.write_graph_to_kuzu_from_chunks:
+        NODE TABLE File   (id, name)
+        NODE TABLE Chunk  (id, text, embedding)
+        NODE TABLE Entity (id, name, label)
+
+        REL TABLE CONTAINS (FROM File TO Chunk)
+        REL TABLE MENTIONS (FROM Chunk TO Entity)
+        REL TABLE RELATED  (FROM Entity TO Entity)
+
+    - Use NetworkX G only to look up node "kind" and to build the final
+      subgraph once we have the node ID set.
+    """
+    conn = _get_kuzu_conn()
+
+    visited = set(seed_ids)
+    frontier = set(seed_ids)
+
+    for _ in range(hop_depth):
+        next_frontier = set()
+
+        for node_id in frontier:
+            if node_id not in G:
+                # If for some reason Kùzu has more than G, fall back to G neighbors
+                for nbr in G.neighbors(node_id):
+                    if nbr not in visited:
+                        visited.add(nbr)
+                        next_frontier.add(nbr)
+                continue
+
+            kind = G.nodes[node_id].get("kind")
+
+            # File node neighbors: File -> Chunk via CONTAINS
+            if kind == "file":
+                q = """
+                MATCH (f:File {id: $id})-[:CONTAINS]->(c:Chunk)
+                RETURN c.id AS id
+                """
+                result = conn.execute(q, parameters={"id": node_id})
+                while result.has_next():
+                    row = result.get_next()
+                    neigh_id = row[0]
+                    if neigh_id not in visited:
+                        visited.add(neigh_id)
+                        next_frontier.add(neigh_id)
+
+            # Chunk node neighbors: File via CONTAINS, Entity via MENTIONS
+            elif kind == "chunk":
+                # Files containing this chunk
+                q_files = """
+                MATCH (f:File)-[:CONTAINS]->(c:Chunk {id: $id})
+                RETURN f.id AS id
+                """
+                res_f = conn.execute(q_files, parameters={"id": node_id})
+                while res_f.has_next():
+                    row = res_f.get_next()
+                    neigh_id = row[0]
+                    if neigh_id not in visited:
+                        visited.add(neigh_id)
+                        next_frontier.add(neigh_id)
+
+                # Entities mentioned by this chunk
+                q_ents = """
+                MATCH (c:Chunk {id: $id})-[:MENTIONS]->(e:Entity)
+                RETURN e.id AS id
+                """
+                res_e = conn.execute(q_ents, parameters={"id": node_id})
+                while res_e.has_next():
+                    row = res_e.get_next()
+                    neigh_id = row[0]
+                    if neigh_id not in visited:
+                        visited.add(neigh_id)
+                        next_frontier.add(neigh_id)
+
+            # Entity node neighbors: Chunks via MENTIONS, Entities via RELATED
+            elif kind == "entity":
+                # Chunks that mention this entity
+                q_chunks = """
+                MATCH (c:Chunk)-[:MENTIONS]->(e:Entity {id: $id})
+                RETURN c.id AS id
+                """
+                res_c = conn.execute(q_chunks, parameters={"id": node_id})
+                while res_c.has_next():
+                    row = res_c.get_next()
+                    neigh_id = row[0]
+                    if neigh_id not in visited:
+                        visited.add(neigh_id)
+                        next_frontier.add(neigh_id)
+
+                # Related entities
+                q_rel = """
+                MATCH (e1:Entity {id: $id})-[:RELATED]->(e2:Entity)
+                RETURN e2.id AS id
+                """
+                res_r = conn.execute(q_rel, parameters={"id": node_id})
+                while res_r.has_next():
+                    row = res_r.get_next()
+                    neigh_id = row[0]
+                    if neigh_id not in visited:
+                        visited.add(neigh_id)
+                        next_frontier.add(neigh_id)
+
+            else:
+                # Fallback: use NetworkX adjacency if kind is unknown
+                for nbr in G.neighbors(node_id):
+                    if nbr not in visited:
+                        visited.add(nbr)
+                        next_frontier.add(nbr)
+
+        frontier = next_frontier
+
+    return visited
+
+
 ###########################################################
 # Hybrid retrieval: vector search + subgraph + LLM answer #
 ###########################################################
@@ -151,7 +286,9 @@ def hybrid_retrieve_and_answer(query: str, vectorstore: Chroma, llm: ChatOpenAI,
     - Seeds for the graph subgraph use chunk-level node_id / chunk_id
       (so the subgraph is rooted at relevant chunks, not whole-doc nodes).
     - Treat 'file' and 'chunk' nodes as doc-like when summarizing the graph.
+    - Subgraph expansion is done via Kuzu instead of pure NetworkX BFS.
     """
+    
     # 1 - Vector Similarity (returns chunk Documents)
     top_docs: List[Document] = vectorstore.similarity_search(query, k=k_docs)
 
