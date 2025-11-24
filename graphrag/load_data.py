@@ -651,6 +651,7 @@ if __name__ == "__main__":
     Some good queries:
         What OS does Xiaomi use in its cellphones? How does this compare to its competitors?
         Tell me about Xiaomi's investments in new technology, especially as it relates to next generation cellphones. Compare these investments to those of Huawei and other competitors.
+        Given only the source info supplied, what are some open questions, not explicitly answered in the provided sources, that could potentially be answered with reasonable confidence by inferring likely relationships within and between entities in the provided sources?
     """
 
 
