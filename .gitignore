@@ -1,0 +1,19 @@
+# Virtual environment
+.venv/
+
+# Python junk
+__pycache__/
+*.pyc
+
+# Local database
+j5_agentic.db
+
+# Environment / secrets
+.env
+*.env
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

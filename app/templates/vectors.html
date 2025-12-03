@@ -1,0 +1,93 @@
+<!-- johny5_agentic/app/templates/vectors.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <h2>Vectors / RAG Playground</h2>
+
+  <p style="font-size: 0.85rem; color: var(--text-muted)">
+    This tab is intended for vector search &amp; graph debugging.
+    Out of the box, it uses the same <code>/api/ask</code> endpoint as the
+    Overview page. Once your internal agent is wired up, you can extend this
+    view to:
+    <br />
+    • run dense vector searches<br />
+    • visualize graph neighborhoods around a ticker<br />
+    • step through agentic flows.
+  </p>
+</section>
+
+<section style="margin-top: 1.25rem">
+  <h3>Quick Question (Agentic Endpoint)</h3>
+  <form onsubmit="j5VectorsAsk(event)">
+    <textarea
+      id="j5-vectors-question"
+      rows="3"
+      placeholder="e.g. What are the most connected semiconductor names in the current KG?"
+    ></textarea>
+    <div style="margin-top: 0.4rem">
+      <button id="j5-vectors-btn" type="submit">Ask via /api/ask</button>
+    </div>
+  </form>
+
+  <div style="margin-top: 0.7rem">
+    <h4 style="font-size: 0.9rem; margin-bottom: 0.3rem">Answer</h4>
+    <pre id="j5-vectors-answer">(answer will appear here)</pre>
+
+    <h4 style="font-size: 0.9rem; margin-top: 0.7rem; margin-bottom: 0.3rem">
+      Trace
+    </h4>
+    <pre id="j5-vectors-trace">(trace will appear here)</pre>
+  </div>
+</section>
+
+<script>
+  async function j5VectorsAsk(event) {
+    event.preventDefault();
+    const txt = document.getElementById("j5-vectors-question");
+    const outAnswer = document.getElementById("j5-vectors-answer");
+    const outTrace = document.getElementById("j5-vectors-trace");
+    const btn = document.getElementById("j5-vectors-btn");
+
+    const question = (txt.value || "").trim();
+    if (!question) {
+      outAnswer.textContent = "Please enter a question first.";
+      outTrace.textContent = "";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Thinking…";
+    outAnswer.textContent = "Calling /api/ask…";
+    outTrace.textContent = "";
+
+    try {
+      const res = await fetch("{{ url_for('dashboard.api_ask') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+
+      const data = await res.json();
+      if (!data.ok) {
+        outAnswer.textContent = "Error: " + (data.error || "Unknown error");
+        outTrace.textContent = "";
+      } else {
+        const payload = data.data || {};
+        const answer = payload.answer || "(no answer field)";
+        const trace = payload.trace || [];
+        const steps = payload.steps || [];
+
+        outAnswer.textContent = answer;
+        outTrace.textContent = JSON.stringify({ steps, trace }, null, 2);
+      }
+    } catch (err) {
+      outAnswer.textContent = "Request failed: " + err;
+      outTrace.textContent = "";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Ask via /api/ask";
+    }
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,216 @@
+<!-- johny5_agentic/app/templates/index.html -->
+{% extends "base.html" %}
+
+{% block head_extra %}
+<script>
+  async function j5Ask(event) {
+    event.preventDefault();
+    const txt = document.getElementById("j5-question");
+    const outAnswer = document.getElementById("j5-answer");
+    const outTrace = document.getElementById("j5-trace");
+    const btn = document.getElementById("j5-ask-btn");
+
+    const question = (txt.value || "").trim();
+    if (!question) {
+      outAnswer.textContent = "Please enter a question first.";
+      outTrace.textContent = "";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Thinking…";
+    outAnswer.textContent = "Calling /api/ask…";
+    outTrace.textContent = "";
+
+    try {
+      const res = await fetch("{{ url_for('dashboard.api_ask') }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+
+      const data = await res.json();
+      if (!data.ok) {
+        outAnswer.textContent = "Error: " + (data.error || "Unknown error");
+        outTrace.textContent = "";
+      } else {
+        const payload = data.data || {};
+        const answer = payload.answer || "(no answer field)";
+        const trace = payload.trace || [];
+        const steps = payload.steps || [];
+        const stats = payload.stats || {};
+
+        outAnswer.textContent = answer;
+
+        const traceRender = {
+          steps,
+          trace,
+          stats,
+        };
+        outTrace.textContent = JSON.stringify(traceRender, null, 2);
+      }
+    } catch (err) {
+      outAnswer.textContent = "Request failed: " + err;
+      outTrace.textContent = "";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Ask Johny 5";
+    }
+  }
+</script>
+{% endblock %}
+
+{% block content %}
+<section>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Companies</div>
+      <div class="card-value">{{ s.companies }}</div>
+      <div class="card-sub">Distinct tickers in j5_agentic.db</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Articles</div>
+      <div class="card-value">{{ s.articles }}</div>
+      <div class="card-sub">News items linked to companies</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">KG Nodes</div>
+      <div class="card-value">{{ s.kg_nodes }}</div>
+      <div class="card-sub">Knowledge graph entities</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">KG Edges</div>
+      <div class="card-value">{{ s.kg_edges }}</div>
+      <div class="card-sub">Relationships captured in the graph</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Orchestration · Pipelines</h2>
+
+  <form
+    class="inline"
+    method="post"
+    action="{{ url_for('dashboard.action_pull_profiles') }}"
+  >
+    <button type="submit">Pull Profiles</button>
+  </form>
+
+  <form
+    class="inline"
+    method="post"
+    action="{{ url_for('dashboard.action_build_graph') }}"
+  >
+    <button type="submit">Build Graph from Profiles</button>
+  </form>
+
+  <form
+    class="inline"
+    method="post"
+    action="{{ url_for('dashboard.action_pull_candles') }}"
+  >
+    <button type="submit">Pull Candles</button>
+  </form>
+
+  <form
+    class="inline"
+    method="post"
+    action="{{ url_for('dashboard.action_ingest_news') }}"
+  >
+    <button type="submit">Ingest News</button>
+  </form>
+
+  <form
+    class="inline"
+    method="post"
+    action="{{ url_for('dashboard.action_rebuild_all') }}"
+  >
+    <button type="submit" class="btn-secondary">
+      Rebuild All (Profiles → Graph → Candles → News)
+    </button>
+  </form>
+
+  <div style="margin-top: 0.75rem">
+    <form
+      class="inline"
+      method="post"
+      action="{{ url_for('dashboard.action_pull_sector') }}"
+    >
+      <input
+        type="text"
+        name="sector"
+        placeholder="Sector code (e.g. XLE)"
+        style="width: 9rem; margin-right: 0.3rem"
+      />
+      <button type="submit" class="btn-secondary">Pull Sector</button>
+    </form>
+  </div>
+</section>
+
+<section>
+  <h2>Model Settings</h2>
+  <form
+    method="post"
+    action="{{ url_for('dashboard.save_gemini_key') }}"
+    style="max-width: 360px"
+  >
+    <label
+      for="gemini_api_key"
+      style="display: block; font-size: 0.8rem; color: var(--text-muted)"
+    >
+      Gemini API Key (optional, stored in session + environment)
+    </label>
+    <input
+      type="text"
+      id="gemini_api_key"
+      name="gemini_api_key"
+      placeholder="GEMINI_API_KEY..."
+      value="{{ session.get('gemini_api_key', '') }}"
+      style="margin-top: 0.25rem; margin-bottom: 0.5rem"
+    />
+    <button type="submit" class="btn-secondary">Save Gemini Key</button>
+  </form>
+</section>
+
+<section>
+  <h2>Ask the Agentic Knowledge Memory</h2>
+
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem">
+    Questions here call <code>/api/ask</code>, which in turn hits
+    <code>backend.llm_analyze()</code>. In production this will be your internal
+    agent (LLM + LangGraph) orchestrating tools and returning both:
+    <strong>(1) an answer</strong> and <strong>(2) a structured trace</strong> of what it used.
+  </p>
+
+  <form onsubmit="j5Ask(event)">
+    <textarea
+      id="j5-question"
+      rows="4"
+      placeholder="e.g. How is NVDA positioned in the current graph, and what recent news affects it?"
+    ></textarea>
+    <div style="margin-top: 0.4rem">
+      <button id="j5-ask-btn" type="submit">Ask Johny 5</button>
+      <a
+        href="{{ url_for('dashboard.vectors_tab') }}"
+        class="btn btn-secondary"
+        style="margin-left: 0.4rem"
+        >Open Vector / RAG View</a
+      >
+    </div>
+  </form>
+
+  <div style="margin-top: 0.7rem">
+    <h3 style="font-size: 0.9rem; margin-bottom: 0.3rem">Answer</h3>
+    <pre id="j5-answer">(answer will appear here)</pre>
+  </div>
+
+  <div style="margin-top: 0.7rem">
+    <h3 style="font-size: 0.9rem; margin-bottom: 0.3rem">Trace &amp; Steps</h3>
+    <pre id="j5-trace">(agentic trace will appear here as JSON)</pre>
+  </div>
+</section>
+{% endblock %}

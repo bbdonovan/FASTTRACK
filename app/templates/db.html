@@ -1,0 +1,33 @@
+<!-- johny5_agentic/app/templates/db.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+  <h2>Database Explorer · j5_agentic.db</h2>
+
+  {% if not tables %}
+    <p style="color: var(--text-muted); font-size: 0.9rem">
+      No database found yet, or no user tables present.
+      Try running <strong>Pull Profiles</strong> or <strong>Rebuild All</strong>
+      from the Overview tab.
+    </p>
+  {% else %}
+    <div class="grid">
+      {% for t in tables %}
+        <div class="card">
+          <div class="card-title">{{ t.name }}</div>
+          <div class="card-value">{{ t.count }}</div>
+          <div class="card-sub">rows</div>
+
+          {% if t.sample %}
+            <details style="margin-top: 0.6rem; font-size: 0.8rem">
+              <summary>Sample row</summary>
+              <pre>{{ t.sample | tojson(indent=2) }}</pre>
+            </details>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endblock %}
