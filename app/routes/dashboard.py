@@ -373,3 +373,42 @@ def api_graph_neighbors():
         return jsonify({"ok": False, "error": str(exc)}), 500
 
     return jsonify({"ok": True, "ticker": ticker, "data": payload})
+
+@bp.get("/api/graph/node_details")
+def api_graph_node_details():
+    """
+    Return aggregated node details for a given ticker.
+
+    Query params:
+        ticker: e.g. "NVDA"
+
+    Response:
+        On success:
+            {
+              "ok": true,
+              "ticker": "NVDA",
+              "data": {
+                "ticker": "NVDA",
+                "company": {...} or null,
+                "metrics": {...} or null,
+                "articles": [...],
+                "candles": [...],
+                "graph": {...},
+                "summary_lines": [...]
+              }
+            }
+        On error:
+            { "ok": false, "error": "<message>" }
+    """
+    ticker = (request.args.get("ticker") or "").strip().upper()
+    if not ticker:
+        return jsonify({"ok": False, "error": "Missing 'ticker' query param"}), 400
+
+    svc = S()
+    try:
+        payload = svc.get_node_details_for_ticker(ticker)
+    except Exception as exc:  # noqa: BLE001
+        current_app.logger.exception("get_node_details_for_ticker failed: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    return jsonify({"ok": True, "ticker": ticker, "data": payload})

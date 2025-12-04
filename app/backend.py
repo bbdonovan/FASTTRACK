@@ -22,6 +22,11 @@ import pathlib
 import sqlite3
 from typing import Any, Dict, List, Optional
 
+from email.utils import parsedate_to_datetime
+from xml.etree import ElementTree as ET
+
+import requests
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -329,41 +334,179 @@ def pull_sector(sector: str) -> Dict[str, Any]:
     return {"sector": sector, "note": "demo implementation; no-op"}
 
 
-def ingest_news() -> Dict[str, Any]:
+def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
     """
-    Ingest or seed news articles tied to companies.
+    Ingest news articles tied to companies via Yahoo Finance RSS, with fallback.
 
-    For the prototype:
-    - Creates one synthetic article per company.
+    For each company ticker in the DB, this function:
+        - Attempts to fetch the Yahoo Finance RSS feed for that ticker.
+        - If successful:
+            * Clears existing rows in the articles table for that ticker.
+            * Inserts up to `max_per_ticker` of the latest headlines.
+        - If the request fails (429 rate limit, network issue, etc.):
+            * Keeps existing rows if any.
+            * If there are no existing rows, inserts a single placeholder
+              article explaining that news is unavailable and this is
+              demo data.
+
+    This keeps the demo resilient: network / rate limit issues won't
+    leave the articles table empty, and the agent's trace still has
+    something to show.
+
+    Args:
+        max_per_ticker: Maximum headlines to store per ticker.
 
     Returns:
-        A dictionary summarizing how many articles were inserted.
+        A dictionary summarizing inserted rows and any errors:
+            {
+              "tickers": [...],
+              "inserted_total": int,
+              "errors": {ticker: "error message", ...},
+              "source": "yahoo-finance-rss+fallback"
+            }
     """
-    logger.info("Using demo ingest_news implementation")
+    logger.info("Ingesting news from Yahoo Finance RSS (with fallback)")
     _ensure_db()
 
     conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cur = conn.cursor()
     cur.execute("SELECT ticker FROM companies")
-    tickers = [row[0] for row in cur.fetchall()]
+    tickers = [row["ticker"] for row in cur.fetchall()]
 
-    inserted = 0
+    total_inserted = 0
+    errors: Dict[str, str] = {}
+
     for ticker in tickers:
-        title = f"Demo article for {ticker}"
-        cur.execute(
-            """
-            INSERT INTO articles (ticker, title, published_at)
-            VALUES (?, ?, datetime('now'))
-            """,
-            (ticker, title),
+        symbol = ticker.upper()
+        url = (
+            "https://feeds.finance.yahoo.com/rss/2.0/headline"
+            f"?s={symbol}&region=US&lang=en-US"
         )
-        inserted += 1
 
-    conn.commit()
+        have_real_news = False
+        inserted_for_symbol = 0
+
+        try:
+            resp = requests.get(
+                url,
+                timeout=5.0,
+                headers={"User-Agent": "Johny5-Agentic-Demo/1.0"},
+            )
+            resp.raise_for_status()
+            xml_text = resp.text
+            root = ET.fromstring(xml_text)
+            channel = root.find("channel")
+            items = channel.findall("item") if channel is not None else []
+        except Exception as exc:  # noqa: BLE001
+            msg = f"Failed to fetch RSS for {symbol}: {exc}"
+            logger.warning(msg)
+            errors[symbol] = str(exc)
+            items = []
+
+        if items:
+            # We have real RSS items → overwrite previous news for this ticker.
+            cur.execute("DELETE FROM articles WHERE ticker = ?", (symbol,))
+            for item in items[:max_per_ticker]:
+                title_el = item.find("title")
+                date_el = item.find("pubDate")
+
+                if title_el is None:
+                    continue
+
+                title = (title_el.text or "").strip()
+                raw_pub = (date_el.text or "").strip() if date_el is not None else ""
+
+                published_at = raw_pub
+                if raw_pub:
+                    try:
+                        published_at = parsedate_to_datetime(raw_pub).isoformat()
+                    except Exception:  # noqa: BLE001
+                        pass
+
+                cur.execute(
+                    """
+                    INSERT INTO articles (ticker, title, published_at)
+                    VALUES (?, ?, ?)
+                    """,
+                    (symbol, title, published_at),
+                )
+                inserted_for_symbol += 1
+
+            have_real_news = True
+            logger.info("Inserted %s real headlines for %s", inserted_for_symbol, symbol)
+        else:
+            # No items (rate limit, network, or empty feed).
+            # Check if this ticker already has any rows.
+            cur.execute(
+                "SELECT COUNT(1) AS cnt FROM articles WHERE ticker = ?",
+                (symbol,),
+            )
+            row = cur.fetchone()
+            existing = int(row["cnt"]) if row and row["cnt"] is not None else 0
+
+            if existing == 0:
+                # Insert a single placeholder article so the UI and agent trace
+                # still have something to show.
+                placeholder_title = (
+                    f"Demo placeholder: news unavailable for {symbol} "
+                    "(likely rate-limited or offline)"
+                )
+                cur.execute(
+                    """
+                    INSERT INTO articles (ticker, title, published_at)
+                    VALUES (?, ?, datetime('now'))
+                    """,
+                    (symbol, placeholder_title),
+                )
+                inserted_for_symbol += 1
+                logger.info(
+                    "Inserted placeholder headline for %s (no real RSS items)",
+                    symbol,
+                )
+
+        conn.commit()
+        total_inserted += inserted_for_symbol
+
     conn.close()
 
-    return {"inserted": inserted, "tickers": tickers}
+    return {
+        "tickers": tickers,
+        "inserted_total": total_inserted,
+        "errors": errors,
+        "source": "yahoo-finance-rss+fallback",
+    }
 
+def fetch_external_metrics(ticker: str) -> Dict[str, Any]:
+    """
+    Placeholder for an external API or microservice call.
+
+    In your real environment this is where you would:
+        - Call an internal REST/gRPC service (e.g. http://internal-api/metrics)
+        - Or call a vendor API
+        - Parse the JSON and normalize it into a stable shape.
+
+    For the demo, we synthesize some metrics so that the agent trace
+    shows a distinct "external metrics" tool.
+
+    Args:
+        ticker: Company ticker, e.g. "NVDA".
+
+    Returns:
+        A dictionary of synthetic metrics, including a 'source' field
+        that makes it clear this came from an external system placeholder.
+    """
+    t = ticker.upper()
+    # simple fake values, just to show structure
+    demo_metrics = {
+        "ticker": t,
+        "source": "demo-external-metrics",
+        "pe_ratio": 42.0 if t == "NVDA" else 20.0,
+        "market_cap_usd_billion": 1200.0 if t == "NVDA" else 500.0,
+        "one_year_volatility": 0.35 if t == "NVDA" else 0.25,
+        "note": "Synthetic metrics for demo; replace with real API call.",
+    }
+    return demo_metrics
 
 def rebuild_all() -> Dict[str, Any]:
     """
@@ -393,6 +536,149 @@ def rebuild_all() -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Agentic QA entrypoint (stubbed locally, ready for real LLM)
 # ---------------------------------------------------------------------------
+def get_node_details_for_ticker(ticker: str) -> Dict[str, Any]:
+    """
+    Aggregate detailed information about a company ticker.
+
+    This function joins multiple internal sources:
+        - companies table (profiles)
+        - external metrics (placeholder API)
+        - articles table (news / filings)
+        - candles table (recent OHLCV)
+        - graph neighborhood (kg_nodes + kg_edges)
+
+    It returns both raw data structures and a list of human-readable
+    summary lines that the UI can render in the "Node Details" panel.
+
+    Args:
+        ticker: Company ticker symbol, e.g. "NVDA".
+
+    Returns:
+        A dictionary with keys:
+            ticker: str
+            company: dict or None
+            metrics: dict or None
+            articles: list[dict]
+            candles: list[dict]
+            graph: dict (same shape as get_graph_neighbors_for_ticker)
+            summary_lines: list[str]
+    """
+    symbol = (ticker or "").strip().upper()
+    _ensure_db()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Company profile
+    cur.execute(
+        "SELECT id, ticker, name FROM companies WHERE ticker = ?",
+        (symbol,),
+    )
+    row = cur.fetchone()
+    company = dict(row) if row is not None else None
+
+    # Latest news
+    cur.execute(
+        """
+        SELECT id, title, published_at
+        FROM articles
+        WHERE ticker = ?
+        ORDER BY published_at DESC
+        LIMIT 5
+        """,
+        (symbol,),
+    )
+    articles = [dict(r) for r in cur.fetchall()]
+
+    # Recent candles
+    cur.execute(
+        """
+        SELECT dt, open, high, low, close, volume
+        FROM candles
+        WHERE ticker = ?
+        ORDER BY dt DESC
+        LIMIT 3
+        """,
+        (symbol,),
+    )
+    candles = [dict(r) for r in cur.fetchall()]
+
+    conn.close()
+
+    # External metrics (placeholder API)
+    metrics: Optional[Dict[str, Any]] = None
+    try:
+        metrics = fetch_external_metrics(symbol)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("fetch_external_metrics failed in node details for %s: %s", symbol, exc)
+
+    # Graph neighborhood (reuse existing helper)
+    graph = get_graph_neighbors_for_ticker(symbol)
+
+    # Build human-readable summary.
+    summary_lines: List[str] = [f"Node details for {symbol}:", ""]
+
+    if company:
+        summary_lines.append(f"• Company: {company.get('name')}")
+    else:
+        summary_lines.append("• Company: (not found in profiles table)")
+
+    if metrics:
+        summary_lines.append("• External metrics:")
+        pe = metrics.get("pe_ratio")
+        mc = metrics.get("market_cap_usd_billion")
+        vol = metrics.get("one_year_volatility")
+        if pe is not None:
+            summary_lines.append(f"    - P/E ratio: {pe}")
+        if mc is not None:
+            summary_lines.append(f"    - Market cap: {mc} B USD")
+        if vol is not None:
+            summary_lines.append(f"    - 1y volatility: {vol}")
+    else:
+        summary_lines.append("• External metrics: (unavailable)")
+
+    if articles:
+        summary_lines.append(f"• Latest articles ({len(articles)}):")
+        for art in articles[:3]:
+            title = art.get("title") or "(no title)"
+            published_at = art.get("published_at") or ""
+            summary_lines.append(f"    - {title} [{published_at}]")
+    else:
+        summary_lines.append("• Latest articles: (none in articles table)")
+
+    if candles:
+        summary_lines.append(f"• Recent candles ({len(candles)} rows):")
+        for c in candles[:3]:
+            summary_lines.append(
+                f"    - {c.get('dt')}: close={c.get('close')} vol={c.get('volume')}"
+            )
+    else:
+        summary_lines.append("• Recent candles: (none in candles table)")
+
+    center = graph.get("center")
+    neighbors = graph.get("neighbors") or []
+    edges = graph.get("edges") or []
+    if center:
+        summary_lines.append(
+            f"• Graph center: {center.get('key')} ({center.get('node_type')})"
+        )
+        summary_lines.append(
+            f"    - Neighbors: {len(neighbors)}; Edges: {len(edges)}"
+        )
+    else:
+        summary_lines.append("• Graph: no center node found for this ticker.")
+
+    return {
+        "ticker": symbol,
+        "company": company,
+        "metrics": metrics,
+        "articles": articles,
+        "candles": candles,
+        "graph": graph,
+        "summary_lines": summary_lines,
+    }
+
 def get_graph_neighbors_for_ticker(ticker: str) -> Dict[str, Any]:
     """
     Return a small graph neighborhood around a company ticker.
@@ -546,6 +832,16 @@ def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
 
     conn.close()
 
+    # Fetch synthetic "external API" metrics for each mentioned ticker.
+    external_metrics: List[Dict[str, Any]] = []
+    for comp in mentioned:
+        ticker = comp["ticker"]
+        try:
+            metrics = fetch_external_metrics(ticker)
+            external_metrics.append(metrics)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("fetch_external_metrics failed for %s: %s", ticker, exc)
+
     # Build an agent-style "steps" trace.
     steps = [
         {
@@ -561,6 +857,12 @@ def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
             "outputs": {"profiles_found": len(mentioned)},
         },
         {
+            "name": "fetch_external_metrics",
+            "description": "Call external metrics API/service for each ticker.",
+            "inputs": {"tickers": [m["ticker"] for m in mentioned]},
+            "outputs": {"metrics_count": len(external_metrics)},
+        },
+        {
             "name": "retrieve_news",
             "description": "Pull recent news for mentioned tickers.",
             "inputs": {"tickers": [m["ticker"] for m in mentioned]},
@@ -573,6 +875,11 @@ def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
             "tool": "companies_lookup",
             "dataset": "companies",
             "results": mentioned,
+        },
+        {
+            "tool": "external_metrics_api",
+            "dataset": "external",
+            "results": external_metrics,
         },
         {
             "tool": "news_lookup",
