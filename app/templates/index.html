@@ -2,7 +2,113 @@
 {% extends "base.html" %}
 
 {% block head_extra %}
+<script src="https://unpkg.com/cytoscape@3.28.1/dist/cytoscape.min.js"></script>
 <script>
+  let j5Cy = null;
+
+  function renderJ5Graph(data) {
+    const container = document.getElementById("j5-graph-canvas");
+    const jsonPane = document.getElementById("j5-graph-output");
+
+    if (!container) return;
+
+    if (!data || !data.center) {
+      container.innerHTML = "No center node found for this ticker.";
+      if (jsonPane) {
+        jsonPane.textContent = "(no graph data returned)";
+      }
+      return;
+    }
+
+    // Build Cytoscape elements from center + neighbors + edges.
+    const elements = [];
+    const center = data.center;
+
+    elements.push({
+      data: {
+        id: center.key,
+        label: center.label || center.key,
+        node_type: center.node_type || "company",
+      },
+    });
+
+    (data.neighbors || []).forEach((n) => {
+      elements.push({
+        data: {
+          id: n.key,
+          label: n.label || n.key,
+          node_type: n.node_type || "neighbor",
+        },
+      });
+    });
+
+    (data.edges || []).forEach((e, idx) => {
+      const id = e.id || `${e.src}-${e.dst}-${e.edge_type || "edge"}-${idx}`;
+      elements.push({
+        data: {
+          id,
+          source: e.src,
+          target: e.dst,
+          label: e.edge_type || "",
+        },
+      });
+    });
+
+    // Clear any previous content.
+    container.innerHTML = "";
+
+    j5Cy = cytoscape({
+      container: container,
+      elements: elements,
+      style: [
+        {
+          selector: "node",
+          style: {
+            "background-color": "#2563eb",
+            "label": "data(label)",
+            "color": "#0f172a",
+            "font-size": 10,
+            "text-valign": "center",
+            "text-halign": "center",
+            "text-wrap": "wrap",
+            "text-max-width": "120px",
+          },
+        },
+        {
+          selector: "node[node_type = 'hub']",
+          style: {
+            "background-color": "#f97316",
+            "font-weight": "bold",
+          },
+        },
+        {
+          selector: "node[node_type = 'company']",
+          style: {
+            "background-color": "#22c55e",
+          },
+        },
+        {
+          selector: "edge",
+          style: {
+            "width": 2,
+            "line-color": "#cbd5f5",
+            "target-arrow-color": "#cbd5f5",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+            "label": "data(label)",
+            "font-size": 8,
+            "text-rotation": "autorotate",
+            "color": "#6b7280",
+          },
+        },
+      ],
+      layout: {
+        name: "cose",
+        animate: false,
+      },
+    });
+  }
+
   async function j5Ask(event) {
     event.preventDefault();
     const txt = document.getElementById("j5-question");
@@ -83,7 +189,9 @@
       if (!data.ok) {
         out.textContent = "Error: " + (data.error || "Unknown error");
       } else {
-        out.textContent = JSON.stringify(data.data, null, 2);
+        const payload = data.data || {};
+        out.textContent = JSON.stringify(payload, null, 2);
+        renderJ5Graph(payload);
       }
     } catch (err) {
       out.textContent = "Request failed: " + err;
@@ -256,13 +364,13 @@
     This is a lightweight graph view backed directly by the
     <code>kg_nodes</code> and <code>kg_edges</code> tables. It returns the
     node for <code>COMP::TICKER</code>, its neighbors, and the connecting
-    edges. Later we can plug this JSON into a full interactive graph
-    (Cytoscape.js or similar) with click-to-expand behavior.
+    edges. The left panel shows an interactive graph, and the right panel
+    shows the raw JSON the agent can use.
   </p>
 
   <form
     onsubmit="j5GraphNeighbors(event)"
-    style="max-width: 340px; margin-bottom: 0.5rem"
+    style="max-width: 340px; margin-bottom: 0.75rem"
   >
     <input
       id="j5-graph-ticker"
@@ -277,8 +385,32 @@
     </div>
   </form>
 
-  <div style="margin-top: 0.4rem">
-    <pre id="j5-graph-output">(graph neighborhood JSON will appear here)</pre>
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Interactive Graph</div>
+      <div
+        id="j5-graph-canvas"
+        style="
+          width: 100%;
+          height: 320px;
+          border-radius: 12px;
+          border: 1px solid var(--border);
+          background: #ffffff;
+        "
+      >
+        <div style="font-size: 0.8rem; color: var(--text-muted); padding: 0.5rem">
+          Enter a ticker and click “Show Neighborhood” to render the graph.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Graph JSON</div>
+      <pre
+        id="j5-graph-output"
+        style="height: 320px; overflow-y: auto"
+      >(graph neighborhood JSON will appear here)</pre>
+    </div>
   </div>
 </section>
 {% endblock %}
