@@ -338,3 +338,38 @@ def api_ask():
         return jsonify({"ok": False, "error": str(exc)}), 500
 
     return jsonify({"ok": True, "data": result})
+
+@bp.get("/api/graph/neighbors")
+def api_graph_neighbors():
+    """
+    Return a small graph neighborhood for a given ticker.
+
+    Query params:
+        ticker: e.g. "NVDA"
+
+    Response:
+        On success:
+            {
+              "ok": true,
+              "ticker": "NVDA",
+              "data": {
+                "center": {...},
+                "neighbors": [...],
+                "edges": [...]
+              }
+            }
+        On error:
+            { "ok": false, "error": "<message>" }
+    """
+    ticker = (request.args.get("ticker") or "").strip().upper()
+    if not ticker:
+        return jsonify({"ok": False, "error": "Missing 'ticker' query param"}), 400
+
+    svc = S()
+    try:
+        payload = svc.get_graph_neighbors_for_ticker(ticker)
+    except Exception as exc:  # noqa: BLE001
+        current_app.logger.exception("get_graph_neighbors_for_ticker failed: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    return jsonify({"ok": True, "ticker": ticker, "data": payload})

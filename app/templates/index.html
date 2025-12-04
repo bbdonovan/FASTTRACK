@@ -57,6 +57,41 @@
       btn.textContent = "Ask Johny 5";
     }
   }
+
+  async function j5GraphNeighbors(event) {
+    event.preventDefault();
+    const input = document.getElementById("j5-graph-ticker");
+    const out = document.getElementById("j5-graph-output");
+    const btn = document.getElementById("j5-graph-btn");
+
+    const ticker = (input.value || "").trim();
+    if (!ticker) {
+      out.textContent = "Please enter a ticker (e.g. NVDA).";
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Loading…";
+    out.textContent = "Loading graph neighborhood…";
+
+    try {
+      const res = await fetch(
+        "{{ url_for('dashboard.api_graph_neighbors') }}?ticker=" +
+          encodeURIComponent(ticker)
+      );
+      const data = await res.json();
+      if (!data.ok) {
+        out.textContent = "Error: " + (data.error || "Unknown error");
+      } else {
+        out.textContent = JSON.stringify(data.data, null, 2);
+      }
+    } catch (err) {
+      out.textContent = "Request failed: " + err;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Show Neighborhood";
+    }
+  }
 </script>
 {% endblock %}
 
@@ -211,6 +246,39 @@
   <div style="margin-top: 0.7rem">
     <h3 style="font-size: 0.9rem; margin-bottom: 0.3rem">Trace &amp; Steps</h3>
     <pre id="j5-trace">(agentic trace will appear here as JSON)</pre>
+  </div>
+</section>
+
+<section>
+  <h2>Graph Preview · Neighborhood</h2>
+
+  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem">
+    This is a lightweight graph view backed directly by the
+    <code>kg_nodes</code> and <code>kg_edges</code> tables. It returns the
+    node for <code>COMP::TICKER</code>, its neighbors, and the connecting
+    edges. Later we can plug this JSON into a full interactive graph
+    (Cytoscape.js or similar) with click-to-expand behavior.
+  </p>
+
+  <form
+    onsubmit="j5GraphNeighbors(event)"
+    style="max-width: 340px; margin-bottom: 0.5rem"
+  >
+    <input
+      id="j5-graph-ticker"
+      type="text"
+      placeholder="Ticker (e.g. NVDA)"
+      style="margin-bottom: 0.4rem"
+    />
+    <div>
+      <button id="j5-graph-btn" type="submit" class="btn-secondary">
+        Show Neighborhood
+      </button>
+    </div>
+  </form>
+
+  <div style="margin-top: 0.4rem">
+    <pre id="j5-graph-output">(graph neighborhood JSON will appear here)</pre>
   </div>
 </section>
 {% endblock %}

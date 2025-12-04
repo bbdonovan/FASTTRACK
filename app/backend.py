@@ -393,6 +393,83 @@ def rebuild_all() -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Agentic QA entrypoint (stubbed locally, ready for real LLM)
 # ---------------------------------------------------------------------------
+def get_graph_neighbors_for_ticker(ticker: str) -> Dict[str, Any]:
+    """
+    Return a small graph neighborhood around a company ticker.
+
+    The neighborhood is defined as:
+        - center: the kg_nodes row for COMP::<TICKER>
+        - neighbors: all nodes connected to the center by any edge
+        - edges: all edges where src or dst is the center key
+
+    Args:
+        ticker: Company ticker symbol (e.g. "NVDA").
+
+    Returns:
+        A dictionary with keys:
+            center:   dict or None
+            neighbors: list[dict]
+            edges:    list[dict]
+    """
+    _ensure_db()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    key = f"COMP::{ticker.upper()}"
+
+    # Look up the center node.
+    cur.execute(
+        "SELECT id, key, label, node_type FROM kg_nodes WHERE key = ?",
+        (key,),
+    )
+    center_row = cur.fetchone()
+    if not center_row:
+        conn.close()
+        return {"center": None, "neighbors": [], "edges": []}
+
+    center = dict(center_row)
+
+    # Fetch edges touching this node.
+    cur.execute(
+        """
+        SELECT src, dst, edge_type
+        FROM kg_edges
+        WHERE src = ? OR dst = ?
+        """,
+        (key, key),
+    )
+    edges = [dict(r) for r in cur.fetchall()]
+
+    # Collect neighbor keys (the other endpoint in each edge).
+    neighbor_keys = set()
+    for edge in edges:
+        if edge["src"] == key:
+            neighbor_keys.add(edge["dst"])
+        if edge["dst"] == key:
+            neighbor_keys.add(edge["src"])
+
+    neighbors: List[Dict[str, Any]] = []
+    if neighbor_keys:
+        placeholders = ",".join("?" for _ in neighbor_keys)
+        cur.execute(
+            f"""
+            SELECT id, key, label, node_type
+            FROM kg_nodes
+            WHERE key IN ({placeholders})
+            """,
+            tuple(neighbor_keys),
+        )
+        neighbors = [dict(r) for r in cur.fetchall()]
+
+    conn.close()
+
+    return {
+        "center": center,
+        "neighbors": neighbors,
+        "edges": edges,
+    }
 
 def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
     """
