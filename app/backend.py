@@ -182,6 +182,9 @@ def pull_profiles(limit: int = 50) -> Dict[str, Any]:
         ("MSFT", "Microsoft Corporation"),
         ("NVDA", "NVIDIA Corporation"),
         ("AMZN", "Amazon.com, Inc."),
+        ("TSLA", "Tesla, Inc."),
+        ("META", "Meta Platforms, Inc."),
+        ("GOOGL", "Alphabet Inc. (Class A)"),
     ][:limit]
 
     conn = sqlite3.connect(DB_PATH)
