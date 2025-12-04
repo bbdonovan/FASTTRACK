@@ -107,6 +107,32 @@
         animate: false,
       },
     });
+
+    // WOW factor: click a company node to refocus on that ticker.
+    j5Cy.on("tap", "node", function (evt) {
+      const node = evt.target;
+      const id = node.data("id");
+      const type = node.data("node_type");
+
+      if (!id) return;
+
+      // We only refocus on company nodes like COMP::NVDA
+      if (type === "company" && id.startsWith("COMP::")) {
+        const ticker = id.split("::")[1];
+        const input = document.getElementById("j5-graph-ticker");
+        if (input) {
+          input.value = ticker;
+        }
+        j5LoadGraphForTicker(ticker);
+      } else {
+        // For hub/other nodes, just gently hint what to click
+        if (jsonPane) {
+          jsonPane.textContent =
+            "Tip: click on a company node (green) to refocus.\n\n" +
+            JSON.stringify(data, null, 2);
+        }
+      }
+    });
   }
 
   async function j5Ask(event) {
@@ -164,16 +190,19 @@
     }
   }
 
-  async function j5GraphNeighbors(event) {
-    event.preventDefault();
+  async function j5LoadGraphForTicker(rawTicker) {
     const input = document.getElementById("j5-graph-ticker");
     const out = document.getElementById("j5-graph-output");
     const btn = document.getElementById("j5-graph-btn");
 
-    const ticker = (input.value || "").trim();
+    const ticker = (rawTicker || "").trim();
     if (!ticker) {
       out.textContent = "Please enter a ticker (e.g. NVDA).";
       return;
+    }
+
+    if (input) {
+      input.value = ticker; // keep the input in sync
     }
 
     btn.disabled = true;
@@ -199,6 +228,12 @@
       btn.disabled = false;
       btn.textContent = "Show Neighborhood";
     }
+  }
+
+  async function j5GraphNeighbors(event) {
+    event.preventDefault();
+    const input = document.getElementById("j5-graph-ticker");
+    await j5LoadGraphForTicker(input.value);
   }
 </script>
 {% endblock %}
@@ -355,6 +390,55 @@
     <h3 style="font-size: 0.9rem; margin-bottom: 0.3rem">Trace &amp; Steps</h3>
     <pre id="j5-trace">(agentic trace will appear here as JSON)</pre>
   </div>
+</section>
+
+<section>
+  <h2>Why This Is Agentic (vs Standard Graph RAG)</h2>
+
+  <p style="font-size: 0.9rem; color: var(--text-muted); max-width: 720px">
+    When you click <strong>Ask Johny 5</strong>, the system does more than a
+    simple vector search. It runs a small <strong>agentic workflow</strong>
+    that orchestrates multiple tools and records a structured trace of what
+    it used.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title">Standard Graph RAG</div>
+      <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.1rem">
+        <li>Embed the question into a vector.</li>
+        <li>Do a similarity search over documents.</li>
+        <li>Optionally expand via graph neighbors.</li>
+        <li>Concatenate context and send once to the LLM.</li>
+        <li>Limited visibility into which systems were used.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Johny 5 · Agentic Graph RAG</div>
+      <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.1rem">
+        <li>Step 1: <strong>Understand question</strong> and detect tickers
+          (see <code>understand_question</code> in Trace &amp; Steps).</li>
+        <li>Step 2: Call <strong>profiles DB</strong> for company metadata
+          (<code>retrieve_profiles</code> / <code>companies_lookup</code>).</li>
+        <li>Step 3: Call <strong>external metrics API</strong> placeholder
+          (<code>fetch_external_metrics</code> / <code>external_metrics_api</code>).</li>
+        <li>Step 4: Call <strong>news / filings source</strong>
+          (<code>retrieve_news</code> / <code>news_lookup</code>), populated
+          from Yahoo Finance RSS in this demo.</li>
+        <li>Step 5: Combine graph structure, metrics and news into a single
+          synthesized answer, with a <strong>trace</strong> you can audit.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.6rem; max-width: 720px">
+    In production at work, each of these tools can point at your internal
+    systems (portfolio exposure, risk models, internal ratings, proprietary
+    news feeds). The key value is that the agent calls them
+    <strong>explicitly</strong> and leaves a structured trail of what data
+    it used to answer the question.
+  </p>
 </section>
 
 <section>
