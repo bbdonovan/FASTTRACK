@@ -339,22 +339,25 @@ def pull_sector(sector: str) -> Dict[str, Any]:
 
 def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
     """
-    Ingest news articles tied to companies via Yahoo Finance RSS, with fallback.
+    Ingest news articles tied to companies via Yahoo Finance RSS, with fallback,
+    and project them into the knowledge graph as NEWS nodes.
 
     For each company ticker in the DB, this function:
         - Attempts to fetch the Yahoo Finance RSS feed for that ticker.
         - If successful:
             * Clears existing rows in the articles table for that ticker.
-            * Inserts up to `max_per_ticker` of the latest headlines.
+            * Clears existing KG NEWS nodes and has_news edges for that ticker.
+            * Inserts up to `max_per_ticker` of the latest headlines into:
+                - articles (ticker, title, published_at)
+                - kg_nodes as NEWS::<TICKER>::N
+                - kg_edges as COMP::<TICKER> --has_news--> NEWS::<TICKER>::N
         - If the request fails (429 rate limit, network issue, etc.):
             * Keeps existing rows if any.
             * If there are no existing rows, inserts a single placeholder
-              article explaining that news is unavailable and this is
-              demo data.
+              article explaining that news is unavailable.
 
-    This keeps the demo resilient: network / rate limit issues won't
-    leave the articles table empty, and the agent's trace still has
-    something to show.
+    This keeps the demo resilient and enriches the graph, so the graph
+    neighborhood for COMP::<TICKER> includes its recent news items.
 
     Args:
         max_per_ticker: Maximum headlines to store per ticker.
@@ -365,10 +368,10 @@ def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
               "tickers": [...],
               "inserted_total": int,
               "errors": {ticker: "error message", ...},
-              "source": "yahoo-finance-rss+fallback"
+              "source": "yahoo-finance-rss+fallback+kg-news"
             }
     """
-    logger.info("Ingesting news from Yahoo Finance RSS (with fallback)")
+    logger.info("Ingesting news from Yahoo Finance RSS (with fallback + KG news)")
     _ensure_db()
 
     conn = sqlite3.connect(DB_PATH)
@@ -387,7 +390,6 @@ def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
             f"?s={symbol}&region=US&lang=en-US"
         )
 
-        have_real_news = False
         inserted_for_symbol = 0
 
         try:
@@ -410,7 +412,19 @@ def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
         if items:
             # We have real RSS items → overwrite previous news for this ticker.
             cur.execute("DELETE FROM articles WHERE ticker = ?", (symbol,))
-            for item in items[:max_per_ticker]:
+
+            # Also clear KG NEWS nodes and has_news edges for this ticker.
+            comp_key = f"COMP::{symbol}"
+            cur.execute(
+                "DELETE FROM kg_edges WHERE src = ? AND edge_type = 'has_news'",
+                (comp_key,),
+            )
+            cur.execute(
+                "DELETE FROM kg_nodes WHERE key LIKE ?",
+                (f"NEWS::{symbol}::%",),
+            )
+
+            for idx, item in enumerate(items[:max_per_ticker]):
                 title_el = item.find("title")
                 date_el = item.find("pubDate")
 
@@ -427,6 +441,7 @@ def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
                     except Exception:  # noqa: BLE001
                         pass
 
+                # Store in articles table.
                 cur.execute(
                     """
                     INSERT INTO articles (ticker, title, published_at)
@@ -436,7 +451,23 @@ def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
                 )
                 inserted_for_symbol += 1
 
-            have_real_news = True
+                # Project into KG as a NEWS node + edge from company.
+                article_key = f"NEWS::{symbol}::{idx}"
+                cur.execute(
+                    """
+                    INSERT INTO kg_nodes (key, label, node_type)
+                    VALUES (?, ?, ?)
+                    """,
+                    (article_key, title, "news"),
+                )
+                cur.execute(
+                    """
+                    INSERT INTO kg_edges (src, dst, edge_type)
+                    VALUES (?, ?, ?)
+                    """,
+                    (comp_key, article_key, "has_news"),
+                )
+
             logger.info("Inserted %s real headlines for %s", inserted_for_symbol, symbol)
         else:
             # No items (rate limit, network, or empty feed).
@@ -477,7 +508,7 @@ def ingest_news(max_per_ticker: int = 5) -> Dict[str, Any]:
         "tickers": tickers,
         "inserted_total": total_inserted,
         "errors": errors,
-        "source": "yahoo-finance-rss+fallback",
+        "source": "yahoo-finance-rss+fallback+kg-news",
     }
 
 def fetch_external_metrics(ticker: str) -> Dict[str, Any]:

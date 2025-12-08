@@ -5,6 +5,8 @@
 <script src="{{ url_for('static', filename='vendor/cytoscape.min.js') }}"></script>
 <script>
   let j5Cy = null;
+  // Stores the last successful /api/ask payload so we can download it.
+  window.j5LastTracePayload = null;
 
   function renderJ5Graph(data) {
     const container = document.getElementById("j5-graph-canvas");
@@ -88,6 +90,12 @@
           },
         },
         {
+          selector: "node[node_type = 'news']",
+          style: {
+            "background-color": "#a855f7",
+          },
+        },
+        {
           selector: "edge",
           style: {
             "width": 2,
@@ -143,7 +151,8 @@
     if (!detailsBox) return;
 
     if (!ticker) {
-      detailsBox.textContent = "Enter a ticker or click a company node to see details.";
+      detailsBox.textContent =
+        "Enter a ticker or click a company node to see details.";
       return;
     }
 
@@ -199,6 +208,7 @@
     btn.textContent = "Thinking…";
     outAnswer.textContent = "Calling /api/ask…";
     outTrace.textContent = "";
+    window.j5LastTracePayload = null;
 
     try {
       const res = await fetch("{{ url_for('dashboard.api_ask') }}", {
@@ -226,6 +236,14 @@
           stats,
         };
         outTrace.textContent = JSON.stringify(traceRender, null, 2);
+
+        // Store for download.
+        window.j5LastTracePayload = {
+          question,
+          timestamp: new Date().toISOString(),
+          data: payload,
+          trace_view: traceRender,
+        };
       }
     } catch (err) {
       outAnswer.textContent = "Request failed: " + err;
@@ -282,6 +300,28 @@
     const ticker = input ? input.value : "";
     await j5LoadGraphForTicker(ticker);
     await j5LoadNodeDetails(ticker);
+  }
+
+  function j5DownloadTrace() {
+    const data = window.j5LastTracePayload;
+    if (!data) {
+      alert("Ask a question first so there is a trace to download.");
+      return;
+    }
+
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    a.href = url;
+    a.download = `johny5_trace_${ts}.json`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 </script>
 {% endblock %}
@@ -434,10 +474,19 @@
     <pre id="j5-answer">(answer will appear here)</pre>
   </div>
 
-  <div style="margin-top: 0.7rem">
-    <h3 style="font-size: 0.9rem; margin-bottom: 0.3rem">Trace &amp; Steps</h3>
-    <pre id="j5-trace">(agentic trace will appear here as JSON)</pre>
+  <section>
+  <h2>Trace & Steps</h2>
+  <div style="margin-bottom: 0.5rem">
+    <button
+      type="button"
+      class="btn-secondary"
+      onclick="j5DownloadTrace()"
+    >
+      Download Trace JSON
+    </button>
   </div>
+  <pre id="j5-trace">(trace & steps JSON will appear here)</pre>
+</section>
 </section>
 
 <section>
