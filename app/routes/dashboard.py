@@ -18,13 +18,13 @@ from typing import Any, Dict, List
 from flask import (
     Blueprint,
     current_app,
-    flash,
     jsonify,
     redirect,
     render_template,
     request,
     session,
     url_for,
+    flash,
 )
 
 from app.backend import DB_PATH, get_stats as backend_get_stats
@@ -202,6 +202,39 @@ def action_build_graph():
         current_app.logger.exception("build_graph failed: %s", exc)
         flash(f"Error building graph: {exc}", "error")
     return redirect(url_for("dashboard.index"))
+
+@bp.get("/api/graph/intel_neighbors")
+def api_graph_intel_neighbors() -> "flask.Response":
+    """
+    API endpoint: return an actor/intel-centered graph neighborhood based on
+    a free-text query.
+
+    Query params:
+        q: the actor, institution, or thematic string to search for, e.g.
+           'Xi Jinping', 'CIPS', 'BRICS', 'Chinese state-owned banks'.
+
+    Response:
+        JSON of the form:
+            {
+              "ok": true/false,
+              "data": {
+                "query": "...",
+                "center": {...} or null,
+                "neighbors": [...],
+                "edges": [...]
+              } or null,
+              "error": "...optional error..."
+            }
+    """
+    svc = S()
+    q = (request.args.get("q") or "").strip()
+
+    try:
+        payload = svc.get_intel_actor_neighbors(q)
+        return jsonify({"ok": True, "data": payload})
+    except Exception as exc:  # noqa: BLE001
+        current_app.logger.exception("get_intel_actor_neighbors failed: %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 500
 
 
 @bp.post("/action/pull_candles")

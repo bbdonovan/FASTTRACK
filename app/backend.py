@@ -20,6 +20,7 @@ from __future__ import annotations
 import logging
 import pathlib
 import sqlite3
+import re
 from typing import Any, Dict, List, Optional
 
 from email.utils import parsedate_to_datetime
@@ -104,10 +105,67 @@ def _ensure_db() -> None:
         )
         """
     )
+    # Geopolitics / sanctions / macro intelligence notes
+    cur.execute(
+        """
+        CREATE TABLE IF NOT EXISTS intel_articles (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            topic        TEXT,    -- e.g. 'china_chip_sanctions', 'brics_dollar'
+            region       TEXT,    -- e.g. 'CN', 'US', 'Global'
+            entities     TEXT,    -- comma-separated list of key actors (companies, people, states)
+            source       TEXT,    -- e.g. 'SyntheticDemo', 'InternalReport'
+            published_at TEXT,
+            title        TEXT NOT NULL,
+            snippet      TEXT
+        )
+        """
+    )
 
     conn.commit()
     conn.close()
 
+def _detect_tickers_from_text(text: str) -> List[str]:
+    """
+    Detect valid tickers mentioned in free text by intersecting tokens with the
+    tickers present in the companies table.
+
+    This prevents us from treating every capitalized word as a ticker.
+    """
+    _ensure_db()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT ticker FROM companies")
+    rows = cur.fetchall()
+    conn.close()
+
+    known = {r["ticker"].upper() for r in rows}
+
+    # Extract alphabetic tokens up to 5 chars, in uppercase.
+    tokens = re.findall(r"[A-Za-z]{1,5}", (text or "").upper())
+
+    seen: set[str] = set()
+    tickers: List[str] = []
+    for tok in tokens:
+        if tok in known and tok not in seen:
+            seen.add(tok)
+            tickers.append(tok)
+
+    # Simple synonym mapping for common names → tickers.
+    upper_text = (text or "").upper()
+    synonyms = [
+        ("NVIDIA", "NVDA"),
+        ("APPLE", "AAPL"),
+        ("AMAZON", "AMZN"),
+        ("MICROSOFT", "MSFT"),
+    ]
+    for name, ticker in synonyms:
+        if name in upper_text and ticker in known and ticker not in seen:
+            seen.add(ticker)
+            tickers.append(ticker)
+
+    return tickers
 
 def get_stats() -> Dict[str, int]:
     """
@@ -206,6 +264,45 @@ def pull_profiles(limit: int = 50) -> Dict[str, Any]:
 
     return {"inserted": inserted, "total_demo": len(demo_companies)}
 
+def _lookup_companies_by_tickers(tickers: List[str]) -> List[Dict[str, Any]]:
+    """
+    Helper: fetch company rows for a list of tickers from the companies table.
+
+    Args:
+        tickers: List of ticker symbols (e.g. ["AAPL", "NVDA"]).
+
+    Returns:
+        A list of dictionaries with basic profile information for each ticker
+        that exists in the table.
+    """
+    _ensure_db()
+
+    if not tickers:
+        return []
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Build a simple IN clause like (..., ?, ?, ...)
+    placeholders = ",".join("?" for _ in tickers)
+    sql = f"""
+        SELECT ticker, name
+        FROM companies
+        WHERE ticker IN ({placeholders})
+        ORDER BY ticker
+    """
+    cur.execute(sql, [t.upper() for t in tickers])
+    rows = cur.fetchall()
+    conn.close()
+
+    return [
+        {
+            "ticker": r["ticker"],
+            "name": r["name"],
+        }
+        for r in rows
+    ]
 
 def build_graph_from_profiles() -> Dict[str, Any]:
     """
@@ -542,28 +639,349 @@ def fetch_external_metrics(ticker: str) -> Dict[str, Any]:
     }
     return demo_metrics
 
-def rebuild_all() -> Dict[str, Any]:
+def seed_intel_articles_demo() -> Dict[str, Any]:
     """
-    Run a top-level data pipeline: profiles → graph → candles → news.
+    Seed the intel_articles table with a small but rich set of synthetic
+    intelligence notes focused on:
+        - Chinese semiconductor industry under US export controls
+        - Tactics to circumvent sanctions (front companies, third-country routing)
+        - BRICS and dedollarization / alternative payment rails
+        - Key actors (states, firms, leaders, institutions)
 
-    For the demo, this calls local helper functions in sequence.
+    This is *demo data* designed to behave like internal research notes:
+        - It is not scraped from the internet.
+        - It gives the agent something realistic to reason over.
+        - At work you would replace this with your own ETL / feeds.
 
     Returns:
-        A dictionary summarizing each stage and final stats.
+        Summary of how many rows were inserted.
     """
-    logger.info("Running demo rebuild_all pipeline")
-    out_profiles = pull_profiles()
-    out_graph = build_graph_from_profiles()
-    out_candles = pull_candles_for_tickers()
-    out_news = ingest_news()
-    stats = get_stats()
+    _ensure_db()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Clear any previous demo intel so rebuilds are deterministic.
+    cur.execute("DELETE FROM intel_articles")
+
+    demo_rows = [
+        {
+            "topic": "china_chip_sanctions",
+            "region": "CN",
+            "entities": "Chinese government, Ministry of Industry and Information Technology, SMIC, Huawei, US Commerce Department",
+            "source": "SyntheticDemo",
+            "published_at": "2023-10-15T00:00:00",
+            "title": "China expands domestic chip ecosystem to reduce reliance on US tooling",
+            "snippet": (
+                "Beijing accelerates subsidies for local fabs and equipment makers "
+                "to offset US export controls on advanced lithography and EDA tools. "
+                "SMIC and Huawei collaborate on workarounds using older nodes and "
+                "multi-patterning to approximate leading-edge performance."
+            ),
+        },
+        {
+            "topic": "china_chip_sanctions",
+            "region": "CN",
+            "entities": "Chinese government, state-owned banks, front companies, Hong Kong intermediaries",
+            "source": "SyntheticDemo",
+            "published_at": "2024-02-01T00:00:00",
+            "title": "Use of front companies and Hong Kong intermediaries to access restricted chip equipment",
+            "snippet": (
+                "Chinese buyers increasingly route orders for restricted semiconductor "
+                "equipment through shell entities and trading firms in Hong Kong and "
+                "third countries. Payments are structured to obscure the ultimate "
+                "beneficiary and avoid direct links to sanctioned entities."
+            ),
+        },
+        {
+            "topic": "china_chip_sanctions",
+            "region": "Global",
+            "entities": "SMIC, Huawei, Taiwanese foundries, US Commerce Department",
+            "source": "SyntheticDemo",
+            "published_at": "2024-03-12T00:00:00",
+            "title": "Shifts in foundry orders as export controls tighten",
+            "snippet": (
+                "Export controls on advanced nodes lead some Chinese design houses to "
+                "split production between domestic fabs and non-US-aligned foundries. "
+                "This reduces transparency on true end-use and complicates compliance "
+                "for global suppliers."
+            ),
+        },
+        {
+            "topic": "brics_dedollarization",
+            "region": "Global",
+            "entities": "China, Russia, India, Brazil, South Africa, BRICS, SWIFT, CIPS, PBoC, Russian central bank",
+            "source": "SyntheticDemo",
+            "published_at": "2023-09-05T00:00:00",
+            "title": "BRICS explore alternatives to dollar-denominated trade",
+            "snippet": (
+                "BRICS members expand the use of local currencies and explore common "
+                "settlement mechanisms to reduce reliance on the US dollar. China "
+                "promotes CIPS as a complement to SWIFT for cross-border RMB payments, "
+                "especially in energy and commodity trade with Russia."
+            ),
+        },
+        {
+            "topic": "brics_dedollarization",
+            "region": "CN",
+            "entities": "People's Bank of China, CIPS, Chinese state-owned banks, Gulf energy exporters",
+            "source": "SyntheticDemo",
+            "published_at": "2024-01-20T00:00:00",
+            "title": "Expansion of RMB-settled commodity contracts via CIPS",
+            "snippet": (
+                "Pilot projects for RMB-settled oil and gas contracts expand through "
+                "CIPS, giving Chinese banks greater visibility and control over trade "
+                "flows while reducing direct exposure to US financial sanctions."
+            ),
+        },
+        {
+            "topic": "sanctions_circumvention_finance",
+            "region": "CN",
+            "entities": "Chinese state-owned banks, regional lenders, Russian corporates, offshore SPVs",
+            "source": "SyntheticDemo",
+            "published_at": "2023-12-10T00:00:00",
+            "title": "Regional Chinese banks deepen ties with sanctioned counterparties",
+            "snippet": (
+                "While large Chinese banks remain cautious about secondary sanctions, "
+                "regional lenders and offshore special purpose vehicles play a larger "
+                "role in financing trade with sanctioned Russian entities, often using "
+                "complex ownership chains and non-dollar currencies."
+            ),
+        },
+        {
+            "topic": "technology_transfer_channels",
+            "region": "CN",
+            "entities": "Chinese universities, research institutes, Western chip firms, joint ventures",
+            "source": "SyntheticDemo",
+            "published_at": "2022-11-03T00:00:00",
+            "title": "Research collaborations used as channels for incremental technology transfer",
+            "snippet": (
+                "Joint labs and university partnerships provide Chinese researchers with "
+                "access to know-how in design tools, advanced packaging, and materials. "
+                "While not always covered by export controls, these relationships can "
+                "accelerate domestic capability upgrades."
+            ),
+        },
+        {
+            "topic": "china_chip_industrial_policy",
+            "region": "CN",
+            "entities": "Chinese government, National IC Fund, local governments, foundry startups",
+            "source": "SyntheticDemo",
+            "published_at": "2021-08-15T00:00:00",
+            "title": "National IC Fund and local subsidies reshape Chinese fab landscape",
+            "snippet": (
+                "Central and provincial funding channels support a wave of smaller fabs, "
+                "some focused on legacy nodes and specialty processes. This broad base "
+                "of capacity reduces dependence on a small set of flagship players and "
+                "creates many potential counterparties for foreign suppliers."
+            ),
+        },
+        {
+            "topic": "key_figures_policy",
+            "region": "CN",
+            "entities": "Xi Jinping, Liu He, senior economic planners, MIIT leadership",
+            "source": "SyntheticDemo",
+            "published_at": "2022-03-01T00:00:00",
+            "title": "Senior leadership frames semiconductors as core national security priority",
+            "snippet": (
+                "Public speeches by Xi Jinping and senior economic planners explicitly "
+                "link semiconductor self-sufficiency to national security, elevating "
+                "chip policy within broader industrial and geopolitical strategy."
+            ),
+        },
+        {
+            "topic": "third_country_routing",
+            "region": "Asia",
+            "entities": "Chinese traders, Southeast Asian intermediaries, US exporters, dual-use goods",
+            "source": "SyntheticDemo",
+            "published_at": "2024-04-02T00:00:00",
+            "title": "Third-country routing of dual-use components through Southeast Asia",
+            "snippet": (
+                "Some Chinese buyers shift procurement of dual-use chips and modules "
+                "to distributors in Southeast Asia, who then re-export to China. "
+                "This complicates enforcement because customs declarations often list "
+                "benign end-users in the intermediary countries."
+            ),
+        },
+        {
+            "topic": "brics_coordination",
+            "region": "Global",
+            "entities": "BRICS finance ministers, multilateral development banks, sanctions-hit borrowers",
+            "source": "SyntheticDemo",
+            "published_at": "2023-07-22T00:00:00",
+            "title": "BRICS explore coordinated financing tools for sanctioned borrowers",
+            "snippet": (
+                "Discussions within BRICS forums include options for syndicated lending "
+                "and guarantee structures that reduce unilateral leverage of any single "
+                "jurisdiction over cross-border capital flows."
+            ),
+        },
+    ]
+
+    for row in demo_rows:
+        cur.execute(
+            """
+            INSERT INTO intel_articles
+                (topic, region, entities, source, published_at, title, snippet)
+            VALUES
+                (:topic, :region, :entities, :source, :published_at, :title, :snippet)
+            """,
+            row,
+        )
+
+    conn.commit()
+    conn.close()
+
+    return {"inserted": len(demo_rows), "source": "seed_intel_articles_demo"}
+
+def project_intel_to_kg() -> Dict[str, Any]:
+    """
+    Project intel_articles into the knowledge graph.
+
+    For each row in intel_articles:
+        - Create an INTEL::<id> node with node_type='intel'.
+        - Parse entities (comma-separated) and, for each entity:
+            * Create an ACTOR::<SLUG> node with node_type='actor' if not present.
+            * Create an edge ACTOR::<SLUG> --mentioned_in--> INTEL::<id>.
+        - If an entity looks like a known company ticker, also link:
+            COMP::<TICKER> --intel_link--> INTEL::<id>.
+
+    This gives us:
+        - Macro/thematic INTEL nodes in the KG.
+        - Actor nodes (people, institutions, states) that analysts care about.
+    """
+    _ensure_db()
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Preload all company tickers so we can link intel notes to them if mentioned.
+    cur.execute("SELECT ticker FROM companies")
+    tickers = {row["ticker"].upper() for row in cur.fetchall()}
+
+    # Clear previous INTEL / ACTOR nodes and related edges so rebuild is clean.
+    cur.execute("DELETE FROM kg_edges WHERE edge_type IN ('mentioned_in', 'intel_link')")
+    cur.execute("DELETE FROM kg_nodes WHERE key LIKE 'INTEL::%'")
+    cur.execute("DELETE FROM kg_nodes WHERE key LIKE 'ACTOR::%'")
+
+    # Fetch intel notes.
+    cur.execute(
+        """
+        SELECT id, topic, region, entities, title
+        FROM intel_articles
+        ORDER BY published_at DESC, id DESC
+        """
+    )
+    rows = cur.fetchall()
+
+    intel_count = 0
+    actor_nodes: set[str] = set()
+    intel_links = 0
+
+    for row in rows:
+        intel_id = row["id"]
+        title = row["title"] or f"Intel note {intel_id}"
+        entities_raw = row["entities"] or ""
+        intel_key = f"INTEL::{intel_id}"
+
+        # Create INTEL node.
+        cur.execute(
+            """
+            INSERT INTO kg_nodes (key, label, node_type)
+            VALUES (?, ?, ?)
+            """,
+            (intel_key, title, "intel"),
+        )
+        intel_count += 1
+
+        # Parse entities; simple comma-separated list.
+        entities = [
+            e.strip() for e in entities_raw.split(",") if e.strip()
+        ]
+        for ent in entities:
+            slug = ent.upper().replace(" ", "_")
+            actor_key = f"ACTOR::{slug}"
+
+            if actor_key not in actor_nodes:
+                cur.execute(
+                    """
+                    INSERT INTO kg_nodes (key, label, node_type)
+                    VALUES (?, ?, ?)
+                    """,
+                    (actor_key, ent, "actor"),
+                )
+                actor_nodes.add(actor_key)
+
+            # ACTOR -> INTEL edge.
+            cur.execute(
+                """
+                INSERT INTO kg_edges (src, dst, edge_type)
+                VALUES (?, ?, ?)
+                """,
+                (actor_key, intel_key, "mentioned_in"),
+            )
+
+            # If this entity looks like a company ticker we know, link that too.
+            candidate = ent.upper()
+            if candidate in tickers:
+                comp_key = f"COMP::{candidate}"
+                cur.execute(
+                    """
+                    INSERT INTO kg_edges (src, dst, edge_type)
+                    VALUES (?, ?, ?)
+                    """,
+                    (comp_key, intel_key, "intel_link"),
+                )
+                intel_links += 1
+
+    conn.commit()
+    conn.close()
 
     return {
-        "profiles": out_profiles,
-        "graph": out_graph,
-        "candles": out_candles,
-        "news": out_news,
-        "stats": stats,
+        "intel_nodes": intel_count,
+        "actor_nodes": len(actor_nodes),
+        "intel_links": intel_links,
+    }
+
+def rebuild_all() -> Dict[str, Any]:
+    """
+    Run the full demo pipeline:
+
+        1. Pull / refresh company profiles into the companies table.
+        2. Build the base knowledge graph (companies + market hub).
+        3. Pull demo candles for those tickers.
+        4. Ingest news headlines from Yahoo Finance RSS (with fallback) and
+           project them into the KG as NEWS nodes.
+        5. Seed geopolitical / sanctions / BRICS intel notes.
+        6. Project those intel notes into the KG as INTEL and ACTOR nodes.
+
+    In production, these steps would be replaced with:
+        - ETL pipelines for real reference data.
+        - Internal news / filings feeds.
+        - Internal sanctions / geopolitical intelligence sources.
+
+    Returns:
+        A dictionary summarizing each stage so the UI and logs can inspect it.
+    """
+    logger.info("Running demo rebuild_all pipeline")
+
+    profiles_result = pull_profiles()
+    graph_result = build_graph_from_profiles()
+    candles_result = pull_candles_for_tickers()
+    news_result = ingest_news()
+
+    intel_seed_result = seed_intel_articles_demo()
+    intel_graph_result = project_intel_to_kg()
+
+    return {
+        "profiles": profiles_result,
+        "graph": graph_result,
+        "candles": candles_result,
+        "news": news_result,
+        "intel_seed": intel_seed_result,
+        "intel_graph": intel_graph_result,
     }
 
 
@@ -713,6 +1131,161 @@ def get_node_details_for_ticker(ticker: str) -> Dict[str, Any]:
         "summary_lines": summary_lines,
     }
 
+def get_intel_actor_neighbors(query: str) -> Dict[str, Any]:
+    """
+    Return a small neighborhood around an ACTOR or INTEL node that matches
+    the given free-text query.
+
+    Search strategy:
+        1. Try to match ACTOR nodes (node_type='actor') whose label contains
+           the query (case-insensitive).
+        2. If no actor matches, try to match INTEL nodes (node_type='intel').
+        3. If still nothing, fall back to any node whose label contains query.
+        4. Once a center node is chosen:
+            - Fetch all edges where src = center or dst = center.
+            - Pull neighbor nodes referenced by those edges.
+            - Return a payload similar to get_graph_neighbors_for_ticker:
+                  {
+                    "query": "...",
+                    "center": {...},
+                    "neighbors": [...],
+                    "edges": [...]
+                  }
+
+    This lets the UI explore themes like "Xi Jinping", "CIPS", "BRICS",
+    "Chinese state-owned banks", etc., and see which intel notes and
+    companies are connected to those actors.
+    """
+    _ensure_db()
+
+    q = (query or "").strip()
+    if not q:
+        return {"query": q, "center": None, "neighbors": [], "edges": []}
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    like = f"%{q.lower()}%"
+
+    # 1) Prefer ACTOR nodes.
+    cur.execute(
+        """
+        SELECT key, label, node_type
+        FROM kg_nodes
+        WHERE node_type = 'actor'
+          AND LOWER(label) LIKE ?
+        ORDER BY key
+        LIMIT 5
+        """,
+        (like,),
+    )
+    rows = cur.fetchall()
+    center_row = rows[0] if rows else None
+
+    # 2) Fallback to INTEL nodes.
+    if center_row is None:
+        cur.execute(
+            """
+            SELECT key, label, node_type
+            FROM kg_nodes
+            WHERE node_type = 'intel'
+              AND LOWER(label) LIKE ?
+            ORDER BY key
+            LIMIT 5
+            """,
+            (like,),
+        )
+        rows = cur.fetchall()
+        center_row = rows[0] if rows else None
+
+    # 3) Fallback to any node label.
+    if center_row is None:
+        cur.execute(
+            """
+            SELECT key, label, node_type
+            FROM kg_nodes
+            WHERE LOWER(label) LIKE ?
+            ORDER BY key
+            LIMIT 5
+            """,
+            (like,),
+        )
+        rows = cur.fetchall()
+        center_row = rows[0] if rows else None
+
+    if center_row is None:
+        conn.close()
+        return {"query": q, "center": None, "neighbors": [], "edges": []}
+
+    center_key = center_row["key"]
+    center = {
+        "key": center_row["key"],
+        "label": center_row["label"],
+        "node_type": center_row["node_type"],
+    }
+
+    # Fetch edges where the center participates.
+    cur.execute(
+        """
+        SELECT src, dst, edge_type, rowid AS edge_id
+        FROM kg_edges
+        WHERE src = ? OR dst = ?
+        """,
+        (center_key, center_key),
+    )
+    edge_rows = cur.fetchall()
+
+    neighbor_keys: set[str] = set()
+    edges: List[Dict[str, Any]] = []
+
+    for e in edge_rows:
+        src = e["src"]
+        dst = e["dst"]
+        edge_type = e["edge_type"] or ""
+        neighbor_keys.add(src)
+        neighbor_keys.add(dst)
+
+        edge_id = f"{src}->{dst}::{edge_type}"
+        edges.append(
+            {
+                "src": src,
+                "dst": dst,
+                "edge_type": edge_type,
+                "id": edge_id,
+            }
+        )
+
+    # Remove the center from the neighbor set so we only return true neighbors.
+    neighbor_keys.discard(center_key)
+
+    neighbors: List[Dict[str, Any]] = []
+    if neighbor_keys:
+        placeholders = ",".join("?" for _ in neighbor_keys)
+        sql = f"""
+            SELECT key, label, node_type
+            FROM kg_nodes
+            WHERE key IN ({placeholders})
+        """
+        cur.execute(sql, list(neighbor_keys))
+        for n in cur.fetchall():
+            neighbors.append(
+                {
+                    "key": n["key"],
+                    "label": n["label"],
+                    "node_type": n["node_type"],
+                }
+            )
+
+    conn.close()
+
+    return {
+        "query": q,
+        "center": center,
+        "neighbors": neighbors,
+        "edges": edges,
+    }
+
 def get_graph_neighbors_for_ticker(ticker: str) -> Dict[str, Any]:
     """
     Return a small graph neighborhood around a company ticker.
@@ -791,164 +1364,277 @@ def get_graph_neighbors_for_ticker(ticker: str) -> Dict[str, Any]:
         "edges": edges,
     }
 
-def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
+def _lookup_news_for_tickers(tickers: List[str]) -> List[Dict[str, Any]]:
     """
-    Run a simple, local "agentic-style" flow without an external LLM.
-
-    This is a stand-in for the real agent you will build at work.
-
-    The logic:
-        1. Parse the question in a trivial way (no real NLP).
-        2. Query the DB for companies and articles.
-        3. Build a small trace that mimics tool calls and results.
-        4. Compose a short answer summarizing what we have.
+    Helper: fetch recent news headlines for one or more tickers from articles.
 
     Args:
-        question: Natural-language question from the analyst.
+        tickers: List of ticker symbols.
 
     Returns:
-        A dictionary containing:
-            answer: str
-            stats: dict
-            trace: list of "tool call" records
-            steps: high-level list of reasoning steps
+        A list of dictionaries with ticker, title, and published_at fields.
     """
-    stats = get_stats()
     _ensure_db()
+
+    if not tickers:
+        return []
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
-    # Very naive "ticker detection": look for any company ticker in the question.
-    cur.execute("SELECT ticker, name FROM companies")
-    companies = cur.fetchall()
-    mentioned: List[Dict[str, Any]] = []
-    lowered = question.lower()
-
-    for row in companies:
-        ticker = row["ticker"]
-        name = row["name"]
-        if ticker.lower() in lowered or name.lower() in lowered:
-            mentioned.append({"ticker": ticker, "name": name})
-
-    # If no explicit mention, just take top 3 companies as "context universe".
-    if not mentioned and companies:
-        mentioned = [
-            {"ticker": row["ticker"], "name": row["name"]}
-            for row in companies[:3]
-        ]
-
-    # Get news for mentioned tickers (if any).
-    news_results: List[Dict[str, Any]] = []
-    for comp in mentioned:
-        ticker = comp["ticker"]
-        cur.execute(
-            """
-            SELECT id, title, published_at
-            FROM articles
-            WHERE ticker = ?
-            ORDER BY published_at DESC
-            LIMIT 3
-            """,
-            (ticker,),
-        )
-        rows = cur.fetchall()
-        for r in rows:
-            news_results.append(
-                {
-                    "article_id": r["id"],
-                    "ticker": ticker,
-                    "title": r["title"],
-                    "published_at": r["published_at"],
-                }
-            )
-
+    placeholders = ",".join("?" for _ in tickers)
+    sql = f"""
+        SELECT ticker, title, published_at
+        FROM articles
+        WHERE ticker IN ({placeholders})
+        ORDER BY published_at DESC, id DESC
+    """
+    cur.execute(sql, [t.upper() for t in tickers])
+    rows = cur.fetchall()
     conn.close()
 
-    # Fetch synthetic "external API" metrics for each mentioned ticker.
-    external_metrics: List[Dict[str, Any]] = []
-    for comp in mentioned:
-        ticker = comp["ticker"]
-        try:
-            metrics = fetch_external_metrics(ticker)
-            external_metrics.append(metrics)
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("fetch_external_metrics failed for %s: %s", ticker, exc)
+    return [
+        {
+            "ticker": r["ticker"],
+            "title": r["title"],
+            "published_at": r["published_at"],
+        }
+        for r in rows
+    ]
 
-    # Build an agent-style "steps" trace.
-    steps = [
+def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
+    """
+    Run a small, fully local "agentic" flow for a given question.
+
+    For demo purposes, this function does not call an external LLM. Instead it:
+        1. Classifies the question and extracts any mentioned tickers.
+        2. Retrieves company profiles for those tickers.
+        3. Fetches placeholder external metrics.
+        4. Retrieves recent news headlines for those tickers.
+        5. If the question appears to be about China / BRICS / sanctions /
+           chips / semiconductors, it also:
+              - Calls geopolitics_lookup() over intel_articles.
+        6. Synthesizes a textual answer and returns:
+              - answer: str
+              - steps: high-level agent steps
+              - trace: raw tool inputs/outputs
+              - stats: small summary
+
+    In production, this flow would be implemented using your internal LLM and
+    orchestration framework (e.g. LangGraph), but the tool boundaries and
+    trace structure can remain the same.
+    """
+    q = (question or "").strip()
+    lower_q = q.lower()
+
+    # ── Step 1: detect *real* tickers from the companies table.
+    tickers = _detect_tickers_from_text(q)
+
+    steps: List[Dict[str, Any]] = []
+    trace: List[Dict[str, Any]] = []
+
+    # Step: understand_question
+    steps.append(
         {
             "name": "understand_question",
-            "description": "Classify question and detect relevant tickers.",
-            "inputs": {"question": question},
-            "outputs": {"mentioned_tickers": [m["ticker"] for m in mentioned]},
-        },
+            "description": "Classify question and detect relevant tickers and themes.",
+            "inputs": {"question": q},
+            "outputs": {
+                "mentioned_tickers": tickers,
+            },
+        }
+    )
+
+    # ── Step 2: retrieve_profiles
+    profiles_info: List[Dict[str, Any]] = []
+    if tickers:
+        profiles_info = _lookup_companies_by_tickers(tickers)
+    steps.append(
         {
             "name": "retrieve_profiles",
             "description": "Look up basic company profiles.",
-            "inputs": {"tickers": [m["ticker"] for m in mentioned]},
-            "outputs": {"profiles_found": len(mentioned)},
-        },
+            "inputs": {"tickers": tickers},
+            "outputs": {"profiles_found": len(profiles_info)},
+        }
+    )
+    trace.append(
+        {
+            "tool": "companies_lookup",
+            "args": {"tickers": tickers},
+            "results": profiles_info,
+        }
+    )
+
+    # ── Step 3: external_metrics_api (placeholder).
+    metrics_results: List[Dict[str, Any]] = []
+    for t in tickers:
+        metrics_results.append(fetch_external_metrics(t))
+    steps.append(
         {
             "name": "fetch_external_metrics",
             "description": "Call external metrics API/service for each ticker.",
-            "inputs": {"tickers": [m["ticker"] for m in mentioned]},
-            "outputs": {"metrics_count": len(external_metrics)},
-        },
-        {
-            "name": "retrieve_news",
-            "description": "Pull recent news for mentioned tickers.",
-            "inputs": {"tickers": [m["ticker"] for m in mentioned]},
-            "outputs": {"articles_found": len(news_results)},
-        },
-    ]
-
-    trace = [
-        {
-            "tool": "companies_lookup",
-            "dataset": "companies",
-            "results": mentioned,
-        },
+            "inputs": {"tickers": tickers},
+            "outputs": {"count": len(metrics_results)},
+        }
+    )
+    trace.append(
         {
             "tool": "external_metrics_api",
-            "dataset": "external",
-            "results": external_metrics,
-        },
+            "args": {"tickers": tickers},
+            "results": metrics_results,
+        }
+    )
+
+    # ── Step 4: news_lookup from articles table.
+    news_results: List[Dict[str, Any]] = []
+    if tickers:
+        news_results = _lookup_news_for_tickers(tickers)
+    steps.append(
+        {
+            "name": "retrieve_news",
+            "description": "Retrieve recent news Reuters/filings-style items for each ticker.",
+            "inputs": {"tickers": tickers},
+            "outputs": {"articles_found": len(news_results)},
+        }
+    )
+    trace.append(
         {
             "tool": "news_lookup",
-            "dataset": "articles",
+            "args": {"tickers": tickers},
             "results": news_results,
-        },
-    ]
+        }
+    )
 
-    # Synthesize a tiny human-readable answer.
-    if not mentioned:
-        answer_lines = [
-            "I could not detect a specific ticker in your question,",
-            "but the knowledge base currently contains:",
-            f"- {stats['companies']} companies",
-            f"- {stats['articles']} articles",
-            f"- {stats['kg_nodes']} knowledge graph nodes",
-            f"- {stats['kg_edges']} knowledge graph edges",
-        ]
+    # ── Step 5: geopolitics_lookup if question is about China / sanctions / BRICS / chips.
+    geo_keywords = [
+        "china",
+        "chinese",
+        "brics",
+        "sanction",
+        "export control",
+        "chip",
+        "semiconductor",
+        "fab",
+        "cips",
+        "yuan",
+        "renminbi",
+    ]
+    needs_geo = any(kw in lower_q for kw in geo_keywords)
+
+    geo_result: Optional[Dict[str, Any]] = None
+    if needs_geo:
+        geo_result = geopolitics_lookup(q)
+        matches = geo_result.get("matches", []) if geo_result else []
+        steps.append(
+            {
+                "name": "geopolitics_lookup",
+                "description": "Search geopolitical / sanctions / BRICS intelligence notes.",
+                "inputs": {"topic": q},
+                "outputs": {"articles_found": len(matches)},
+            }
+        )
+        trace.append(
+            {
+                "tool": "geopolitics_lookup",
+                "args": {"topic": q},
+                "results": matches,
+            }
+        )
+
+    # ── Synthesis: build a readable answer string.
+    lines: List[str] = []
+    if tickers:
+        focus = ", ".join(tickers)
+        lines.append(f"For the question '{q}', I focused on: {focus}.")
+        lines.append("")
     else:
-        summary_tickers = ", ".join(m["ticker"] for m in mentioned)
-        answer_lines = [
-            f"For the question {question!r}, I focused on: {summary_tickers}.",
-            "",
-            f"There are {len(news_results)} recent demo news articles for these names.",
-            "In a real agentic setup, this step would:",
-            "- Retrieve structured fundamentals and time series.",
-            "- Retrieve relevant news & filings.",
-            "- Combine them to answer risk/exposure questions.",
-        ]
+        lines.append(f"For the question '{q}', I treated this as a thematic inquiry.")
+        lines.append("")
+
+    if profiles_info:
+        lines.append(
+            f"There are {len(profiles_info)} company profiles in the graph for these tickers."
+        )
+
+    if news_results:
+        lines.append(
+            f"There are {len(news_results)} recent news articles linked to these names."
+        )
+
+    if metrics_results:
+        lines.append(
+            "External metrics (placeholder API) provide a snapshot of valuation and volatility."
+        )
+
+    if geo_result:
+        matches = geo_result.get("matches", [])
+        if matches:
+            lines.append("")
+            lines.append(
+                f"The question includes China/BRICS/sanctions themes, so I also consulted "
+                f"{len(matches)} geopolitical intelligence notes."
+            )
+            lines.append("Examples:")
+            for m in matches[:3]:
+                title = m.get("title") or "(untitled intel note)"
+                region = m.get("region") or "Global"
+                lines.append(f" - [{region}] {title}")
+            lines.append("")
+
+            # High-level synthesis of what those notes are about.
+            lines.append("Taken together, these notes highlight several recurring tactics:")
+            lines.append(
+                " - Expanding the *domestic chip ecosystem* via subsidies, the National IC Fund, "
+                "and a broad base of smaller fabs to reduce reliance on US tooling."
+            )
+            lines.append(
+                " - Using *front companies, Hong Kong intermediaries, and third-country routing* "
+                "to acquire restricted semiconductor equipment and dual-use components."
+            )
+            lines.append(
+                " - *Splitting production* across Chinese and non-US-aligned foundries to obscure "
+                "true end-use and make export controls harder to enforce."
+            )
+            lines.append(
+                " - Building *non-dollar financial channels* through BRICS coordination, RMB-"
+                "settled commodity contracts, and CIPS to lower exposure to US financial sanctions."
+            )
+            lines.append(
+                " - Leveraging *research collaborations and joint ventures* with foreign firms and "
+                "universities as channels for incremental technology transfer."
+            )
+            lines.append(
+                " - Relying on *regional banks and offshore SPVs* to finance trade with sanctioned "
+                "counterparties while larger banks remain more cautious."
+            )
+        else:
+            lines.append("")
+            lines.append(
+                "I attempted to consult geopolitical intelligence notes, but none matched this topic."
+            )
+
+    lines.append("")
+    lines.append(
+        "In a real agentic setup, these tools would point at internal reference data, "
+        "sanctions/OSINT feeds, and portfolio exposures. The trace below records which "
+        "tools I called and what I used from each to answer the question."
+    )
+
+    answer = "\n".join(lines)
+
+    stats = {
+        "tickers": tickers,
+        "profiles": len(profiles_info),
+        "news_articles": len(news_results),
+        "geo_notes": len(geo_result.get("matches", [])) if geo_result else 0,
+    }
 
     return {
-        "answer": "\n".join(answer_lines),
-        "stats": stats,
-        "trace": trace,
+        "answer": answer,
         "steps": steps,
+        "trace": trace,
+        "stats": stats,
     }
 
 
@@ -993,3 +1679,89 @@ def llm_analyze(question: str) -> Dict[str, Any]:
     result = _run_demo_agentic_flow(question)
     result.setdefault("source", "demo-agentic")
     return result
+
+def geopolitics_lookup(topic: str) -> Dict[str, Any]:
+    """
+    Lookup geopolitical / sanctions / BRICS intel related to a topic.
+
+    This demo implementation:
+        - Extracts a small set of thematic keywords from the question.
+        - Searches intel_articles for any rows whose topic/title/snippet/
+          entities contain one or more of those keywords.
+
+    In production this would call an internal search / intel system instead.
+    """
+    _ensure_db()
+
+    raw = (topic or "").strip()
+    lower = raw.lower()
+
+    # Hand-crafted thematic keywords that matter for our seeded intel.
+    keywords: List[str] = []
+
+    if "china" in lower or "chinese" in lower:
+        keywords.append("china")
+    if "chip" in lower or "semiconductor" in lower or "fab" in lower:
+        keywords.append("chip")
+    if "sanction" in lower or "export control" in lower:
+        keywords.append("sanction")
+    if "brics" in lower:
+        keywords.append("brics")
+    if "cips" in lower or "renminbi" in lower or "yuan" in lower:
+        keywords.append("cips")
+    if "dollar" in lower or "dedollar" in lower:
+        keywords.append("dollar")
+
+    # Fallback: if nothing matched, just use a generic token so we at least try.
+    if not keywords:
+        keywords = ["china"]
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    where_clauses: List[str] = []
+    params: List[Any] = []
+
+    # Build OR of (topic/title/snippet/entities LIKE %kw%) for each keyword.
+    for kw in keywords:
+        pattern = f"%{kw}%"
+        where_clauses.append(
+            "(LOWER(topic) LIKE ? OR LOWER(title) LIKE ? "
+            "OR LOWER(snippet) LIKE ? OR LOWER(entities) LIKE ?)"
+        )
+        params.extend([pattern, pattern, pattern, pattern])
+
+    where_sql = " OR ".join(where_clauses)
+
+    sql = f"""
+        SELECT id, topic, region, entities, source, published_at, title, snippet
+        FROM intel_articles
+        WHERE {where_sql}
+        ORDER BY published_at DESC, id DESC
+    """
+    cur.execute(sql, params)
+    rows = cur.fetchall()
+    conn.close()
+
+    matches: List[Dict[str, Any]] = []
+    for r in rows:
+        entities_raw = r["entities"] or ""
+        entities = [e.strip() for e in entities_raw.split(",") if e.strip()]
+        matches.append(
+            {
+                "id": r["id"],
+                "title": r["title"],
+                "source": r["source"],
+                "published_at": r["published_at"],
+                "region": r["region"],
+                "entities": entities,
+                "snippet": r["snippet"],
+            }
+        )
+
+    return {
+        "topic": raw,
+        "keywords": keywords,
+        "matches": matches,
+    }

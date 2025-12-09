@@ -323,6 +323,192 @@
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
+
+let j5IntelCy = null;
+
+  function renderIntelGraph(data) {
+    const container = document.getElementById("j5-intel-graph-canvas");
+    const jsonPane = document.getElementById("j5-intel-graph-output");
+
+    if (!container) return;
+
+    if (!data || !data.center) {
+      container.innerHTML = "No matching actor or intel node found for this query.";
+      if (jsonPane) {
+        jsonPane.textContent = "(no intel/actor graph data returned)";
+      }
+      return;
+    }
+
+    const elements = [];
+    const center = data.center;
+
+    elements.push({
+      data: {
+        id: center.key,
+        label: center.label || center.key,
+        node_type: center.node_type || "actor",
+      },
+    });
+
+    (data.neighbors || []).forEach((n) => {
+      elements.push({
+        data: {
+          id: n.key,
+          label: n.label || n.key,
+          node_type: n.node_type || "neighbor",
+        },
+      });
+    });
+
+    (data.edges || []).forEach((e, idx) => {
+      const id = e.id || `${e.src}-${e.dst}-${e.edge_type || "edge"}-${idx}`;
+      elements.push({
+        data: {
+          id,
+          source: e.src,
+          target: e.dst,
+          label: e.edge_type || "",
+        },
+      });
+    });
+
+    container.innerHTML = "";
+
+    j5IntelCy = cytoscape({
+      container: container,
+      elements: elements,
+      style: [
+        {
+          selector: "node",
+          style: {
+            "background-color": "#0ea5e9",
+            "label": "data(label)",
+            "color": "#0f172a",
+            "font-size": 10,
+            "text-valign": "center",
+            "text-halign": "center",
+            "text-wrap": "wrap",
+            "text-max-width": "140px",
+          },
+        },
+        {
+          selector: "node[node_type = 'actor']",
+          style: {
+            "background-color": "#22c55e", // green-ish for people/institutions
+            "font-weight": "bold",
+          },
+        },
+        {
+          selector: "node[node_type = 'intel']",
+          style: {
+            "background-color": "#f97316", // orange for intel notes
+          },
+        },
+        {
+          selector: "node[node_type = 'company']",
+          style: {
+            "background-color": "#2563eb", // blue for companies
+          },
+        },
+        {
+          selector: "node[node_type = 'news']",
+          style: {
+            "background-color": "#a855f7", // purple for news
+          },
+        },
+        {
+          selector: "edge",
+          style: {
+            "width": 2,
+            "line-color": "#cbd5f5",
+            "target-arrow-color": "#cbd5f5",
+            "target-arrow-shape": "triangle",
+            "curve-style": "bezier",
+            "label": "data(label)",
+            "font-size": 8,
+            "text-rotation": "autorotate",
+            "color": "#6b7280",
+          },
+        },
+      ],
+      layout: {
+        name: "cose",
+        animate: false,
+      },
+    });
+
+    j5IntelCy.on("tap", "node", function (evt) {
+      const node = evt.target;
+      const label = node.data("label") || "";
+      const type = node.data("node_type") || "";
+
+      const input = document.getElementById("j5-actor-query");
+      if (input && label) {
+        input.value = label;
+      }
+
+      const jsonHint = [
+        "Clicked node:",
+        `  label: ${label}`,
+        `  type: ${type}`,
+        "",
+        "Tip: You can refine the query above and reload the neighborhood.",
+        "",
+        JSON.stringify(data, null, 2),
+      ].join("\n");
+
+      if (jsonPane) {
+        jsonPane.textContent = jsonHint;
+      }
+    });
+  }
+
+  async function j5IntelLoadGraph(rawQuery) {
+    const input = document.getElementById("j5-actor-query");
+    const out = document.getElementById("j5-intel-graph-output");
+    const btn = document.getElementById("j5-intel-btn");
+
+    const q = (rawQuery || (input ? input.value : "") || "").trim();
+    if (!q) {
+      out.textContent = "Please enter an actor, institution, or theme (e.g. Xi Jinping, CIPS, BRICS).";
+      return;
+    }
+
+    if (input) {
+      input.value = q; // keep UI in sync
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Loading…";
+    out.textContent = "Loading intel/actor graph neighborhood…";
+
+    try {
+      const res = await fetch(
+        "{{ url_for('dashboard.api_graph_intel_neighbors') }}?q=" +
+          encodeURIComponent(q)
+      );
+      const data = await res.json();
+      if (!data.ok) {
+        out.textContent = "Error: " + (data.error || "Unknown error");
+      } else {
+        const payload = data.data || {};
+        out.textContent = JSON.stringify(payload, null, 2);
+        renderIntelGraph(payload);
+      }
+    } catch (err) {
+      out.textContent = "Request failed: " + err;
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Show Intel / Actor Neighborhood";
+    }
+  }
+
+  async function j5IntelGraphNeighbors(event) {
+    event.preventDefault();
+    await j5IntelLoadGraph();
+  }
+
 </script>
 {% endblock %}
 
@@ -566,7 +752,7 @@
     </div>
   </form>
 
-  div class="grid">
+  <div class="grid">
     <div class="card">
       <div class="card-title">Interactive Graph</div>
       <div
@@ -602,5 +788,54 @@
       >(click a company node or load a ticker to see details)</pre>
     </div>
   </div>
+</section>
+
+<section>
+  <h2>Intel / Actors Graph (Thematic view)</h2>
+  <p>
+    Explore the network of key figures, institutions, and intel notes powering
+    thematic answers (e.g. China chips, BRICS, sanctions, dedollarization).
+  </p>
+
+  <form onsubmit="j5IntelGraphNeighbors(event)" class="stack gap-2">
+    <label for="j5-actor-query">Actor, institution, or theme</label>
+    <input
+      type="text"
+      id="j5-actor-query"
+      name="actor"
+      placeholder="e.g. Xi Jinping, CIPS, BRICS, Chinese state-owned banks"
+    />
+    <button type="submit" id="j5-intel-btn" class="btn-primary">
+      Show Intel / Actor Neighborhood
+    </button>
+  </form>
+
+  <div class="grid">
+    <div class="card">
+        <div class="card-title">Intel / Actors Graph</div>
+        <div
+        id="j5-intel-graph-canvas"
+        style="
+            width: 100%;
+            height: 320px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        "
+        >
+        <div style="font-size: 0.8rem; color: var(--text-muted); padding: 0.5rem">
+            Enter an actor/theme above and click “Show Intel / Actor Neighborhood”.
+        </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Intel / actor JSON</div>
+        <pre
+        id="j5-intel-graph-output"
+        style="height: 320px; overflow-y: auto"
+        >(intel/actor graph JSON will appear here)</pre>
+    </div>
+    </div>
 </section>
 {% endblock %}
