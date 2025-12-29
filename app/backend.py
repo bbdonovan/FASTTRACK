@@ -26,10 +26,192 @@ from typing import Any, Dict, List, Optional
 from email.utils import parsedate_to_datetime
 from xml.etree import ElementTree as ET
 
-import requests
+import os
+import json
+import textwrap
+import requests 
 
 logger = logging.getLogger(__name__)
 
+# Basic stopwords so we don't treat every word as a ticker.
+_TICKER_STOPWORDS = {
+    "WHAT",
+    "DOES",
+    "THE",
+    "LLM",
+    "KNOW",
+    "ABOUT",
+    "CURRENTLY",
+    "BASED",
+    "INFORMATION",
+    "YOU",
+    "HAVE",
+    "HOW",
+    "DO",
+    "GO",
+    "IS",
+    "ARE",
+    "AND",
+    "OR",
+    "FOR",
+    "WITH",
+    "THIS",
+    "THAT",
+}
+
+# ---------------------------------------------------------------------------
+# Ollama Setup
+# ---------------------------------------------------------------------------
+def _get_ollama_settings() -> tuple[str, str]:
+    """
+    Read Ollama connection settings from environment.
+
+    Environment variables:
+        J5_OLLAMA_BASE_URL  (default: http://127.0.0.1:11434)
+        J5_OLLAMA_MODEL     (default: llama3:latest)
+
+    Returns:
+        (base_url, model)
+    """
+    base = os.getenv("J5_OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+    model = os.getenv("J5_OLLAMA_MODEL", "llama3:latest")
+    return base.rstrip("/"), model
+
+
+def _ollama_generate(prompt: str, temperature: float = 0.2) -> str:
+    """
+    Call a local Ollama model to get a completion for the given prompt.
+
+    This uses Ollama's /api/generate endpoint with stream=False so we get
+    a single JSON object back.
+
+    If the call fails, we return a clear error message instead of faking
+    an answer.
+    """
+    base_url, model = _get_ollama_settings()
+    url = f"{base_url}/api/generate"
+
+    payload = {
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+        "options": {
+            "temperature": temperature,
+        },
+    }
+
+    try:
+        resp = requests.post(url, json=payload, timeout=60)
+        resp.raise_for_status()
+        data = resp.json()
+        return (data.get("response") or "").strip() or "LLM returned an empty response."
+    except Exception as exc:  # noqa: BLE001
+        # We do NOT fabricate an answer here – just report the error.
+        return f"LLM call via Ollama failed: {exc}"
+    
+def _build_agentic_prompt_for_llm(
+    question: str,
+    tickers: list[str],
+    profiles: list[dict],
+    metrics: list[dict],
+    articles: list[dict],
+    geo_notes: list[dict] | object,
+    graph_neighborhood: dict | None,
+) -> str:
+    """
+    Turn structured tool outputs into a single prompt string for the LLM.
+
+    The agentic part (tool orchestration) happens in Python; the LLM's job
+    is to reason over this context and write a clear answer.
+    """
+    parts: list[str] = []
+
+    parts.append(
+        "You are Johny 5, an equity + geopolitics analyst working inside a bank.\n"
+        "You receive a user question and a set of structured data sources.\n"
+        "Use ONLY this context to answer. If something is unknown, say so explicitly.\n"
+    )
+
+    parts.append("QUESTION:")
+    parts.append(question.strip())
+    parts.append("")
+
+    parts.append("TICKERS DETECTED:")
+    parts.append(", ".join(tickers) if tickers else "(none)")
+    parts.append("")
+
+    if profiles:
+        parts.append("COMPANY PROFILES (subset):")
+        for p in profiles[:3]:
+            parts.append(
+                f"- {p.get('ticker', '?')}: {p.get('name', '(no name)')} "
+                f"(sector={p.get('sector', '?')}, industry={p.get('industry', '?')})"
+            )
+        parts.append("")
+
+    if metrics:
+        parts.append("EXTERNAL METRICS (subset):")
+        for m in metrics[:3]:
+            parts.append(
+                f"- {m.get('ticker', '?')}: "
+                f"PE={m.get('pe_ratio', '?')}, "
+                f"mkt_cap_usd_billion={m.get('market_cap_usd_billion', '?')}, "
+                f"1y_volatility={m.get('one_year_volatility', '?')}"
+            )
+        parts.append("")
+
+    if articles:
+        parts.append("NEWS / FILINGS (subset):")
+        for a in articles[:5]:
+            parts.append(
+                f"- [{a.get('published_at', '?')}] "
+                f"{a.get('ticker', a.get('symbol', '?'))}: "
+                f"{a.get('title', '(no title)')}"
+            )
+        parts.append("")
+
+    geo_list = _normalize_geo_notes(geo_notes)
+    if geo_list:
+        parts.append("GEOPOLITICAL / SANCTIONS INTEL NOTES (subset):")
+        for g in geo_list[:6]:
+            snippet = (g.get("snippet") or "").replace("\n", " ")
+            if len(snippet) > 260:
+                snippet = snippet[:260] + "..."
+            parts.append(
+                f"- [{g.get('region', 'Global')}] {g.get('title', '(no title)')}: "
+                f"{snippet}"
+            )
+        parts.append("")
+    if graph_neighborhood and graph_neighborhood.get("center"):
+        center = graph_neighborhood["center"]
+        parts.append(
+            "GRAPH NEIGHBORHOOD SUMMARY "
+            f"(center={center.get('key')} · {center.get('label')} · "
+            f"type={center.get('node_type')}):"
+        )
+        parts.append(
+            f"- Neighbors: {len(graph_neighborhood.get('neighbors', []))}; "
+            f"Edges: {len(graph_neighborhood.get('edges', []))}"
+        )
+        parts.append("")
+
+    parts.append(
+        textwrap.dedent(
+            """
+            INSTRUCTIONS FOR YOUR ANSWER:
+
+            - Write a concise, professional answer (2–4 short paragraphs).
+            - Explicitly tie your reasoning back to the data above
+              (profiles, metrics, news, intel notes, and graph structure).
+            - Highlight risk/exposure angles and, where relevant, how China vs U.S.
+              constraints show up in this data.
+            - If key information is missing, call that out instead of guessing.
+            - At the end, add a short bullet list: "Key Points" with 3–6 bullets.
+            """
+        ).strip()
+    )
+
+    return "\n".join(parts)
 # ---------------------------------------------------------------------------
 # Paths & DB helpers
 # ---------------------------------------------------------------------------
@@ -166,6 +348,32 @@ def _detect_tickers_from_text(text: str) -> List[str]:
             tickers.append(ticker)
 
     return tickers
+
+def _extract_candidate_tickers(question: str) -> list[str]:
+    """
+    Heuristic ticker detector.
+
+    - Finds 2–6 letter alphabetic tokens in the question.
+    - Uppercases them.
+    - Drops obvious non-ticker stopwords.
+    - Deduplicates while preserving order.
+
+    Downstream lookups (companies_lookup) will further filter out
+    anything that isn't in the profiles database.
+    """
+    import re
+
+    if not question:
+        return []
+
+    tokens = re.findall(r"[A-Za-z]{2,6}", question.upper())
+    seen: list[str] = []
+    for token in tokens:
+        if token in _TICKER_STOPWORDS:
+            continue
+        if token not in seen:
+            seen.append(token)
+    return seen
 
 def get_stats() -> Dict[str, int]:
     """
@@ -638,6 +846,169 @@ def fetch_external_metrics(ticker: str) -> Dict[str, Any]:
         "note": "Synthetic metrics for demo; replace with real API call.",
     }
     return demo_metrics
+
+def _intel_query_to_themes(
+    query: str,
+    geo_payload: object | None,
+) -> list[str]:
+    """
+    Turn a user query (keyword or full sentence) into one or more
+    'themes' we should center the intel graph on.
+
+    Strategy:
+      - If query is short (<= 4 tokens), use it directly as a theme.
+      - Otherwise, prefer any 'keywords' field returned by geopolitics_lookup().
+      - Fallback: just use the raw query.
+    """
+    q = (query or "").strip()
+    if not q:
+        return []
+
+    tokens = q.split()
+    if len(tokens) <= 4:
+        # e.g. "BRICS", "CIPS", "China chip policy"
+        return [q]
+
+    # Longer sentence → try to use geopolitics_lookup keywords.
+    keywords: list[str] = []
+    if isinstance(geo_payload, dict):
+        kw = geo_payload.get("keywords")
+        if isinstance(kw, list):
+            keywords = [str(k) for k in kw if isinstance(k, (str, int, float))]
+
+    if keywords:
+        return keywords
+
+    # Last resort, just treat the sentence itself as a single theme.
+    return [q]
+
+def get_intel_graph_neighbors(query: str) -> dict:
+    """
+    Build a lightweight intel / actors graph around a sanctions / geopolitics theme.
+
+    This uses geopolitics_lookup(), which is already LLM-backed in our pipeline,
+    so it works both for:
+      - short keywords (e.g. 'BRICS', 'CIPS', 'dedollarization')
+      - full questions ('how does China circumvent US chip export controls?')
+
+    Returns a structure consumed directly by the Cytoscape.js intel graph:
+
+      {
+        "center": {...},
+        "neighbors": [...],
+        "edges": [...]
+      }
+    """
+    q = (query or "").strip()
+    if not q:
+        return {}
+
+    # 1) Ask the geopolitics tool (LLM-backed) for relevant intel notes.
+    try:
+        geo_raw = geopolitics_lookup(q)  # type: ignore[name-defined]
+    except NameError:
+        # If geopolitics_lookup isn't wired yet, just return empty.
+        return {}
+
+    matches: list[dict] = []
+    if isinstance(geo_raw, dict):
+        # Our LLM-based tool returns {"topic": ..., "keywords": [...], "matches": [...]}
+        m = geo_raw.get("matches") or geo_raw.get("results")
+        if isinstance(m, list):
+            matches = [x for x in m if isinstance(x, dict)]
+    elif isinstance(geo_raw, list):
+        matches = [x for x in geo_raw if isinstance(x, dict)]
+
+    if not matches:
+        return {}
+
+    # 2) Decide what theme(s) to center on (keyword vs full sentence).
+    themes = _intel_query_to_themes(q, geo_raw)
+    if not themes:
+        themes = [q]
+
+    center_label = themes[0]
+    center_key = f"THEME::{center_label}"
+
+    center_node = {
+        "id": 0,
+        "key": center_key,
+        "label": center_label,
+        "node_type": "actor",  # treat as actor / main subject
+    }
+
+    neighbors: list[dict] = []
+    edges: list[dict] = []
+
+    # Simple registry to avoid duplicate nodes.
+    node_by_key: dict[str, dict] = {center_key: center_node}
+    next_id = 1
+
+    def ensure_node(key: str, label: str, node_type: str) -> dict:
+        nonlocal next_id
+        if key in node_by_key:
+            return node_by_key[key]
+        node = {
+            "id": next_id,
+            "key": key,
+            "label": label,
+            "node_type": node_type,
+        }
+        node_by_key[key] = node
+        neighbors.append(node)
+        next_id += 1
+        return node
+
+    # 3) Build nodes/edges:
+    #    - Center THEME node
+    #    - One INTEL node per matched note
+    #    - ACTOR/INSTITUTION nodes for each entity in the note
+    for note in matches:
+        note_id = note.get("id")
+        note_title = note.get("title") or f"Intel note {note_id}"
+        note_key = f"INTEL::{note_id}"
+
+        intel_node = ensure_node(note_key, note_title, "intel")
+
+        # Edge from theme center to intel note
+        edges.append(
+            {
+                "id": f"{center_key}->{note_key}::relevant_intel",
+                "src": center_key,
+                "dst": note_key,
+                "edge_type": "relevant_intel",
+            }
+        )
+
+        for ent in note.get("entities", []):
+            if not isinstance(ent, str):
+                continue
+            ent_label = ent.strip()
+            if not ent_label:
+                continue
+
+            # 👇 slug to match project_intel_to_kg() convention
+            slug = ent_label.upper().replace(" ", "_")
+            ent_key = f"ACTOR::{slug}"
+
+            # crude but decent heuristic: names with spaces → person/actor
+            node_type = "actor" if " " in ent_label else "institution"
+
+            actor_node = ensure_node(ent_key, ent_label, node_type)
+            edges.append(
+                {
+                    "id": f"{note_key}->{ent_key}::mentioned_in",
+                    "src": note_key,
+                    "dst": ent_key,
+                    "edge_type": "mentioned_in",
+                }
+            )
+
+    return {
+        "center": center_node,
+        "neighbors": neighbors,
+        "edges": edges,
+    }
 
 def seed_intel_articles_demo() -> Dict[str, Any]:
     """
@@ -1133,157 +1504,227 @@ def get_node_details_for_ticker(ticker: str) -> Dict[str, Any]:
 
 def get_intel_actor_neighbors(query: str) -> Dict[str, Any]:
     """
-    Return a small neighborhood around an ACTOR or INTEL node that matches
-    the given free-text query.
+    Public intel / actors graph API.
 
-    Search strategy:
-        1. Try to match ACTOR nodes (node_type='actor') whose label contains
-           the query (case-insensitive).
-        2. If no actor matches, try to match INTEL nodes (node_type='intel').
-        3. If still nothing, fall back to any node whose label contains query.
-        4. Once a center node is chosen:
-            - Fetch all edges where src = center or dst = center.
-            - Pull neighbor nodes referenced by those edges.
-            - Return a payload similar to get_graph_neighbors_for_ticker:
-                  {
-                    "query": "...",
-                    "center": {...},
-                    "neighbors": [...],
-                    "edges": [...]
-                  }
-
-    This lets the UI explore themes like "Xi Jinping", "CIPS", "BRICS",
-    "Chinese state-owned banks", etc., and see which intel notes and
-    companies are connected to those actors.
+    1) Use an LLM guardrail to decide if the query belongs in the
+       sanctions / BRICS / chip-intel domain.
+    2) If out-of-scope → return an empty graph plus guardrail info.
+    3) If in-scope → build a graph via get_intel_graph_neighbors() and
+       attach node/edge counts + guardrail to the payload.
     """
-    _ensure_db()
-
     q = (query or "").strip()
-    if not q:
-        return {"query": q, "center": None, "neighbors": [], "edges": []}
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
+    guard = _llm_guardrail_intel_query(q)
+    in_scope = guard.get("in_scope", False)
+    confidence = guard.get("confidence", 0.0)
+    reason = guard.get("reason", "unknown")
 
-    like = f"%{q.lower()}%"
+    MIN_CONF = 0.65  # tweak as you like
 
-    # 1) Prefer ACTOR nodes.
-    cur.execute(
-        """
-        SELECT key, label, node_type
-        FROM kg_nodes
-        WHERE node_type = 'actor'
-          AND LOWER(label) LIKE ?
-        ORDER BY key
-        LIMIT 5
-        """,
-        (like,),
-    )
-    rows = cur.fetchall()
-    center_row = rows[0] if rows else None
+    # Out-of-scope or low confidence → empty graph, but explicit about why.
+    if not in_scope or confidence < MIN_CONF:
+        return {
+            "query": q,
+            "center": None,
+            "neighbors": [],
+            "edges": [],
+            "node_count": 0,
+            "edge_count": 0,
+            "guardrail": guard,
+        }
 
-    # 2) Fallback to INTEL nodes.
-    if center_row is None:
-        cur.execute(
-            """
-            SELECT key, label, node_type
-            FROM kg_nodes
-            WHERE node_type = 'intel'
-              AND LOWER(label) LIKE ?
-            ORDER BY key
-            LIMIT 5
-            """,
-            (like,),
-        )
-        rows = cur.fetchall()
-        center_row = rows[0] if rows else None
+    # In-scope → build the actual intel graph.
+    graph = get_intel_graph_neighbors(q)
 
-    # 3) Fallback to any node label.
-    if center_row is None:
-        cur.execute(
-            """
-            SELECT key, label, node_type
-            FROM kg_nodes
-            WHERE LOWER(label) LIKE ?
-            ORDER BY key
-            LIMIT 5
-            """,
-            (like,),
-        )
-        rows = cur.fetchall()
-        center_row = rows[0] if rows else None
+    center = graph.get("center")
+    neighbors = graph.get("neighbors", [])
+    edges = graph.get("edges", [])
 
-    if center_row is None:
-        conn.close()
-        return {"query": q, "center": None, "neighbors": [], "edges": []}
+    node_count = (1 if center else 0) + len(neighbors)
+    edge_count = len(edges)
 
-    center_key = center_row["key"]
-    center = {
-        "key": center_row["key"],
-        "label": center_row["label"],
-        "node_type": center_row["node_type"],
-    }
-
-    # Fetch edges where the center participates.
-    cur.execute(
-        """
-        SELECT src, dst, edge_type, rowid AS edge_id
-        FROM kg_edges
-        WHERE src = ? OR dst = ?
-        """,
-        (center_key, center_key),
-    )
-    edge_rows = cur.fetchall()
-
-    neighbor_keys: set[str] = set()
-    edges: List[Dict[str, Any]] = []
-
-    for e in edge_rows:
-        src = e["src"]
-        dst = e["dst"]
-        edge_type = e["edge_type"] or ""
-        neighbor_keys.add(src)
-        neighbor_keys.add(dst)
-
-        edge_id = f"{src}->{dst}::{edge_type}"
-        edges.append(
-            {
-                "src": src,
-                "dst": dst,
-                "edge_type": edge_type,
-                "id": edge_id,
-            }
-        )
-
-    # Remove the center from the neighbor set so we only return true neighbors.
-    neighbor_keys.discard(center_key)
-
-    neighbors: List[Dict[str, Any]] = []
-    if neighbor_keys:
-        placeholders = ",".join("?" for _ in neighbor_keys)
-        sql = f"""
-            SELECT key, label, node_type
-            FROM kg_nodes
-            WHERE key IN ({placeholders})
-        """
-        cur.execute(sql, list(neighbor_keys))
-        for n in cur.fetchall():
-            neighbors.append(
-                {
-                    "key": n["key"],
-                    "label": n["label"],
-                    "node_type": n["node_type"],
-                }
-            )
-
-    conn.close()
-
+    # Flatten: we keep the structure the frontend already expects
+    # (center / neighbors / edges at top level) and just add metadata.
     return {
         "query": q,
         "center": center,
         "neighbors": neighbors,
         "edges": edges,
+        "node_count": node_count,
+        "edge_count": edge_count,
+        "guardrail": guard,
+    }
+
+def get_intel_node_details(node_key: str) -> Dict[str, Any]:
+    """
+    Return rich text for an intel / actor / company node key.
+
+    Used by the dashboard when a user clicks a node in the Intel graph.
+    """
+    _ensure_db()
+    key = (node_key or "").strip()
+
+    if not key:
+        return {
+            "key": key,
+            "kind": "unknown",
+            "text": "No node key provided.",
+        }
+
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Try to enrich from kg_nodes if present, but don't require it.
+    cur.execute(
+        "SELECT key, label, node_type FROM kg_nodes WHERE key = ?",
+        (key,),
+    )
+    node = cur.fetchone()
+    label = node["label"] if node else key
+    node_type = node["node_type"] or "unknown" if node else "unknown"
+
+    # --- INTEL::<id> → pull back full intel note from intel_articles
+    if key.startswith("INTEL::"):
+        intel_id_str = key.split("::", 1)[1]
+        try:
+            intel_id = int(intel_id_str)
+        except ValueError:
+            intel_id = None
+
+        row = None
+        if intel_id is not None:
+            cur.execute(
+                """
+                SELECT id, topic, region, entities, source,
+                       published_at, title, snippet
+                FROM intel_articles
+                WHERE id = ?
+                """,
+                (intel_id,),
+            )
+            row = cur.fetchone()
+
+        conn.close()
+
+        if not row:
+            return {
+                "key": key,
+                "kind": "intel",
+                "title": label,
+                "text": "No intel_articles row found for this note.",
+            }
+
+        entities_raw = row["entities"] or ""
+        entities = [e.strip() for e in entities_raw.split(",") if e.strip()]
+
+        text_lines = [
+            f"[{row['region']}] {row['title']} ({row['published_at']})",
+            "",
+        ]
+        if entities:
+            text_lines.append("Entities: " + ", ".join(entities))
+            text_lines.append("")
+        if row["snippet"]:
+            text_lines.append(row["snippet"])
+
+        return {
+            "key": key,
+            "kind": "intel",
+            "title": row["title"],
+            "topic": row["topic"],
+            "region": row["region"],
+            "source": row["source"],
+            "published_at": row["published_at"],
+            "entities": entities,
+            "snippet": row["snippet"],
+            "text": "\n".join(text_lines),
+        }
+
+    # --- ACTOR::<...> → show intel notes this actor appears in
+    if key.startswith("ACTOR::"):
+        cur.execute(
+            """
+            SELECT dst
+            FROM kg_edges
+            WHERE src = ?
+              AND dst LIKE 'INTEL::%'
+            """,
+            (key,),
+        )
+        rows = cur.fetchall()
+        intel_ids: list[int] = []
+        for r in rows:
+            dst_key = r["dst"]
+            parts = dst_key.split("::", 1)
+            if len(parts) == 2:
+                try:
+                    intel_ids.append(int(parts[1]))
+                except ValueError:
+                    continue
+
+        notes: list[dict] = []
+        if intel_ids:
+            placeholders = ",".join("?" for _ in intel_ids)
+            cur.execute(
+                f"""
+                SELECT id, title, region, published_at
+                FROM intel_articles
+                WHERE id IN ({placeholders})
+                ORDER BY published_at DESC, id DESC
+                """,
+                intel_ids,
+            )
+            for r in cur.fetchall():
+                notes.append(
+                    {
+                        "id": r["id"],
+                        "title": r["title"],
+                        "region": r["region"],
+                        "published_at": r["published_at"],
+                    }
+                )
+
+        conn.close()
+
+        lines = [f"Actor: {label}", ""]
+        if notes:
+            lines.append("Mentioned in intel notes:")
+            for n in notes:
+                lines.append(
+                    f" - [{n['region']}] {n['title']} "
+                    f"[{n['published_at']}] (INTEL::{n['id']})"
+                )
+        else:
+            lines.append("No intel notes found for this actor in the current graph.")
+
+        return {
+            "key": key,
+            "kind": "actor",
+            "label": label,
+            "notes": notes,
+            "text": "\n".join(lines),
+        }
+
+    # --- COMP::<TICKER> → reuse node-details helper
+    if key.startswith("COMP::"):
+        conn.close()
+        ticker = key.split("::", 1)[1]
+        details = get_node_details_for_ticker(ticker)
+        return {
+            "key": key,
+            "kind": "company",
+            "ticker": ticker,
+            "text": "\n".join(details.get("summary_lines", [])),
+        }
+
+    # --- Fallback generic case
+    conn.close()
+    return {
+        "key": key,
+        "kind": node_type,
+        "label": label,
+        "text": f"{label} (node_type={node_type})",
     }
 
 def get_graph_neighbors_for_ticker(ticker: str) -> Dict[str, Any]:
@@ -1402,6 +1843,29 @@ def _lookup_news_for_tickers(tickers: List[str]) -> List[Dict[str, Any]]:
         }
         for r in rows
     ]
+
+def companies_lookup(tickers: list[str]) -> list[dict[str, Any]]:
+    """
+    Demo implementation of companies_lookup for the agent trace.
+
+    In production you can replace this function to call your internal
+    reference-data service instead of the local SQLite DB.
+    """
+    return _lookup_companies_by_tickers(tickers)
+
+
+def external_metrics_api(tickers: list[str]) -> list[dict[str, Any]]:
+    """
+    Demo external metrics tool, backed by fetch_external_metrics().
+    """
+    return [fetch_external_metrics(t) for t in tickers]
+
+
+def news_lookup(tickers: list[str]) -> list[dict[str, Any]]:
+    """
+    Demo news tool, backed by the local articles table.
+    """
+    return _lookup_news_for_tickers(tickers)
 
 def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
     """
@@ -1638,93 +2102,437 @@ def _run_demo_agentic_flow(question: str) -> Dict[str, Any]:
     }
 
 
-def llm_analyze(question: str) -> Dict[str, Any]:
+def llm_analyze(question: str) -> dict:
     """
-    High-level analysis entrypoint used by /api/ask.
+    Main agentic controller for the Johny 5 prototype, backed by a REAL LLM
+    via Ollama instead of hard-coded text.
 
-    In production at work, this function should:
-    - Call your internal LLM / LangGraph agent.
-    - Orchestrate tools over profiles, candles, news, and KG.
-    - Return a payload with:
-        answer: final natural language answer
-        stats: snapshot of the DB
-        trace: list of tool calls and their results (provenance)
-        steps: high-level reasoning steps (for debugging / demo)
+    Orchestration steps:
 
-    For the prototype at home, this function uses a local demo flow
-    implemented by _run_demo_agentic_flow().
+    1) Use simple heuristics to detect possible tickers in the question.
+    2) Call companies_lookup() to filter for real tickers and fetch profiles.
+    3) Call external_metrics_api() for placeholder valuation/volatility.
+    4) Call news_lookup() to fetch recent articles per ticker.
+    5) Call geopolitics_lookup() for China/BRICS/sanctions-style intel notes.
+    6) If we have at least one ticker, call get_graph_neighbors_for_ticker()
+       to capture a local graph neighborhood.
+    7) Build a structured prompt that includes all of this context and send it
+       to a local Ollama model to get the final answer text.
 
-    Args:
-        question: Natural-language question from the analyst.
-
-    Returns:
-        A dictionary payload suitable to be returned from /api/ask.
-    """
-    question = (question or "").strip()
-    if not question:
-        stats = get_stats()
-        return {
-            "answer": "Please provide a non-empty question.",
-            "stats": stats,
-            "trace": [],
-            "steps": [],
-            "source": "empty-question",
+    Returns a dict with:
+        {
+          "answer": <str>,       # LLM-written answer
+          "steps": [...],        # high-level logical steps
+          "trace": [...],        # low-level tool call trace
+          "stats": {...},        # summary counts
         }
 
-    # In the future, drop your real agent here:
+    The UI simply renders "answer" and shows "steps"/"trace" as JSON.
+    """
+    q = (question or "").strip()
+    if not q:
+        return {
+            "answer": "Please provide a non-empty question.",
+            "steps": [],
+            "trace": [],
+            "stats": {},
+        }
+
+    steps: list[dict] = []
+    trace: list[dict] = []
+    stats: dict[str, object] = {}
+
     #
-    #   return internal_agent.run(question=question, db_path=str(DB_PATH))
+    # 1) Detect candidate tickers from question text.
     #
-    # For now, we run a local demo flow.
-    result = _run_demo_agentic_flow(question)
-    result.setdefault("source", "demo-agentic")
-    return result
+    candidates = _extract_candidate_tickers(q)
+    steps.append(
+        {
+            "name": "understand_question",
+            "description": "Classify question and detect relevant tickers and themes.",
+            "inputs": {"question": q},
+            "outputs": {"candidate_tickers": candidates},
+        }
+    )
+
+    #
+    # 2) Company profiles via companies_lookup().
+    #
+    profiles: list[dict] = []
+    tickers: list[str] = []
+    if candidates:
+        try:
+            profiles = companies_lookup(candidates)  # type: ignore[name-defined]
+        except NameError:
+            # If companies_lookup is not implemented yet, just skip gracefully.
+            profiles = []
+
+    if profiles:
+        seen: set[str] = set()
+        for p in profiles:
+            t = (p.get("ticker") or "").upper()
+            if t and t not in seen:
+                seen.add(t)
+        tickers = sorted(seen)
+
+    stats["tickers"] = tickers
+    stats["profiles"] = len(profiles)
+
+    trace.append(
+        {
+            "tool": "companies_lookup",
+            "args": {"tickers": candidates},
+            "results": profiles,
+        }
+    )
+
+    if profiles:
+        steps.append(
+            {
+                "name": "retrieve_profiles",
+                "description": "Look up basic company profiles for detected tickers.",
+                "inputs": {"tickers": candidates},
+                "outputs": {"profiles_found": len(profiles)},
+            }
+        )
+
+    #
+    # 3) External metrics.
+    #
+    metrics: list[dict] = []
+    if tickers:
+        try:
+            metrics = external_metrics_api(tickers)  # type: ignore[name-defined]
+        except NameError:
+            metrics = []
+
+    stats["metrics"] = len(metrics)
+
+    trace.append(
+        {
+            "tool": "external_metrics_api",
+            "args": {"tickers": tickers},
+            "results": metrics,
+        }
+    )
+
+    if metrics:
+        steps.append(
+            {
+                "name": "fetch_external_metrics",
+                "description": "Call external metrics API/service for each ticker.",
+                "inputs": {"tickers": tickers},
+                "outputs": {"count": len(metrics)},
+            }
+        )
+
+    #
+    # 4) News / filings.
+    #
+    articles: list[dict] = []
+    if tickers:
+        try:
+            articles = news_lookup(tickers)  # type: ignore[name-defined]
+        except NameError:
+            articles = []
+
+    stats["news_articles"] = len(articles)
+
+    trace.append(
+        {
+            "tool": "news_lookup",
+            "args": {"tickers": tickers},
+            "results": articles,
+        }
+    )
+
+    if articles:
+        steps.append(
+            {
+                "name": "retrieve_news",
+                "description": "Retrieve recent news / filings-style items for each ticker.",
+                "inputs": {"tickers": tickers},
+                "outputs": {"articles_found": len(articles)},
+            }
+        )
+
+    #
+    # 5) Geopolitics / sanctions / BRICS intel, even if there are no tickers.
+    #
+    raw_geo: object = []
+    try:
+        raw_geo = geopolitics_lookup(q)  # type: ignore[name-defined]
+    except NameError:
+        raw_geo = []
+
+    geo_notes: list[dict] = _normalize_geo_notes(raw_geo)
+    stats["geo_notes"] = len(geo_notes)
+
+    trace.append(
+        {
+            "tool": "geopolitics_lookup",
+            "args": {"topic": q},
+            "results": raw_geo,
+        }
+    )
+
+    if geo_notes:
+        steps.append(
+            {
+                "name": "geopolitics_lookup",
+                "description": "Search geopolitical / sanctions / BRICS intelligence notes.",
+                "inputs": {"topic": q},
+                "outputs": {"articles_found": len(geo_notes)},
+            }
+        )
+
+    #
+    # 6) Optional graph neighborhood for the first ticker.
+    #
+    graph_neighborhood: dict | None = None
+    if tickers:
+        first = tickers[0]
+        try:
+            graph_neighborhood = get_graph_neighbors_for_ticker(first)  # type: ignore[name-defined]
+            stats["graph_center"] = graph_neighborhood.get("center", {}).get("key")
+            stats["graph_neighbors"] = len(graph_neighborhood.get("neighbors", []))
+            stats["graph_edges"] = len(graph_neighborhood.get("edges", []))
+
+            steps.append(
+                {
+                    "name": "graph_neighbors",
+                    "description": "Retrieve local graph neighborhood for the first ticker.",
+                    "inputs": {"ticker": first},
+                    "outputs": {
+                        "neighbors": stats["graph_neighbors"],
+                        "edges": stats["graph_edges"],
+                    },
+                }
+            )
+
+            trace.append(
+                {
+                    "tool": "graph_neighbors",
+                    "args": {"ticker": first},
+                    "results": graph_neighborhood,
+                }
+            )
+        except Exception as exc:  # noqa: BLE001
+            steps.append(
+                {
+                    "name": "graph_neighbors",
+                    "description": "Attempted to retrieve graph neighborhood but failed.",
+                    "inputs": {"ticker": first},
+                    "outputs": {"error": str(exc)},
+                }
+            )
+
+    #
+    # 7) Build LLM prompt and call Ollama.
+    #
+    prompt = _build_agentic_prompt_for_llm(
+        question=q,
+        tickers=tickers,
+        profiles=profiles,
+        metrics=metrics,
+        articles=articles,
+        geo_notes=geo_notes,
+        graph_neighborhood=graph_neighborhood,
+    )
+
+    answer_text = _ollama_generate(prompt)
+
+    return {
+        "answer": answer_text,
+        "steps": steps,
+        "trace": trace,
+        "stats": stats,
+    }
+
+def _normalize_geo_notes(raw_geo: object) -> list[dict]:
+    """
+    Normalize whatever geopolitics_lookup() returns into a list[dict].
+
+    Supports:
+      - list[dict]
+      - {"matches": [...]} style dict
+      - {"results": [...]} style dict
+      - {"notes": [...]} style dict
+
+    Any non-dict entries are filtered out.
+    """
+    if isinstance(raw_geo, list):
+        return [g for g in raw_geo if isinstance(g, dict)]
+
+    if isinstance(raw_geo, dict):
+        for key in ("matches", "results", "notes"):
+            val = raw_geo.get(key)
+            if isinstance(val, list):
+                return [g for g in val if isinstance(g, dict)]
+
+    return []
+
+def _ollama_structured_geointent(query: str) -> dict:
+    """
+    Use the local LLM (via Ollama) to translate an analyst query into a
+    structured search intent for intel_articles.
+
+    Expected JSON shape from the model:
+
+        {
+          "keywords": ["china", "chips", "sanctions"],
+          "entities": ["Chinese state-owned banks", "CIPS"],
+          "regions": ["CN", "Global"],
+          "risk_tags": ["sanctions_circumvention", "payments"]
+        }
+
+    All fields are optional; we fall back to heuristics if parsing fails.
+    """
+    q = (query or "").strip()
+    if not q:
+        return {}
+
+    prompt = textwrap.dedent(f"""
+        You are a sanctions / BRICS / geopolitics intelligence planner.
+
+        Your job is to translate a free-text analyst question into a compact
+        JSON object that can drive search over an intel_notes database.
+
+        The database contains notes on:
+          - Chinese semiconductor policy and US export controls.
+          - Tactics to circumvent sanctions (front companies, third-country routing,
+            regional banks, offshore SPVs, dual-use goods).
+          - BRICS and dedollarization (CIPS, local-currency settlement, RMB trade).
+          - Key actors (governments, state-owned banks, leaders, companies).
+
+        For the USER_QUERY below, identify:
+          - 3–7 short "keywords" for searching titles/snippets/entities.
+          - 2–6 "entities" (people, institutions, countries, organisations).
+          - 0–4 "regions" (e.g. "CN", "US", "Global", "Asia", "EU").
+          - 0–6 "risk_tags" like
+              ["sanctions_circumvention","chips","payments","energy","banks"].
+
+        Return ONLY valid JSON, with this exact top-level schema
+        and lowercase strings where reasonable:
+
+        {{
+          "keywords": ["...", "..."],
+          "entities": ["...", "..."],
+          "regions": ["...", "..."],
+          "risk_tags": ["...", "..."]
+        }}
+
+        No commentary, no backticks, no explanation – just the JSON.
+
+        USER_QUERY:
+        {q}
+    """).strip()
+
+    raw = _ollama_generate(prompt, temperature=0.0)
+
+    # Try straight JSON first.
+    try:
+        return json.loads(raw)
+    except Exception:
+        # Try to salvage a JSON block if the model added extra text.
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(raw[start : end + 1])
+            except Exception:
+                pass
+
+    logger.warning(
+        "ollama_structured_geointent: failed to parse JSON from LLM output: %r",
+        raw[:200],
+    )
+    return {}
 
 def geopolitics_lookup(topic: str) -> Dict[str, Any]:
     """
-    Lookup geopolitical / sanctions / BRICS intel related to a topic.
+    LLM-assisted lookup of geopolitical / sanctions / BRICS intel notes.
 
-    This demo implementation:
-        - Extracts a small set of thematic keywords from the question.
-        - Searches intel_articles for any rows whose topic/title/snippet/
-          entities contain one or more of those keywords.
+    Pipeline:
+      1) Ask the local LLM (via Ollama) for a structured search intent
+         (keywords, entities, regions, risk_tags).
+      2) Merge that with a small heuristic fallback so we always have
+         at least one keyword.
+      3) Query intel_articles using those keywords across topic/title/
+         snippet/entities.
+      4) Return a normalized payload with the matches plus the intent
+         the model produced.
 
-    In production this would call an internal search / intel system instead.
+    This is used both by:
+      - llm_analyze() for context in the main answer.
+      - get_intel_graph_neighbors() to drive the Intel / Actors graph.
     """
     _ensure_db()
 
     raw = (topic or "").strip()
     lower = raw.lower()
 
-    # Hand-crafted thematic keywords that matter for our seeded intel.
-    keywords: List[str] = []
+    # 1) Structured intent from the LLM (best effort).
+    intent = _ollama_structured_geointent(raw)
 
-    if "china" in lower or "chinese" in lower:
+    kw_from_llm = [
+        str(k).strip().lower()
+        for k in intent.get("keywords", [])
+        if str(k).strip()
+    ]
+    entities_from_llm = [
+        str(e).strip()
+        for e in intent.get("entities", [])
+        if str(e).strip()
+    ]
+    regions_from_llm = [
+        str(r).strip().upper()
+        for r in intent.get("regions", [])
+        if str(r).strip()
+    ]
+    risk_tags = [
+        str(r).strip().lower()
+        for r in intent.get("risk_tags", [])
+        if str(r).strip()
+    ]
+
+    keywords: list[str] = kw_from_llm.copy()
+
+    # 2) Heuristic reinforcement / fallback so we never return an empty search.
+    if "china" in lower and "china" not in keywords:
         keywords.append("china")
-    if "chip" in lower or "semiconductor" in lower or "fab" in lower:
+    if any(tok in lower for tok in ("chip", "semiconductor", "fab")) and "chip" not in keywords:
         keywords.append("chip")
     if "sanction" in lower or "export control" in lower:
-        keywords.append("sanction")
-    if "brics" in lower:
+        if "sanction" not in keywords:
+            keywords.append("sanction")
+    if "brics" in lower and "brics" not in keywords:
         keywords.append("brics")
-    if "cips" in lower or "renminbi" in lower or "yuan" in lower:
+    if any(tok in lower for tok in ("cips", "renminbi", "yuan")) and "cips" not in keywords:
         keywords.append("cips")
-    if "dollar" in lower or "dedollar" in lower:
+    if any(tok in lower for tok in ("dollar", "dedollar")) and "dollar" not in keywords:
         keywords.append("dollar")
 
-    # Fallback: if nothing matched, just use a generic token so we at least try.
+    # Final backstop: always have at least one anchor.
     if not keywords:
         keywords = ["china"]
+
+    # Deduplicate while preserving order.
+    seen_kw: set[str] = set()
+    final_keywords: list[str] = []
+    for kw in keywords:
+        if kw not in seen_kw:
+            seen_kw.add(kw)
+            final_keywords.append(kw)
 
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
 
-    where_clauses: List[str] = []
-    params: List[Any] = []
+    where_clauses: list[str] = []
+    params: list[Any] = []
 
-    # Build OR of (topic/title/snippet/entities LIKE %kw%) for each keyword.
-    for kw in keywords:
+    for kw in final_keywords:
         pattern = f"%{kw}%"
         where_clauses.append(
             "(LOWER(topic) LIKE ? OR LOWER(title) LIKE ? "
@@ -1762,6 +2570,81 @@ def geopolitics_lookup(topic: str) -> Dict[str, Any]:
 
     return {
         "topic": raw,
-        "keywords": keywords,
+        "keywords": final_keywords,
+        "entities_hint": entities_from_llm,
+        "regions_hint": regions_from_llm,
+        "risk_tags": risk_tags,
         "matches": matches,
     }
+
+def _llm_guardrail_intel_query(query: str) -> Dict[str, Any]:
+    """
+    Use the local LLM (via Ollama) as a gatekeeper to decide whether a query
+    belongs in the geopolitics / sanctions / BRICS intel domain.
+
+    Returns:
+        {
+          "in_scope": bool,
+          "confidence": float,   # 0.0–1.0
+          "reason": str
+        }
+    """
+    q = (query or "").strip()
+    if not q:
+        return {"in_scope": False, "confidence": 0.0, "reason": "empty_query"}
+
+    prompt = textwrap.dedent(f"""
+        You are a strict gatekeeper for a geopolitical / sanctions
+        intelligence knowledge graph. The graph ONLY covers:
+
+        - sanctions, export controls, and trade restrictions
+        - BRICS, CIPS, SWIFT, and alternative payment / settlement systems
+        - central banks, state-owned banks, and multilateral lenders
+        - chip / semiconductor supply chains and dual-use exports
+        - energy flows tied to these topics (oil, gas, LNG, etc.)
+
+        Read the user's query and decide if it is clearly about THIS domain.
+        If it is obviously about sports, entertainment, weather, or anything
+        unrelated, mark it out_of_scope.
+
+        Respond ONLY with compact JSON:
+
+        {{
+          "in_scope": true or false,
+          "confidence": number between 0 and 1,
+          "reason": "short explanation"
+        }}
+
+        User query: {q!r}
+    """).strip()
+
+    raw = _ollama_generate(prompt, temperature=0.0)
+
+    try:
+        obj = json.loads(raw)
+    except json.JSONDecodeError:
+        # Fail closed – if the guardrail can't parse, treat as out-of-scope.
+        return {
+            "in_scope": False,
+            "confidence": 0.0,
+            "reason": "guardrail_llm_invalid_json",
+        }
+
+    in_scope = bool(obj.get("in_scope"))
+    confidence = float(obj.get("confidence", 0.0))
+    reason = str(obj.get("reason", "") or "").strip() or "no_reason"
+
+    return {
+        "in_scope": in_scope,
+        "confidence": confidence,
+        "reason": reason,
+    }
+
+
+class BackendService:
+    ...
+    def get_intel_node_details(self, node_key: str) -> dict:
+        return get_intel_node_details(node_key)
+
+    def get_intel_actor_neighbors(self, query: str) -> dict:
+        return get_intel_actor_neighbors(query)

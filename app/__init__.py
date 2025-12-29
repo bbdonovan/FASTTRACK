@@ -21,7 +21,7 @@ def create_app() -> Flask:
     app.secret_key = "dev_key"
 
     # Import and register blueprints.
-    from app.routes.dashboard import bp as dashboard_bp  # noqa: WPS433
+    from app.routes.dashboard import bp as dashboard_bp  
 
     app.register_blueprint(dashboard_bp)
 

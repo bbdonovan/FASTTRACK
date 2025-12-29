@@ -1,195 +1,61 @@
-<!-- johny5_agentic/app/templates/index.html -->
 {% extends "base.html" %}
 
 {% block head_extra %}
+<style>
+  /* Page-local tweaks */
+  main {
+    max-width: 1200px;
+    margin: 1.5rem auto 3rem;
+  }
+
+  .grid-wide-2 {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .scroll-box {
+    max-height: 360px;
+    overflow-y: auto;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-alt);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", "Courier New", monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  /* Force graph canvases into light mode */
+  #companyGraph,
+  #intelGraph,
+  .graph-canvas,
+  .intel-graph-canvas {
+    background: #f9fafb !important;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+   /* Make code / JSON panels feel light too (optional) */
+  .code-panel {
+    background: #f3f4f6;
+    color: #111827;
+  }
+
+  .card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+</style>
+
 <script src="{{ url_for('static', filename='vendor/cytoscape.min.js') }}"></script>
 <script>
-  let j5Cy = null;
-  // Stores the last successful /api/ask payload so we can download it.
-  window.j5LastTracePayload = null;
-
-  function renderJ5Graph(data) {
-    const container = document.getElementById("j5-graph-canvas");
-    const jsonPane = document.getElementById("j5-graph-output");
-
-    if (!container) return;
-
-    if (!data || !data.center) {
-      container.innerHTML = "No center node found for this ticker.";
-      if (jsonPane) {
-        jsonPane.textContent = "(no graph data returned)";
-      }
-      return;
-    }
-
-    // Build Cytoscape elements from center + neighbors + edges.
-    const elements = [];
-    const center = data.center;
-
-    elements.push({
-      data: {
-        id: center.key,
-        label: center.label || center.key,
-        node_type: center.node_type || "company",
-      },
-    });
-
-    (data.neighbors || []).forEach((n) => {
-      elements.push({
-        data: {
-          id: n.key,
-          label: n.label || n.key,
-          node_type: n.node_type || "neighbor",
-        },
-      });
-    });
-
-    (data.edges || []).forEach((e, idx) => {
-      const id = e.id || `${e.src}-${e.dst}-${e.edge_type || "edge"}-${idx}`;
-      elements.push({
-        data: {
-          id,
-          source: e.src,
-          target: e.dst,
-          label: e.edge_type || "",
-        },
-      });
-    });
-
-    // Clear any previous content.
-    container.innerHTML = "";
-
-    j5Cy = cytoscape({
-      container: container,
-      elements: elements,
-      style: [
-        {
-          selector: "node",
-          style: {
-            "background-color": "#2563eb",
-            "label": "data(label)",
-            "color": "#0f172a",
-            "font-size": 10,
-            "text-valign": "center",
-            "text-halign": "center",
-            "text-wrap": "wrap",
-            "text-max-width": "120px",
-          },
-        },
-        {
-          selector: "node[node_type = 'hub']",
-          style: {
-            "background-color": "#f97316",
-            "font-weight": "bold",
-          },
-        },
-        {
-          selector: "node[node_type = 'company']",
-          style: {
-            "background-color": "#22c55e",
-          },
-        },
-        {
-          selector: "node[node_type = 'news']",
-          style: {
-            "background-color": "#a855f7",
-          },
-        },
-        {
-          selector: "edge",
-          style: {
-            "width": 2,
-            "line-color": "#cbd5f5",
-            "target-arrow-color": "#cbd5f5",
-            "target-arrow-shape": "triangle",
-            "curve-style": "bezier",
-            "label": "data(label)",
-            "font-size": 8,
-            "text-rotation": "autorotate",
-            "color": "#6b7280",
-          },
-        },
-      ],
-      layout: {
-        name: "cose",
-        animate: false,
-      },
-    });
-
-    // WOW factor: click a company node to refocus + load details.
-    j5Cy.on("tap", "node", function (evt) {
-      const node = evt.target;
-      const id = node.data("id");
-      const type = node.data("node_type");
-
-      if (!id) return;
-
-      // We only refocus on company nodes like COMP::NVDA
-      if (type === "company" && id.startsWith("COMP::")) {
-        const ticker = id.split("::")[1];
-        const input = document.getElementById("j5-graph-ticker");
-        if (input) {
-          input.value = ticker;
-        }
-        j5LoadGraphForTicker(ticker);
-        j5LoadNodeDetails(ticker);
-      } else {
-        // For hub/other nodes, gently hint what to click
-        if (jsonPane) {
-          jsonPane.textContent =
-            "Tip: click on a company node (green) to refocus.\n\n" +
-            JSON.stringify(data, null, 2);
-        }
-      }
-    });
-  }
-
-  async function j5LoadNodeDetails(rawTicker) {
-    const detailsBox = document.getElementById("j5-node-details");
-    const ticker = (rawTicker || "").trim().toUpperCase();
-
-    if (!detailsBox) return;
-
-    if (!ticker) {
-      detailsBox.textContent =
-        "Enter a ticker or click a company node to see details.";
-      return;
-    }
-
-    detailsBox.textContent = "Loading node details for " + ticker + "…";
-
-    try {
-      const res = await fetch(
-        "{{ url_for('dashboard.api_graph_node_details') }}?ticker=" +
-          encodeURIComponent(ticker)
-      );
-      const data = await res.json();
-      if (!data.ok) {
-        detailsBox.textContent = "Error: " + (data.error || "Unknown error");
-        return;
-      }
-      const payload = data.data || {};
-      const lines = Array.isArray(payload.summary_lines)
-        ? payload.summary_lines
-        : [];
-      const summary = lines.join("\n") || "(no summary provided)";
-
-      const rawDetails = {
-        company: payload.company,
-        metrics: payload.metrics,
-        articles: payload.articles,
-        candles: payload.candles,
-      };
-
-      detailsBox.textContent =
-        summary +
-        "\n\n---\n\nRaw details:\n" +
-        JSON.stringify(rawDetails, null, 2);
-    } catch (err) {
-      detailsBox.textContent = "Request failed: " + err;
-    }
-  }
-
+  // -------------------------------------------------------------------
+  // Ask Johny 5 /api/ask
+  // -------------------------------------------------------------------
   async function j5Ask(event) {
     event.preventDefault();
     const txt = document.getElementById("j5-question");
@@ -208,7 +74,6 @@
     btn.textContent = "Thinking…";
     outAnswer.textContent = "Calling /api/ask…";
     outTrace.textContent = "";
-    window.j5LastTracePayload = null;
 
     try {
       const res = await fetch("{{ url_for('dashboard.api_ask') }}", {
@@ -229,20 +94,13 @@
         const stats = payload.stats || {};
 
         outAnswer.textContent = answer;
+        outTrace.textContent = JSON.stringify({ steps, trace, stats }, null, 2);
 
-        const traceRender = {
-          steps,
-          trace,
-          stats,
-        };
-        outTrace.textContent = JSON.stringify(traceRender, null, 2);
-
-        // Store for download.
         window.j5LastTracePayload = {
           question,
           timestamp: new Date().toISOString(),
           data: payload,
-          trace_view: traceRender,
+          trace_view: { steps, trace, stats },
         };
       }
     } catch (err) {
@@ -254,104 +112,47 @@
     }
   }
 
-  async function j5LoadGraphForTicker(rawTicker) {
-    const input = document.getElementById("j5-graph-ticker");
-    const out = document.getElementById("j5-graph-output");
-    const btn = document.getElementById("j5-graph-btn");
-
-    const ticker = (rawTicker || "").trim();
-    if (!ticker) {
-      out.textContent = "Please enter a ticker (e.g. NVDA).";
-      return;
-    }
-
-    if (input) {
-      input.value = ticker; // keep input in sync
-    }
-
-    btn.disabled = true;
-    btn.textContent = "Loading…";
-    out.textContent = "Loading graph neighborhood…";
-
-    try {
-      const res = await fetch(
-        "{{ url_for('dashboard.api_graph_neighbors') }}?ticker=" +
-          encodeURIComponent(ticker)
-      );
-      const data = await res.json();
-      if (!data.ok) {
-        out.textContent = "Error: " + (data.error || "Unknown error");
-      } else {
-        const payload = data.data || {};
-        out.textContent = JSON.stringify(payload, null, 2);
-        renderJ5Graph(payload);
-      }
-    } catch (err) {
-      out.textContent = "Request failed: " + err;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Show Neighborhood";
-    }
-  }
-
-  async function j5GraphNeighbors(event) {
-    event.preventDefault();
-    const input = document.getElementById("j5-graph-ticker");
-    const ticker = input ? input.value : "";
-    await j5LoadGraphForTicker(ticker);
-    await j5LoadNodeDetails(ticker);
-  }
-
   function j5DownloadTrace() {
     const data = window.j5LastTracePayload;
     if (!data) {
-      alert("Ask a question first so there is a trace to download.");
+      alert("Ask a question first so there is trace data to download.");
       return;
     }
 
-    const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], { type: "application/json" });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-
     const a = document.createElement("a");
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
     a.href = url;
     a.download = `johny5_trace_${ts}.json`;
-
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
 
-let j5IntelCy = null;
+  // -------------------------------------------------------------------
+  // Company KG Neighborhood graph
+  // -------------------------------------------------------------------
+  let companyCy = null;
+  let lastCompanyGraphBundle = null;
 
-  function renderIntelGraph(data) {
-    const container = document.getElementById("j5-intel-graph-canvas");
-    const jsonPane = document.getElementById("j5-intel-graph-output");
-
-    if (!container) return;
-
-    if (!data || !data.center) {
-      container.innerHTML = "No matching actor or intel node found for this query.";
-      if (jsonPane) {
-        jsonPane.textContent = "(no intel/actor graph data returned)";
-      }
-      return;
-    }
-
+  function buildCompanyElements(graph) {
     const elements = [];
-    const center = data.center;
+    if (!graph || !graph.center) return elements;
 
+    const center = graph.center;
     elements.push({
       data: {
         id: center.key,
         label: center.label || center.key,
-        node_type: center.node_type || "actor",
+        node_type: center.node_type || "company",
       },
     });
 
-    (data.neighbors || []).forEach((n) => {
+    (graph.neighbors || []).forEach((n) => {
       elements.push({
         data: {
           id: n.key,
@@ -361,154 +162,542 @@ let j5IntelCy = null;
       });
     });
 
-    (data.edges || []).forEach((e, idx) => {
-      const id = e.id || `${e.src}-${e.dst}-${e.edge_type || "edge"}-${idx}`;
+    (graph.edges || []).forEach((e, idx) => {
       elements.push({
         data: {
-          id,
+          id: e.id || `${e.src}->${e.dst}-${idx}`,
           source: e.src,
           target: e.dst,
-          label: e.edge_type || "",
+          edge_type: e.edge_type || "",
         },
       });
     });
 
-    container.innerHTML = "";
+    return elements;
+  }
 
-    j5IntelCy = cytoscape({
-      container: container,
-      elements: elements,
+  function renderCompanyGraph(graph) {
+    const container = document.getElementById("companyGraph");
+    if (!container) return;
+
+    if (!graph || !graph.center) {
+      container.innerHTML =
+        '<div style="padding:0.5rem;font-size:0.85rem;">No graph data for this ticker yet.</div>';
+      return;
+    }
+
+    if (companyCy) {
+      companyCy.destroy();
+    }
+
+    companyCy = cytoscape({
+      container,
+      elements: buildCompanyElements(graph),
       style: [
         {
           selector: "node",
           style: {
-            "background-color": "#0ea5e9",
-            "label": "data(label)",
-            "color": "#0f172a",
-            "font-size": 10,
+            "background-color": "#e5f2ff",       // light blue bubble
+            "border-width": 1,
+            "border-color": "#cbd5f5",
+            "font-size": 11,
+            "text-wrap": "wrap",
+            "text-max-width": "120px",
             "text-valign": "center",
             "text-halign": "center",
-            "text-wrap": "wrap",
-            "text-max-width": "140px",
-          },
+            label: "data(label)",
+            color: "#111827"                     // dark text for light mode
+          }
         },
         {
-          selector: "node[node_type = 'actor']",
+          selector: 'node[node_type = "company"]',
           style: {
-            "background-color": "#22c55e", // green-ish for people/institutions
-            "font-weight": "bold",
-          },
+            "background-color": "#bbf7d0",       // light green
+            "border-color": "#16a34a",
+            color: "#052e16",
+            "font-weight": "600"
+          }
         },
         {
-          selector: "node[node_type = 'intel']",
+          selector: 'node[node_type = "hub"]',
           style: {
-            "background-color": "#f97316", // orange for intel notes
-          },
-        },
-        {
-          selector: "node[node_type = 'company']",
-          style: {
-            "background-color": "#2563eb", // blue for companies
-          },
-        },
-        {
-          selector: "node[node_type = 'news']",
-          style: {
-            "background-color": "#a855f7", // purple for news
-          },
+            "background-color": "#fed7aa",       // light orange
+            "border-color": "#f97316",
+            "font-weight": "700"
+          }
         },
         {
           selector: "edge",
           style: {
-            "width": 2,
-            "line-color": "#cbd5f5",
-            "target-arrow-color": "#cbd5f5",
+            width: 1.3,
+            "line-color": "#9ca3af",
+            "target-arrow-color": "#9ca3af",
             "target-arrow-shape": "triangle",
-            "curve-style": "bezier",
-            "label": "data(label)",
-            "font-size": 8,
-            "text-rotation": "autorotate",
-            "color": "#6b7280",
-          },
+            "curve-style": "bezier"
+          }
         },
+        {
+          selector: "edge.highlighted",
+          style: {
+            width: 2.2,
+            "line-color": "#facc15",
+            "target-arrow-color": "#facc15"
+          }
+        }
       ],
-      layout: {
-        name: "cose",
-        animate: false,
-      },
+      layout: { name: "cose", padding: 40, fit: true }
     });
 
-    j5IntelCy.on("tap", "node", function (evt) {
+    companyCy.ready(() => {
+      companyCy.fit(undefined, 40);
+    });
+
+    companyCy.on("tap", "node", function (evt) {
       const node = evt.target;
-      const label = node.data("label") || "";
-      const type = node.data("node_type") || "";
+      const id = node.data("id");
+      const type = node.data("node_type");
+      if (!id) return;
 
-      const input = document.getElementById("j5-actor-query");
-      if (input && label) {
-        input.value = label;
-      }
+      // highlight connected edges
+      companyCy.elements("edge").removeClass("highlighted");
+      node.connectedEdges().addClass("highlighted");
 
-      const jsonHint = [
-        "Clicked node:",
-        `  label: ${label}`,
-        `  type: ${type}`,
-        "",
-        "Tip: You can refine the query above and reload the neighborhood.",
-        "",
-        JSON.stringify(data, null, 2),
-      ].join("\n");
-
-      if (jsonPane) {
-        jsonPane.textContent = jsonHint;
+      if (type === "company" && id.startsWith("COMP::")) {
+        const ticker = id.split("::")[1];
+        const input = document.getElementById("graphTickerInput");
+        if (input) input.value = ticker;
+        loadCompanyNeighborhood(ticker);
       }
     });
   }
 
-  async function j5IntelLoadGraph(rawQuery) {
-    const input = document.getElementById("j5-actor-query");
-    const out = document.getElementById("j5-intel-graph-output");
-    const btn = document.getElementById("j5-intel-btn");
+  async function loadCompanyNodeDetails(ticker) {
+    const detailsEl = document.getElementById("graphNodeDetails");
+    const t = (ticker || "").trim().toUpperCase();
 
-    const q = (rawQuery || (input ? input.value : "") || "").trim();
-    if (!q) {
-      out.textContent = "Please enter an actor, institution, or theme (e.g. Xi Jinping, CIPS, BRICS).";
+    if (!detailsEl) return;
+
+    if (!t) {
+      detailsEl.textContent =
+        "Enter a ticker or click a company node to see details.";
       return;
     }
 
-    if (input) {
-      input.value = q; // keep UI in sync
-    }
-
-    btn.disabled = true;
-    btn.textContent = "Loading…";
-    out.textContent = "Loading intel/actor graph neighborhood…";
+    detailsEl.textContent = "Loading node details for " + t + "…";
 
     try {
       const res = await fetch(
-        "{{ url_for('dashboard.api_graph_intel_neighbors') }}?q=" +
-          encodeURIComponent(q)
+        "{{ url_for('dashboard.api_graph_node_details') }}?ticker=" +
+          encodeURIComponent(t)
       );
-      const data = await res.json();
-      if (!data.ok) {
-        out.textContent = "Error: " + (data.error || "Unknown error");
-      } else {
-        const payload = data.data || {};
-        out.textContent = JSON.stringify(payload, null, 2);
-        renderIntelGraph(payload);
+      const payload = await res.json();
+      if (!payload.ok) {
+        detailsEl.textContent = "Error: " + (payload.error || "Unknown error");
+        return;
       }
+
+      const data = payload.data || {};
+      const lines = Array.isArray(data.summary_lines)
+        ? data.summary_lines
+        : [];
+      const summary = lines.join("\n") || "(no summary provided)";
+
+      const raw = {
+        company: data.company,
+        metrics: data.metrics,
+        articles: data.articles,
+        candles: data.candles,
+      };
+
+      detailsEl.textContent =
+        summary +
+        "\n\n---\n\nRaw details:\n" +
+        JSON.stringify(raw, null, 2);
     } catch (err) {
-      out.textContent = "Request failed: " + err;
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Show Intel / Actor Neighborhood";
+      detailsEl.textContent = "Request failed: " + err;
     }
   }
 
-  async function j5IntelGraphNeighbors(event) {
-    event.preventDefault();
-    await j5IntelLoadGraph();
+  async function loadCompanyNeighborhood(ticker) {
+    const input = document.getElementById("graphTickerInput");
+    const jsonEl = document.getElementById("graphJson");
+
+    const t = (ticker || (input ? input.value : "") || "")
+      .trim()
+      .toUpperCase();
+    if (!t) {
+      if (jsonEl)
+        jsonEl.textContent = "Please enter a ticker (e.g. NVDA).";
+      return;
+    }
+    if (input) input.value = t;
+
+    if (jsonEl) jsonEl.textContent = "Loading graph neighborhood…";
+
+    try {
+      const res = await fetch(
+        "{{ url_for('dashboard.api_graph_neighbors') }}?ticker=" +
+          encodeURIComponent(t)
+      );
+      const payload = await res.json();
+      if (!payload.ok) {
+        jsonEl.textContent = "Error: " + (payload.error || "Unknown error");
+        return;
+      }
+
+      const graph = payload.data || {};
+      lastCompanyGraphBundle = {
+        ticker: t,
+        generated_at: new Date().toISOString(),
+        node_count: 1 + (graph.neighbors || []).length,
+        edge_count: (graph.edges || []).length,
+        graph,
+      };
+
+      if (jsonEl) {
+        jsonEl.textContent = JSON.stringify(lastCompanyGraphBundle, null, 2);
+      }
+
+      renderCompanyGraph(graph);
+      loadCompanyNodeDetails(t);
+    } catch (err) {
+      if (jsonEl) jsonEl.textContent = "Request failed: " + err;
+    }
   }
 
+  // -------------------------------------------------------------------
+  // Intel / Actors graph + connection summary + JSON download
+  // -------------------------------------------------------------------
+  let intelCy = null;
+  let currentIntelData = null;
+
+  function renderIntelConnectionSummary(bundle) {
+    const box = document.getElementById("intelConnectionSummary");
+    if (!box) return;
+
+    if (!bundle || !bundle.graph || !bundle.graph.center) {
+      box.textContent =
+        "Run an intel query to see how this theme links notes, actors, and institutions.";
+      return;
+    }
+
+    const graph = bundle.graph;
+    const query = bundle.query || "";
+    const nodeCount =
+      bundle.node_count || 1 + (graph.neighbors || []).length;
+    const edgeCount = bundle.edge_count || (graph.edges || []).length;
+    const themeLabel = graph.center.label || query || "(untitled theme)";
+
+    const neighbors = graph.neighbors || [];
+    const actors = neighbors
+      .filter((n) => n.node_type === "actor")
+      .map((n) => n.label)
+      .slice(0, 10);
+    const intelNotes = neighbors
+      .filter((n) => n.node_type === "intel")
+      .map((n) => n.label)
+      .slice(0, 5);
+    const institutions = neighbors
+      .filter((n) => n.node_type === "institution")
+      .map((n) => n.label)
+      .slice(0, 8);
+
+    const parts = [];
+    parts.push("Johny 5 Connection Summary\n");
+    parts.push(
+      "Short narrative of how this theme links intel notes and key actors.\n"
+    );
+    parts.push("Theme: " + themeLabel);
+    parts.push(
+      "Span: " + nodeCount + " nodes · " + edgeCount + " relationships\n"
+    );
+
+    if (intelNotes.length) {
+      parts.push(
+        "Key intel notes: " + intelNotes.join("; ")
+      );
+    }
+    if (actors.length) {
+      parts.push(
+        "\nKey players: " + actors.join(", ")
+      );
+    }
+    if (institutions.length) {
+      parts.push(
+        "\nKey institutions & systems: " +
+          institutions.join(", ")
+      );
+    }
+
+    box.textContent = parts.join("\n");
+  }
+
+  function buildIntelElements(graph) {
+    const elements = [];
+    if (!graph || !graph.center) return elements;
+
+    elements.push({
+      data: {
+        id: graph.center.key,
+        label: graph.center.label,
+        node_type: graph.center.node_type || "theme",
+      },
+    });
+
+    (graph.neighbors || []).forEach((n) => {
+      elements.push({
+        data: {
+          id: n.key,
+          label: n.label,
+          node_type: n.node_type,
+        },
+      });
+    });
+
+    (graph.edges || []).forEach((e, idx) => {
+      elements.push({
+        data: {
+          id: e.id || `${e.src}->${e.dst}-${idx}`,
+          source: e.src,
+          target: e.dst,
+          edge_type: e.edge_type || "",
+        },
+      });
+    });
+
+    return elements;
+  }
+
+  function renderIntelGraph(graph) {
+    const container = document.getElementById("intelGraph");
+    if (!container) return;
+
+    if (!graph || !graph.center) {
+      container.innerHTML =
+        '<div style="padding:0.5rem;font-size:0.85rem;">No intel graph for this query.</div>';
+      return;
+    }
+
+    if (intelCy) {
+      intelCy.destroy();
+    }
+
+    intelCy = cytoscape({
+      container,
+      elements: buildIntelElements(graph),
+      layout: { name: "cose", padding: 50, fit: true },
+      style: [
+        {
+          selector: "node",
+          style: {
+            "background-color": "#e0f2fe",       // light sky blue
+            "border-width": 1,
+            "border-color": "#bae6fd",
+            label: "data(label)",
+            "text-wrap": "wrap",
+            "text-max-width": "180px",
+            "font-size": 11,
+            color: "#111827",
+            "text-valign": "center",
+            "text-halign": "center"
+          }
+        },
+        {
+          selector: 'node[node_type = "intel"]',
+          style: {
+            "background-color": "#ffedd5"        // light orange
+          }
+        },
+        {
+          selector: 'node[node_type = "actor"]',
+          style: {
+            "background-color": "#dcfce7"        // light green
+          }
+        },
+        {
+          selector: 'node[node_type = "institution"]',
+          style: {
+            "background-color": "#ddeafe"        // slightly stronger blue
+          }
+        },
+        {
+          selector: "edge",
+          style: {
+            "curve-style": "bezier",
+            "target-arrow-shape": "triangle",
+            "line-color": "#9ca3af",
+            "target-arrow-color": "#9ca3af",
+            width: 1.4
+          }
+        }
+      ]
+    });
+
+    intelCy.ready(() => {
+      intelCy.fit(undefined, 40);
+    });
+
+    intelCy.on("tap", "node", function (evt) {
+      const node = evt.target;
+      const key = node.id();
+      const label = node.data("label");
+      const nodeType = node.data("node_type");
+
+      const selectedBox = document.getElementById("intelSelectedNode");
+      const detailsBox = document.getElementById("intelNodeDetails");
+
+      if (selectedBox) {
+        selectedBox.value = `${label} (${nodeType})`;
+      }
+      if (detailsBox) {
+        detailsBox.textContent = "Loading node details…";
+      }
+
+      fetch(
+        "{{ url_for('dashboard.api_intel_node_details') }}?key=" +
+          encodeURIComponent(key)
+      )
+        .then((r) => r.json())
+        .then((payload) => {
+          if (!detailsBox) return;
+          if (!payload || !payload.text) {
+            detailsBox.textContent =
+              "No additional details found for this node.";
+          } else {
+            detailsBox.textContent = payload.text;
+          }
+        })
+        .catch((err) => {
+          if (detailsBox) {
+            detailsBox.textContent =
+              "Error loading node details: " + err;
+          }
+        });
+    });
+  }
+
+  async function loadIntelGraphFromQuery() {
+    const input = document.getElementById("intelQueryInput");
+    const jsonBox = document.getElementById("intelActorJson");
+    const metaBox = document.getElementById("intelSelectedNode");
+    const noteBox = document.getElementById("intelNodeDetails");
+    const summaryBox = document.getElementById("intelConnectionSummary");
+
+    const query = (input && input.value ? input.value : "").trim();
+
+    if (jsonBox) jsonBox.textContent = "Loading intel graph…";
+    if (metaBox) metaBox.value = "";
+    if (noteBox) noteBox.textContent = "";
+    if (summaryBox) summaryBox.textContent =
+      "Running guardrail + intel lookup…";
+
+    try {
+      const res = await fetch(
+        "{{ url_for('dashboard.api_intel_actor_neighbors') }}",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (jsonBox) jsonBox.textContent = JSON.stringify(data, null, 2);
+
+      const guard = data.guardrail || {};
+      const center = data.center || null;
+
+      if (!center) {
+        // Out-of-scope or no matches
+        if (intelCy) {
+          intelCy.destroy();
+          intelCy = null;
+        }
+        if (summaryBox) {
+          summaryBox.innerHTML = `
+          <div class="agentic-connection-summary" style="background:#f9fafb;color:#111;">
+            <h3>Johny 5 Connection Summary</h3>
+            <p>No intel neighborhood is available for this query.</p>
+            <p style="font-size:0.8rem;opacity:0.85;">
+              Guardrail reason: <code>${guard.reason || "out_of_scope"}</code>
+              · confidence: ${(guard.confidence ?? 0).toFixed(2)}
+            </p>
+          </div>
+        `;
+        }
+        currentIntelData = data;    // still downloadable
+        return;
+      }
+
+      // We have a real graph
+      const graph = data;
+      const nodeCount =
+        graph.node_count ?? (1 + (graph.neighbors || []).length);
+      const edgeCount =
+        graph.edge_count ?? (graph.edges || []).length;
+
+      const bundle = {
+        query,
+        generated_at: new Date().toISOString(),
+        node_count: nodeCount,
+        edge_count: edgeCount,
+        guardrail: guard,
+        graph,
+      };
+      currentIntelData = bundle;
+
+      renderIntelGraph(graph);
+      renderIntelConnectionSummary(bundle);
+    } catch (err) {
+      if (jsonBox) jsonBox.textContent = "Intel lookup failed: " + err;
+      if (summaryBox) {
+        summaryBox.textContent = "Intel lookup failed: " + err;
+      }
+    }
+  }
+
+  function downloadIntelJson() {
+    if (!currentIntelData) {
+      alert("Run an Intel / Actor query first.");
+      return;
+    }
+
+    const blob = new Blob(
+      [JSON.stringify(currentIntelData, null, 2)],
+      { type: "application/json" }
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const ts = new Date().toISOString().replace(/[:.]/g, "-");
+    a.href = url;
+    a.download = `johny5_intel_graph_${ts}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // -------------------------------------------------------------------
+  // Wire up buttons once DOM is ready
+  // -------------------------------------------------------------------
+  document.addEventListener("DOMContentLoaded", function () {
+    const nbBtn = document.getElementById("btnShowNeighborhood");
+    if (nbBtn) {
+      nbBtn.addEventListener("click", function (evt) {
+        evt.preventDefault();
+        loadCompanyNeighborhood();
+      });
+    }
+
+    const intelBtn = document.getElementById("btnShowIntel");
+    if (intelBtn) {
+      intelBtn.addEventListener("click", function (evt) {
+        evt.preventDefault();
+        loadIntelGraphFromQuery();
+      });
+    }
+  });
 </script>
 {% endblock %}
 
@@ -582,7 +771,7 @@ let j5IntelCy = null;
     action="{{ url_for('dashboard.action_rebuild_all') }}"
   >
     <button type="submit" class="btn-secondary">
-      Rebuild All (Profiles → Graph → Candles → News)
+      Rebuild All (Profiles → Graph → Candles → News → Intel)
     </button>
   </form>
 
@@ -605,6 +794,11 @@ let j5IntelCy = null;
 
 <section>
   <h2>Model Settings</h2>
+  <p style="font-size: 0.8rem; color: var(--text-muted); max-width: 540px">
+    This instance is wired to a <strong>local Ollama model</strong> (Llama&nbsp;3)
+    for all <code>/api/ask</code> calls. You can still optionally store a Gemini
+    API key here if you want to experiment with cloud models later.
+  </p>
   <form
     method="post"
     action="{{ url_for('dashboard.save_gemini_key') }}"
@@ -614,7 +808,7 @@ let j5IntelCy = null;
       for="gemini_api_key"
       style="display: block; font-size: 0.8rem; color: var(--text-muted)"
     >
-      Gemini API Key (optional, stored in session + environment)
+      Gemini API Key (optional)
     </label>
     <input
       type="text"
@@ -629,20 +823,29 @@ let j5IntelCy = null;
 </section>
 
 <section>
-  <h2>Ask the Agentic Knowledge Memory</h2>
+  <h2>Ask Johny 5 · Live Agentic Graph RAG</h2>
 
-  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem">
+  <p
+    style="
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      max-width: 760px;
+    "
+  >
     Questions here call <code>/api/ask</code>, which in turn hits
-    <code>backend.llm_analyze()</code>. In production this will be your internal
-    agent (LLM + LangGraph) orchestrating tools and returning both:
-    <strong>(1) an answer</strong> and <strong>(2) a structured trace</strong> of what it used.
+    <code>backend.llm_analyze()</code>. That function talks to a local
+    <strong>Ollama LLM</strong> and orchestrates tools over company profiles,
+    external metrics, recent news, geopolitical intel notes, and the graph
+    neighborhood. The response includes <strong>(1) an answer</strong> and
+    <strong>(2) a structured trace</strong> of every tool the agent used.
   </p>
 
   <form onsubmit="j5Ask(event)">
     <textarea
       id="j5-question"
       rows="4"
-      placeholder="e.g. How is NVDA positioned in the current graph, and what recent news affects it?"
+      placeholder="e.g. What does the LLM know about NVDA and China chip sanctions right now?"
     ></textarea>
     <div style="margin-top: 0.4rem">
       <button id="j5-ask-btn" type="submit">Ask Johny 5</button>
@@ -655,187 +858,186 @@ let j5IntelCy = null;
     </div>
   </form>
 
-  <div style="margin-top: 0.7rem">
-    <h3 style="font-size: 0.9rem; margin-bottom: 0.3rem">Answer</h3>
-    <pre id="j5-answer">(answer will appear here)</pre>
+  <div class="grid-wide-2" style="margin-top: 0.9rem">
+    <div class="card">
+      <div class="card-title-row">
+        <span>Answer</span>
+      </div>
+      <pre id="j5-answer" class="scroll-box">(answer will appear here)</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-title-row">
+        <span>Trace &amp; Steps</span>
+        <span class="card-title-row-actions">
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="j5DownloadTrace()"
+          >
+            Download JSON
+          </button>
+        </span>
+      </div>
+      <pre id="j5-trace" class="scroll-box">(trace &amp; steps JSON will appear here)</pre>
+    </div>
+  </div>
+</section>
+
+<section class="card mt-6 agentic-compare">
+  <div class="agentic-header">
+    <div>
+      <h2>Why Johny 5 is Agentic (not just another RAG bot)</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); max-width: 640px">
+        When you ask a question, Johny 5 doesn’t just search for a paragraph.
+        It runs a mini-investigation across data sources and shows you the
+        steps it took.
+      </p>
+    </div>
+
+    <!-- Subtle nostalgia badge -->
+    <div class="agentic-mascot">
+      <div class="agentic-mascot-inner">
+        <img
+          src="{{ url_for('static', filename='img/johny5_new.jpg') }}"
+          alt="Johny 5"
+        />
+      </div>
+      <div class="agentic-mascot-caption">JOHNY&nbsp;5 · AGENTIC MODE</div>
+    </div>
   </div>
 
-  <section>
-  <h2>Trace & Steps</h2>
-  <div style="margin-bottom: 0.5rem">
-    <button
-      type="button"
-      class="btn-secondary"
-      onclick="j5DownloadTrace()"
-    >
-      Download Trace JSON
+  <div class="agentic-columns">
+    <div class="agentic-column agentic-standard">
+      <h3>Standard Graph RAG</h3>
+      <ul>
+        <li>Turns your question into a single vector.</li>
+        <li>Grabs a few similar documents.</li>
+        <li>Optionally follows simple graph links.</li>
+        <li>Sends one big context dump to an LLM.</li>
+        <li>Little visibility into <em>how</em> it answered.</li>
+      </ul>
+    </div>
+
+    <div class="agentic-column agentic-johny">
+      <h3>Johny 5 · Agentic Graph RAG</h3>
+      <ul>
+        <li>Understands the question and detects tickers &amp; themes.</li>
+        <li>Looks up company profiles and external metrics.</li>
+        <li>Pulls fresh news, filings-style items, and geopolitics intel.</li>
+        <li>Walks the knowledge graph neighborhood for related entities.</li>
+        <li>
+          Then synthesizes everything into one analyst-style answer, plus a
+          transparent tool-by-tool trace.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="agentic-timeline">
+    <h4>What Johny 5 just did for your question</h4>
+    <ol class="agentic-timeline-steps">
+      <li><span>1</span> Classified the question (tickers &amp; themes).</li>
+      <li><span>2</span> Retrieved profiles &amp; headline metrics.</li>
+      <li><span>3</span> Pulled recent news &amp; filings items.</li>
+      <li><span>4</span> Checked sanctions / geopolitics intel.</li>
+      <li><span>5</span> Explored the graph neighborhood.</li>
+      <li><span>6</span> Wrote a concise, stitched-together answer.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="card mt-6">
+  <h2>Graph Preview · Neighborhood</h2>
+  <p style="font-size: 0.85rem; color: var(--text-muted)">
+    Lightweight view backed by <code>kg_nodes</code> and <code>kg_edges</code>.
+    Type a ticker (e.g. NVDA), then explore its local neighborhood.
+  </p>
+
+  <div class="graph-controls mb-3">
+    <input
+      id="graphTickerInput"
+      type="text"
+      class="input"
+      placeholder="NVDA"
+    />
+    <button class="btn btn-primary" id="btnShowNeighborhood">
+      Show Neighborhood
     </button>
   </div>
-  <pre id="j5-trace">(trace & steps JSON will appear here)</pre>
-</section>
-</section>
 
-<section>
-  <h2>Why This Is Agentic (vs Standard Graph RAG)</h2>
-
-  <p style="font-size: 0.9rem; color: var(--text-muted); max-width: 720px">
-    When you click <strong>Ask Johny 5</strong>, the system does more than a
-    simple vector search. It runs a small <strong>agentic workflow</strong>
-    that orchestrates multiple tools and records a structured trace of what
-    it used.
-  </p>
-
-  <div class="grid">
-    <div class="card">
-      <div class="card-title">Standard Graph RAG</div>
-      <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.1rem">
-        <li>Embed the question into a vector.</li>
-        <li>Do a similarity search over documents.</li>
-        <li>Optionally expand via graph neighbors.</li>
-        <li>Concatenate context and send once to the LLM.</li>
-        <li>Limited visibility into which systems were used.</li>
-      </ul>
+  <div class="graph-neighborhood-layout">
+    <div class="graph-main card-surface">
+      <h3>Interactive Graph</h3>
+      <div id="companyGraph" class="graph-canvas graph-canvas-tall"></div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Johny 5 · Agentic Graph RAG</div>
-      <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.1rem">
-        <li>Step 1: <strong>Understand question</strong> and detect tickers
-          (see <code>understand_question</code> in Trace &amp; Steps).</li>
-        <li>Step 2: Call <strong>profiles DB</strong> for company metadata
-          (<code>retrieve_profiles</code> / <code>companies_lookup</code>).</li>
-        <li>Step 3: Call <strong>external metrics API</strong> placeholder
-          (<code>fetch_external_metrics</code> / <code>external_metrics_api</code>).</li>
-        <li>Step 4: Call <strong>news / filings source</strong>
-          (<code>retrieve_news</code> / <code>news_lookup</code>), populated
-          from Yahoo Finance RSS in this demo.</li>
-        <li>Step 5: Combine graph structure, metrics and news into a single
-          synthesized answer, with a <strong>trace</strong> you can audit.</li>
-      </ul>
-    </div>
-  </div>
-
-  <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.6rem; max-width: 720px">
-    In production at work, each of these tools can point at your internal
-    systems (portfolio exposure, risk models, internal ratings, proprietary
-    news feeds). The key value is that the agent calls them
-    <strong>explicitly</strong> and leaves a structured trail of what data
-    it used to answer the question.
-  </p>
-</section>
-
-<section>
-  <h2>Graph Preview · Neighborhood</h2>
-
-  <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem">
-    This is a lightweight graph view backed directly by the
-    <code>kg_nodes</code> and <code>kg_edges</code> tables. It returns the
-    node for <code>COMP::TICKER</code>, its neighbors, and the connecting
-    edges. The left panel shows an interactive graph, and the right panel
-    shows the raw JSON the agent can use.
-  </p>
-
-  <form
-    onsubmit="j5GraphNeighbors(event)"
-    style="max-width: 340px; margin-bottom: 0.75rem"
-  >
-    <input
-      id="j5-graph-ticker"
-      type="text"
-      placeholder="Ticker (e.g. NVDA)"
-      style="margin-bottom: 0.4rem"
-    />
-    <div>
-      <button id="j5-graph-btn" type="submit" class="btn-secondary">
-        Show Neighborhood
-      </button>
-    </div>
-  </form>
-
-  <div class="grid">
-    <div class="card">
-      <div class="card-title">Interactive Graph</div>
-      <div
-        id="j5-graph-canvas"
-        style="
-          width: 100%;
-          height: 320px;
-          border-radius: 12px;
-          border: 1px solid var(--border);
-          background: #ffffff;
-        "
-      >
-        <div style="font-size: 0.8rem; color: var(--text-muted); padding: 0.5rem">
-          Enter a ticker and click “Show Neighborhood”, or click a company node
-          (green) to refocus.
-        </div>
+    <div class="graph-bottom-row">
+      <div class="graph-subcard card-surface">
+        <h3>Graph JSON</h3>
+        <pre id="graphJson" class="code-panel"></pre>
+      </div>
+      <div class="graph-subcard card-surface">
+        <h3>Node Details</h3>
+        <pre id="graphNodeDetails" class="code-panel"></pre>
       </div>
     </div>
-
-    <div class="card">
-      <div class="card-title">Graph JSON</div>
-      <pre
-        id="j5-graph-output"
-        style="height: 320px; overflow-y: auto"
-      >(graph neighborhood JSON will appear here)</pre>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Node Details</div>
-      <pre
-        id="j5-node-details"
-        style="height: 320px; overflow-y: auto"
-      >(click a company node or load a ticker to see details)</pre>
-    </div>
   </div>
 </section>
 
-<section>
-  <h2>Intel / Actors Graph (Thematic view)</h2>
-  <p>
-    Explore the network of key figures, institutions, and intel notes powering
-    thematic answers (e.g. China chips, BRICS, sanctions, dedollarization).
-  </p>
+<section class="card mt-6">
+  <div class="intel-header">
+    <div>
+      <h2>Intel / Actors Graph (Thematic view)</h2>
+      <p class="text-sm text-muted">
+        Start with a theme (“China chip sanctions”), then drill into actors,
+        banks, and institutions mentioned in the intel notes.
+      </p>
+    </div>
 
-  <form onsubmit="j5IntelGraphNeighbors(event)" class="stack gap-2">
-    <label for="j5-actor-query">Actor, institution, or theme</label>
+    <div class="intel-legend">
+      <span><span class="legend-dot legend-theme"></span> Theme / Intel node</span>
+      <span><span class="legend-dot legend-actor"></span> Actor / Person</span>
+      <span><span class="legend-dot legend-institution"></span> Institution / System</span>
+    </div>
+  </div>
+
+  <div class="intel-controls mb-3">
     <input
+      id="intelQueryInput"
       type="text"
-      id="j5-actor-query"
-      name="actor"
-      placeholder="e.g. Xi Jinping, CIPS, BRICS, Chinese state-owned banks"
+      class="input"
+      placeholder="China chip sanctions"
     />
-    <button type="submit" id="j5-intel-btn" class="btn-primary">
+    <button class="btn btn-primary" id="btnShowIntel">
       Show Intel / Actor Neighborhood
     </button>
-  </form>
+  </div>
 
-  <div class="grid">
-    <div class="card">
-        <div class="card-title">Intel / Actors Graph</div>
-        <div
-        id="j5-intel-graph-canvas"
-        style="
-            width: 100%;
-            height: 320px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: #ffffff;
-        "
-        >
-        <div style="font-size: 0.8rem; color: var(--text-muted); padding: 0.5rem">
-            Enter an actor/theme above and click “Show Intel / Actor Neighborhood”.
-        </div>
-        </div>
-    </div>
+  <div id="intelGraph" class="intel-graph-canvas"></div>
 
-    <div class="card">
-        <div class="card-title">Intel / actor JSON</div>
-        <pre
-        id="j5-intel-graph-output"
-        style="height: 320px; overflow-y: auto"
-        >(intel/actor graph JSON will appear here)</pre>
+  <div class="graph-bottom-row" style="margin-top: 0.75rem;">
+    <div class="graph-subcard card">
+      <h3>Selected node</h3>
+      <input id="intelSelectedNode" class="input" readonly />
     </div>
+    <div class="graph-subcard card">
+      <h3>Intel / note details</h3>
+      <pre id="intelNodeDetails" class="code-panel"></pre>
     </div>
+    <div class="graph-subcard card">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <h3>Intel / Actor JSON</h3>
+        <button type="button" class="btn-secondary" onclick="downloadIntelJson()">
+          Download JSON
+        </button>
+      </div>
+      <pre id="intelActorJson" class="code-panel"></pre>
+    </div>
+  </div>
+
+  <div id="intelConnectionSummary" class="agentic-connection-summary" style="margin-top:1rem;">
+    Run an intel query above to see Johny 5’s connection summary.
+  </div>
 </section>
 {% endblock %}

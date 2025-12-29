@@ -27,10 +27,33 @@ from flask import (
     flash,
 )
 
+from app.backend import BackendService
+
 from app.backend import DB_PATH, get_stats as backend_get_stats
 
-bp = Blueprint("dashboard", __name__)
 
+bp = Blueprint("dashboard", __name__)
+service = BackendService()
+
+_backend = BackendService()
+
+def get_backend() -> BackendService:
+    return _backend
+
+@bp.route("/api/intel_actor_neighbors", methods=["POST"])
+def api_intel_actor_neighbors():
+    payload = request.get_json(silent=True) or {}
+    query = (payload.get("query") or "").strip()
+    # Allow empty → backend will still try a default like "china"
+    data = service.get_intel_actor_neighbors(query)
+    return jsonify(data)
+
+
+@bp.route("/api/intel_node_details")
+def api_intel_node_details():
+    key = (request.args.get("key") or "").strip()
+    data = service.get_intel_node_details(key)
+    return jsonify(data)
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -202,6 +225,7 @@ def action_build_graph():
         current_app.logger.exception("build_graph failed: %s", exc)
         flash(f"Error building graph: {exc}", "error")
     return redirect(url_for("dashboard.index"))
+
 
 @bp.get("/api/graph/intel_neighbors")
 def api_graph_intel_neighbors() -> "flask.Response":
